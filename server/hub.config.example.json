@@ -129,5 +129,7 @@
       "key": "",
       "user": "seu-usuario"
     }
-  }
+  },
+  "dbPath": "centraldiogo.db",
+  "allowedOrigins": []
 }

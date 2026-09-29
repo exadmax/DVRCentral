@@ -16,6 +16,9 @@ window.CD_SETTINGS = {
     { label: 'ROMs',   sub: 'Arquivos',  icon: 'folder',  port: 8080, path: '/roms/' }
   ],
 
+  // Geladeira e Dispensa: itens que vencem em até N dias ficam em destaque âmbar (vencidos, em vermelho)
+  estoque: { soonDays: 3 },
+
   refreshMinutes: 15,
   night: { from: 23, until: 5 }   // modo noturno: das 23h às 5h
 };

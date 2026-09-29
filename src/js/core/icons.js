@@ -20,7 +20,19 @@
     clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
     refresh: '<path d="M20 11a8 8 0 0 0-14.3-4.3L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.3l1.7-1.8M20 20v-4.5h-4.5"/>',
     back: '<path d="M15 5l-7 7 7 7"/>',
-    search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>'
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>',
+    home: '<path d="M3 11.5l9-8 9 8"/><path d="M5.5 10v10h4.5v-6h4v6h4.5V10"/>',
+    fridge: '<rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 10.5h14M8.5 6v1.8M8.5 13.5V17"/>',
+    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    edit: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4ZM13.5 6.5l4 4"/>',
+    trash: '<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/>',
+    pin: '<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    snow: '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M9.5 4.7L12 7.2l2.5-2.5M9.5 19.3L12 16.8l2.5 2.5"/>',
+    box: '<path d="M3.5 8L12 3.5 20.5 8v8.5L12 21l-8.5-4.5V8Z"/><path d="M3.5 8L12 12.5 20.5 8M12 12.5V21"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    alert: '<path d="M12 3.5l9.5 16.5h-19L12 3.5Z"/><path d="M12 10v4.5M12 17.4v.1"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
   };
 
   // Código WMO (Open-Meteo) -> nome do ícone

@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -33,10 +34,12 @@ type Config struct {
 	TrafficCacheMinutes  int         `json:"trafficCacheMinutes"` // intervalo entre consultas dentro da janela
 	ForceIPv4            bool        `json:"forceIPv4"`
 	Games                GamesConfig `json:"games"`
+	DBPath               string      `json:"dbPath"`         // banco SQLite (estoque e contatos); relativo à pasta do hub.config.json
+	AllowedOrigins       []string    `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
 func loadConfig(path string) Config {
-	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true}
+	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db"}
 	b, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatalf("não foi possível ler %s: %v (copie hub.config.example.json para hub.config.json)", path, err)
@@ -58,6 +61,7 @@ func withCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -84,7 +88,18 @@ func main() {
 	gm := newGames(cfg, *cfgPath)
 	go gm.loop()
 
+	// Se o banco não abrir, o resto do hub (agenda, clima, jogos) segue no ar e /api/estoque e /api/contatos respondem 503.
+	if !filepath.IsAbs(cfg.DBPath) { // relativo à pasta do hub.config.json, como o stateFile dos jogos
+		cfg.DBPath = filepath.Join(filepath.Dir(*cfgPath), cfg.DBPath)
+	}
+	db, err := openStore(cfg.DBPath, cfg.AllowedOrigins)
+	if err != nil {
+		log.Printf("banco de dados %s: %v", cfg.DBPath, err)
+		db = nil
+	}
+
 	mux := http.NewServeMux()
+	db.register(mux)
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]interface{}{"ok": true, "time": time.Now().Format(time.RFC3339)})
 	})
