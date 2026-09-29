@@ -1,0 +1,3 @@
+- Hub (servidor): `server/package.sh` gera `server/dist/centraldiogo.tgz`; no Linux: `sudo bash install.sh` (ver server/).
+- Android: `platforms/android/build.sh [URL]` gera `build/central-diogo.apk` (sem Gradle; usa o SDK instalado).
+- TV Samsung: `platforms/tizen/README.md` (Tizen Studio, certificado Samsung, .wgt).

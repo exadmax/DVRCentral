@@ -1,0 +1,133 @@
+{
+  "listen": ":8080",
+  "staticDir": "../src",
+  "calendarCacheMinutes": 5,
+  "trafficCacheMinutes": 10,
+  "calendars": [
+    {
+      "who": "casal",
+      "label": "Casal",
+      "color": "linear-gradient(135deg,#4DA3FF 50%,#33E19A 50%)",
+      "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
+    },
+    {
+      "who": "diogo",
+      "label": "Diogo",
+      "color": "#4DA3FF",
+      "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
+    },
+    {
+      "who": "pessoa2",
+      "label": "Pessoa 2",
+      "color": "#33E19A",
+      "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
+    },
+    {
+      "who": "plantoes",
+      "label": "Plantões Prevent",
+      "color": "#B48CFF",
+      "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
+    }
+  ],
+  "traffic": {
+    "key": "",
+    "home": "Rua Exemplo, 100, São Paulo, SP",
+    "diogo": {
+      "arriveBy": "09:00",
+      "days": {
+        "1": [
+          {
+            "name": "Escritório",
+            "to": "Av. Exemplo, 200, São Paulo, SP"
+          }
+        ],
+        "2": [
+          {
+            "name": "Escritório",
+            "to": "Av. Exemplo, 200, São Paulo, SP"
+          }
+        ],
+        "3": [
+          {
+            "name": "Escritório",
+            "to": "Av. Exemplo, 200, São Paulo, SP"
+          }
+        ],
+        "4": [
+          {
+            "name": "Escritório",
+            "to": "Av. Exemplo, 200, São Paulo, SP"
+          }
+        ],
+        "5": [
+          {
+            "name": "Escritório",
+            "to": "Av. Exemplo, 200, São Paulo, SP"
+          }
+        ]
+      },
+      "onDemand": true
+    },
+    "pessoa2": {
+      "arriveBy": "07:00",
+      "days": {
+        "1": [
+          {
+            "name": "Trabalho A",
+            "to": "Av. Exemplo, 300, São Paulo, SP"
+          }
+        ],
+        "2": [
+          {
+            "name": "Trabalho B",
+            "to": "Rua Exemplo, 400, São Paulo, SP"
+          }
+        ],
+        "3": [
+          {
+            "home": true
+          }
+        ],
+        "4": [
+          {
+            "name": "Trabalho A",
+            "to": "Av. Exemplo, 300, São Paulo, SP"
+          }
+        ],
+        "5": [
+          {
+            "name": "Trabalho B",
+            "to": "Rua Exemplo, 400, São Paulo, SP"
+          }
+        ]
+      },
+      "window": [
+        "06:00",
+        "08:00"
+      ],
+      "showUntil": "09:00"
+    }
+  },
+  "forceIPv4": true,
+  "games": {
+    "cacheMinutes": 360,
+    "stateFile": "games.state.json",
+    "steam": {
+      "key": "",
+      "user": "seu-usuario"
+    },
+    "psn": {
+      "npsso": "",
+      "user": "seu-usuario"
+    },
+    "xbox": {
+      "clientId": "",
+      "clientSecret": "",
+      "gamertag": "SeuGamertag"
+    },
+    "retro": {
+      "key": "",
+      "user": "seu-usuario"
+    }
+  }
+}

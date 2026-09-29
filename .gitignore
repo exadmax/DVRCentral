@@ -1,0 +1,17 @@
+node_modules/
+src/config/settings.js
+platforms/android/android/
+build/
+*.wgt
+
+platforms/tizen/www/
+server/hub.config.json
+server/dist/
+server/games.state.json
+
+# binários locais, bancos SQLite e chaves (nunca versionar)
+*.exe
+*.db
+*.db-wal
+*.db-shm
+key/
