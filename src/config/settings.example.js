@@ -12,10 +12,14 @@ window.CD_SETTINGS = {
     { label: 'Jogos',  sub: 'WebRCade',  icon: 'gamepad', port: 8080, path: '/jogos/play/?feed={host}:8080/roms/feed.json' },
     { label: 'Geladeira', sub: 'Itens e validades', icon: 'fridge', path: '/estoque.html', alert: 'estoque' },
     { label: 'Serviços', sub: 'Profissionais', icon: 'phone', path: '/contatos.html' },
+    { label: 'Câmeras', sub: 'Ao vivo', icon: 'camera', path: '/camaras.html' },
     { label: 'Música', sub: 'Navidrome', icon: 'music',   port: 4533, path: '/' },
     { label: 'Vídeos', sub: 'Pasta',     icon: 'film',    port: 8080, path: '/videos/' },
     { label: 'ROMs',   sub: 'Arquivos',  icon: 'folder',  port: 8080, path: '/roms/' }
   ],
+
+  // Câmeras no meio da tela inicial (no lugar do Clima): cada câmera fica N segundos, depois volta o Clima e segue o rodízio. Precisa do hub.
+  cameras: { rotateSeconds: 60 },
 
   // Geladeira e Dispensa: itens que vencem em até N dias ficam em destaque âmbar (vencidos, em vermelho)
   estoque: { soonDays: 3 },

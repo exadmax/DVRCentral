@@ -31,5 +31,9 @@
     };
   }
 
-  CD.hubApi = { estoque: resource('/api/estoque'), contatos: resource('/api/contatos') };
+  CD.hubApi = {
+    estoque: resource('/api/estoque'), contatos: resource('/api/contatos'),
+    // câmeras ao vivo: a lista vem do hub (a URL com a senha nunca sai de lá); o vídeo é um MP4 contínuo em /stream
+    cameras: { list() { return call('GET', '/api/cameras'); }, streamUrl(id) { return CD.state.hub + '/api/cameras/' + encodeURIComponent(id) + '/stream'; } }
+  };
 })(window.CD = window.CD || {});

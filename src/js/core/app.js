@@ -5,10 +5,12 @@
   const cfg = U.deepMerge(JSON.parse(JSON.stringify(window.CD_SETTINGS || {})), window.CD_SETTINGS_LOCAL);
   cfg.calendar = cfg.calendar || { sources: [], proxy: '' };
   cfg.night = cfg.night || { from: 23, until: 5 };
+  cfg.cameras = cfg.cameras || { rotateSeconds: 60 };
 
   const state = {
     cfg: cfg, now: new Date(), weather: null, wxStale: false, cal: { demo: true, sources: [] },
-    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0
+    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0,
+    cams: [], midIdx: 0            // câmeras do hub e o que ocupa o meio: 0 = Clima, 1..n = câmeras (rodízio)
   };
   CD.state = state;
 
@@ -25,7 +27,7 @@
 
   function day(s) {
     return header(s) + '<div class="rule"></div><main class="main">' +
-      CD.widgets.agenda(s) + CD.widgets.weather(s) + CD.widgets.map(s) + '</main>' + CD.widgets.links(s) + CD.widgets.footer(s);
+      CD.widgets.agenda(s) + (CD.widgets.cameraCur(s) ? CD.widgets.cameraSlot(s) : CD.widgets.weather(s)) + CD.widgets.map(s) + '</main>' + CD.widgets.links(s) + CD.widgets.footer(s);
   }
 
   function isNight(now) {
@@ -58,6 +60,7 @@
     shell.innerHTML = night ? CD.widgets.night(state) : day(state);
     const list = $('#evlist');
     if (list) list.scrollTop = state.agTop;
+    CD.widgets.cameraSync(state);
   }
 
   // TV/web: palco fixo 1920x1080 escalado para caber. Celular (ou retrato): coluna única.
@@ -139,7 +142,25 @@
     try { state.stock = await CD.hubApi.estoque.list(); render(); } catch (e) { /* mantém o anterior */ }
   }
 
-  function refreshAll() { refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); }
+  // Câmeras ao vivo: a lista vem do hub; o meio da tela alterna Clima e cada câmera (uma por minuto)
+  async function refreshCameras() {
+    if (!state.hub) { state.cams = []; state.midIdx = 0; return; }
+    try {
+      const l = await CD.hubApi.cameras.list();
+      state.cams = Array.isArray(l) ? l : [];
+      if (state.midIdx > state.cams.length) state.midIdx = 0;
+      render();
+    } catch (e) { /* mantém a lista anterior */ }
+  }
+
+  function rotateMid() {
+    const n = state.cams.length;
+    if (!n || !CD.cameraPlayer.supported()) { state.midIdx = 0; return; }
+    state.midIdx = (state.midIdx + 1) % (n + 1);
+    render();
+  }
+
+  function refreshAll() { refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); refreshCameras(); }
 
   // ---------- boot ----------
   async function boot() {
@@ -154,6 +175,8 @@
     setInterval(refreshHolidays, 6 * 60 * min);
     setInterval(refreshStock, 5 * min);
     setInterval(shift, 3 * min);
+    const q = /[?&]rotate=(\d+)/.exec(location.search);                   // ?rotate=15 acelera o rodízio (teste)
+    setInterval(rotateMid, Math.max(5, q ? +q[1] : cfg.cameras.rotateSeconds || 60) * 1000);
     setInterval(autoScroll, 6000);
     window.addEventListener('resize', fit);
     window.addEventListener('online', () => { state.online = true; refreshAll(); });

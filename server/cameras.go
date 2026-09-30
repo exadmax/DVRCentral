@@ -1,0 +1,415 @@
+// Câmeras ao vivo: o hub lê o RTSP (H.264) de cada câmera e entrega ao navegador como MP4 fragmentado contínuo
+// (/api/cameras/{id}/stream), que a página toca com Media Source Extensions. O hub só repassa o vídeo (sem recodificar),
+// então não gasta CPU nem precisa de ffmpeg. A URL da câmera (com a senha) fica só no hub.config.json: o navegador nunca a vê.
+// A conexão com a câmera só existe enquanto alguém assiste (fecha 15 s depois do último espectador), compartilhada entre todos.
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+	"sync"
+	"time"
+
+	"github.com/bluenviron/gortsplib/v5"
+	"github.com/bluenviron/gortsplib/v5/pkg/base"
+	"github.com/bluenviron/gortsplib/v5/pkg/format"
+	"github.com/bluenviron/mediacommon/v2/pkg/codecs/h264"
+	"github.com/bluenviron/mediacommon/v2/pkg/formats/fmp4"
+	"github.com/bluenviron/mediacommon/v2/pkg/formats/fmp4/seekablebuffer"
+	"github.com/pion/rtp"
+)
+
+type CameraConfig struct {
+	ID   string `json:"id"`   // usado na URL da API
+	Name string `json:"name"` // nome exibido em cima da imagem
+	URL  string `json:"url"`  // rtsp://usuario:senha@ip:554/cam/realmonitor?channel=1&subtype=1 (senha com %40 no lugar de @ etc.)
+}
+
+const (
+	camTimescale   = 90000            // relógio RTP do H.264
+	camIdleClose   = 15 * time.Second // sem espectadores, derruba a conexão com a câmera
+	camRetry       = 4 * time.Second
+	camMaxGOPParts = 900 // teto do cache do último grupo de quadros (memória limitada)
+)
+
+type camViewer struct {
+	ch      chan []byte
+	gotInit bool // já recebeu o segmento de inicialização
+	synced  bool // já recebeu um quadro-chave (só então passa a receber os quadros seguintes)
+}
+
+type camera struct {
+	cfg CameraConfig
+
+	mu      sync.Mutex
+	viewers map[*camViewer]struct{}
+	running bool
+	gen     int // identifica a sessão atual; quadros de sessões antigas são descartados
+	stop    context.CancelFunc
+	idle    *time.Timer
+	initSeg []byte
+	codec   string   // "avc1.64001F": o navegador precisa dele para abrir o MP4
+	gop     [][]byte // do último quadro-chave até agora: quem chega no meio já começa com imagem
+	lastErr string
+}
+
+type cameras struct {
+	list []*camera
+	byID map[string]*camera
+}
+
+func newCameras(cfgs []CameraConfig) *cameras {
+	cs := &cameras{byID: map[string]*camera{}}
+	for _, cc := range cfgs {
+		if cc.ID == "" || cc.URL == "" {
+			continue
+		}
+		if cc.Name == "" {
+			cc.Name = cc.ID
+		}
+		c := &camera{cfg: cc, viewers: map[*camViewer]struct{}{}}
+		cs.list = append(cs.list, c)
+		cs.byID[cc.ID] = c
+	}
+	return cs
+}
+
+// ---- espectadores ----
+
+// push entrega uma mensagem ao espectador sem bloquear; quem não acompanha (fila cheia) é desconectado e o navegador reconecta.
+func (c *camera) push(v *camViewer, b []byte) {
+	select {
+	case v.ch <- b:
+	default:
+		c.removeLocked(v)
+	}
+}
+
+func (c *camera) removeLocked(v *camViewer) {
+	if _, ok := c.viewers[v]; ok {
+		delete(c.viewers, v)
+		close(v.ch)
+	}
+}
+
+// attach registra um espectador e já entrega o que existe (init e último grupo de quadros).
+func (c *camera) attach() *camViewer {
+	v := &camViewer{ch: make(chan []byte, 256)}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.idle != nil {
+		c.idle.Stop()
+		c.idle = nil
+	}
+	c.viewers[v] = struct{}{}
+	if c.initSeg != nil {
+		v.gotInit = true
+		c.push(v, c.initSeg)
+		if len(c.gop) > 0 {
+			v.synced = true
+			for _, p := range c.gop {
+				c.push(v, p)
+			}
+		}
+	}
+	return v
+}
+
+func (c *camera) subscribe() *camViewer {
+	v := c.attach()
+	c.mu.Lock()
+	if !c.running {
+		c.running = true
+		c.gen++
+		ctx, cancel := context.WithCancel(context.Background())
+		c.stop = cancel
+		go c.run(ctx, c.gen)
+	}
+	c.mu.Unlock()
+	return v
+}
+
+func (c *camera) unsubscribe(v *camViewer) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.removeLocked(v)
+	if len(c.viewers) == 0 && c.running && c.idle == nil {
+		c.idle = time.AfterFunc(camIdleClose, func() {
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			c.idle = nil
+			if len(c.viewers) == 0 && c.running {
+				c.running = false
+				c.stop()
+				c.resetLocked()
+			}
+		})
+	}
+}
+
+func (c *camera) resetLocked() {
+	c.initSeg, c.codec, c.gop = nil, "", nil
+	for v := range c.viewers {
+		v.gotInit, v.synced = false, false
+	}
+}
+
+func (c *camera) setInit(gen int, init []byte, codec string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if !c.running || gen != c.gen {
+		return
+	}
+	c.initSeg, c.codec, c.lastErr = init, codec, ""
+	for v := range c.viewers {
+		if !v.gotInit {
+			v.gotInit = true
+			c.push(v, init)
+		}
+	}
+}
+
+func (c *camera) pushFrame(gen int, frag []byte, key bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if !c.running || gen != c.gen {
+		return
+	}
+	if key {
+		c.gop = append(c.gop[:0], frag)
+	} else if len(c.gop) > 0 && len(c.gop) < camMaxGOPParts {
+		c.gop = append(c.gop, frag)
+	}
+	for v := range c.viewers {
+		if !v.gotInit {
+			continue
+		}
+		if !v.synced {
+			if !key {
+				continue
+			}
+			v.synced = true
+		}
+		c.push(v, frag)
+	}
+}
+
+// ---- conexão com a câmera ----
+
+func (c *camera) run(ctx context.Context, gen int) {
+	for ctx.Err() == nil {
+		err := c.session(ctx, gen)
+		if ctx.Err() != nil {
+			return
+		}
+		c.mu.Lock()
+		if gen == c.gen {
+			c.lastErr = err.Error()
+			c.resetLocked()
+		}
+		c.mu.Unlock()
+		log.Printf("câmera %s: %v (nova tentativa em %s)", c.cfg.ID, err, camRetry)
+		select {
+		case <-ctx.Done():
+		case <-time.After(camRetry):
+		}
+	}
+}
+
+func (c *camera) session(ctx context.Context, gen int) error {
+	u, err := base.ParseURL(c.cfg.URL)
+	if err != nil {
+		return errors.New("URL RTSP inválida no hub.config.json")
+	}
+	proto := gortsplib.ProtocolTCP // TCP: sem perda de pacotes no Wi-Fi
+	cl := gortsplib.Client{Scheme: u.Scheme, Host: u.Host, Protocol: &proto, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second}
+	if err := cl.Start(); err != nil {
+		return err
+	}
+	defer cl.Close()
+
+	desc, _, err := cl.Describe(u)
+	if err != nil {
+		return err
+	}
+	var forma *format.H264
+	medi := desc.FindFormat(&forma)
+	if medi == nil {
+		return errors.New("a câmera não entrega H.264 neste endereço (use o substream: subtype=1)")
+	}
+	dec, err := forma.CreateDecoder()
+	if err != nil {
+		return err
+	}
+	if _, err = cl.Setup(desc.BaseURL, medi, 0, 0); err != nil {
+		return err
+	}
+
+	var (
+		sps, pps           = forma.SPS, forma.PPS
+		haveInit, havePrev bool
+		firstPTS, prevPTS  int64
+		seq                uint32
+	)
+	cl.OnPacketRTP(medi, forma, func(pkt *rtp.Packet) {
+		pts, ok := cl.PacketPTS(medi, pkt)
+		if !ok {
+			return
+		}
+		au, err := dec.Decode(pkt)
+		if err != nil { // "mais pacotes": o quadro ainda está chegando
+			return
+		}
+		nalus := make([][]byte, 0, len(au))
+		for _, n := range au {
+			if len(n) == 0 {
+				continue
+			}
+			switch h264.NALUType(n[0] & 0x1F) {
+			case h264.NALUTypeSPS:
+				sps = append([]byte(nil), n...)
+			case h264.NALUTypePPS:
+				pps = append([]byte(nil), n...)
+			case h264.NALUTypeAccessUnitDelimiter: // o init já leva SPS/PPS
+			default:
+				nalus = append(nalus, n)
+			}
+		}
+		if len(nalus) == 0 {
+			return
+		}
+		if !haveInit {
+			if len(sps) < 4 || len(pps) == 0 {
+				return
+			}
+			init, err := buildInit(sps, pps)
+			if err != nil {
+				log.Printf("câmera %s: init: %v", c.cfg.ID, err)
+				return
+			}
+			c.setInit(gen, init, fmt.Sprintf("avc1.%02X%02X%02X", sps[1], sps[2], sps[3]))
+			haveInit, firstPTS = true, pts
+		}
+		dur := int64(camTimescale / 15) // duração do primeiro quadro: estimativa
+		if havePrev && pts > prevPTS {
+			dur = pts - prevPTS
+		}
+		if dur > 2*camTimescale {
+			dur = 2 * camTimescale
+		}
+		prevPTS, havePrev = pts, true
+
+		sample, err := fmp4.NewSampleH264(0, nalus)
+		if err != nil {
+			return
+		}
+		sample.Duration = uint32(dur)
+		seq++
+		var buf seekablebuffer.Buffer
+		part := fmp4.Part{SequenceNumber: seq, Tracks: []*fmp4.PartTrack{{ID: 1, BaseTime: uint64(pts - firstPTS), Samples: []*fmp4.Sample{sample}}}}
+		if err := part.Marshal(&buf); err != nil {
+			return
+		}
+		c.pushFrame(gen, buf.Bytes(), !sample.IsNonSyncSample)
+	})
+
+	if _, err = cl.Play(nil); err != nil {
+		return err
+	}
+	done := make(chan error, 1)
+	go func() { done <- cl.Wait() }()
+	select {
+	case <-ctx.Done():
+		return nil
+	case err := <-done:
+		return err
+	}
+}
+
+func buildInit(sps, pps []byte) ([]byte, error) {
+	var buf seekablebuffer.Buffer
+	init := fmp4.Init{Tracks: []*fmp4.InitTrack{{ID: 1, TimeScale: camTimescale, Codec: &fmp4.CodecH264{SPS: sps, PPS: pps}}}}
+	if err := init.Marshal(&buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// ---- HTTP ----
+
+func (cs *cameras) register(mux *http.ServeMux) {
+	mux.HandleFunc("GET /api/cameras", func(w http.ResponseWriter, r *http.Request) {
+		out := make([]map[string]string, 0, len(cs.list))
+		for _, c := range cs.list {
+			out = append(out, map[string]string{"id": c.cfg.ID, "name": c.cfg.Name})
+		}
+		writeJSON(w, out)
+	})
+	mux.HandleFunc("GET /api/cameras/{id}/stream", cs.stream)
+}
+
+func (cs *cameras) stream(w http.ResponseWriter, r *http.Request) {
+	c := cs.byID[r.PathValue("id")]
+	if c == nil {
+		http.Error(w, "câmera não encontrada", http.StatusNotFound)
+		return
+	}
+	v := c.subscribe()
+	defer c.unsubscribe(v)
+
+	var first []byte
+	select {
+	case b, ok := <-v.ch:
+		if !ok {
+			http.Error(w, "conexão encerrada", http.StatusServiceUnavailable)
+			return
+		}
+		first = b
+	case <-time.After(15 * time.Second):
+		c.mu.Lock()
+		msg := c.lastErr
+		c.mu.Unlock()
+		if msg == "" {
+			msg = "sem imagem"
+		}
+		http.Error(w, "câmera indisponível: "+msg, http.StatusServiceUnavailable)
+		return
+	case <-r.Context().Done():
+		return
+	}
+	c.mu.Lock()
+	codec := c.codec
+	c.mu.Unlock()
+
+	h := w.Header()
+	h.Set("Content-Type", "video/mp4")
+	h.Set("Cache-Control", "no-store")
+	h.Set("X-Codec", codec)
+	h.Set("Access-Control-Expose-Headers", "X-Codec")
+	rc := http.NewResponseController(w)
+	write := func(b []byte) bool {
+		rc.SetWriteDeadline(time.Now().Add(15 * time.Second)) // o WriteTimeout do servidor (60 s) cortaria o vídeo contínuo
+		if _, err := w.Write(b); err != nil {
+			return false
+		}
+		return rc.Flush() == nil
+	}
+	if !write(first) {
+		return
+	}
+	for {
+		select {
+		case b, ok := <-v.ch:
+			if !ok || !write(b) {
+				return
+			}
+		case <-time.After(20 * time.Second): // a câmera parou de mandar imagem: o navegador reconecta
+			return
+		case <-r.Context().Done():
+			return
+		}
+	}
+}

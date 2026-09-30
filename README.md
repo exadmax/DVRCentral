@@ -8,6 +8,7 @@ Central de informações (Tizen + Android APK). Código web único em `src/`, em
 - **Mapa + trânsito** (deslocamento até trabalho do Diogo e da Pessoa 2)
 - **Feriados** (nacional / estadual / municipal)
 - **Geladeira e Dispensa** (`estoque.html`, item do menu de atalhos): itens com quantidade e/ou kg, validade e local (freezer / geladeira / dispensa), CRUD em SQLite; a tela inicial avisa o que está vencendo — ver `docs/estoque-contatos.md`
+- **Câmeras** (`camaras.html`, item do menu de atalhos): imagem ao vivo das câmeras de casa, cada uma com o nome em cima; no painel principal elas alternam com o Clima (1 min cada) — ver `docs/cameras.md`
 - **Serviços** (`contatos.html`, item do menu de atalhos): profissionais e prestadores de serviço (eletricista, encanador...), CRUD em SQLite — ver `docs/estoque-contatos.md`
 
 ## Estrutura
@@ -36,7 +37,7 @@ Design de referência: `docs/design/` e `docs/spec-design.md`.
 
 ## Arquitetura (casa)
 - **Hub** (`server/`, Go): roda no Linux "servidor" (porta 80). Serve o painel, guarda as URLs iCal e a chave do Google
-  e expõe `/api/ics`, `/api/traffic` e `/api/games`. Também guarda o banco SQLite (`centraldiogo.db`) das páginas
+  e expõe `/api/ics`, `/api/traffic`, `/api/games` e `/api/cameras`. Também guarda o banco SQLite (`centraldiogo.db`) das páginas
   Geladeira e Dispensa e Contatos, via `/api/estoque` e `/api/contatos`. Compilar o hub exige Go 1.26+ (sem CGO).
   As duas páginas precisam do hub: rode localmente com `cd server && go run . -config hub.config.json`.
 - **Painel** (`src/`): HTML/JS. Aberto pelo hub (navegador), pela **TV Samsung** (`platforms/tizen`) ou pelo **APK** (`platforms/android`).

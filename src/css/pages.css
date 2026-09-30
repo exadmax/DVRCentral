@@ -106,6 +106,25 @@ a { color: inherit; }
 .cc.confirm { background: rgba(255, 107, 107, .08); }
 .cc.confirm .cc-act { position: static; margin-top: 6px; }
 
+/* câmeras ao vivo (camaras.html); 16:9 por padding-top, sem aspect-ratio, por causa das TVs Tizen */
+.cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; align-content: start; }
+.cams .empty { grid-column: 1 / -1; }
+.cam { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: var(--card); min-width: 0; }
+.cam-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cam-h h2 { margin: 0; font: 700 22px/1.1 'Poppins', 'Inter', sans-serif; }
+.cam-v { position: relative; width: 100%; padding-top: 56.25%; border-radius: 10px; overflow: hidden; background: #000; }
+.cam-v video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.cam-s { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 16px; text-align: center;
+  font-size: 15px; color: var(--dim); background: rgba(0, 0, 0, .55); }
+.cam-s.err { color: #FFB3B3; }
+.cam-s.off { display: none; }
+.cam:fullscreen { padding: 0; border-radius: 0; background: #000; }
+.cam:fullscreen .cam-v { flex: 1; padding-top: 0; }
+.cam:-webkit-full-screen { padding: 0; border-radius: 0; background: #000; }
+.cam:-webkit-full-screen .cam-v { flex: 1; padding-top: 0; }
+.cam:fullscreen .cam-h { position: absolute; left: 16px; top: 12px; z-index: 2; text-shadow: 0 1px 6px #000; }
+.cam:-webkit-full-screen .cam-h { position: absolute; left: 16px; top: 12px; z-index: 2; text-shadow: 0 1px 6px #000; }
+
 /* janela de formulário */
 .modal { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(5, 7, 12, .78); }
 .dlg { width: 520px; max-width: 100%; max-height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 22px 24px;
@@ -141,6 +160,7 @@ a { color: inherit; }
   .rw.confirm .rw-act { flex: 1 0 100%; }
   .rw.confirm .btn { flex: 1; }
   .pg-list.cards { grid-template-columns: 1fr; }
+  .cams { grid-template-columns: 1fr; }
   .cc-top { padding-right: 0; }
   .cc-act { position: static; margin-top: 4px; }
   .modal { padding: 12px; }

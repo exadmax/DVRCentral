@@ -39,7 +39,8 @@ type Config struct {
 		URL     string `json:"url"`     // CSV da aba de profissionais (Google Planilhas); vazio desliga a sincronização
 		Minutes int    `json:"minutes"` // intervalo entre sincronizações (padrão 5)
 	} `json:"profissionaisSheet"`
-	AllowedOrigins []string `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
+	Cameras        []CameraConfig `json:"cameras"`        // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
+	AllowedOrigins []string       `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
 func loadConfig(path string) Config {
@@ -107,6 +108,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	db.register(mux)
+	newCameras(cfg.Cameras).register(mux)
 	if db != nil && cfg.ProfissionaisSheet.URL != "" {
 		go db.sheetLoop(cfg.ProfissionaisSheet.URL, time.Duration(cfg.ProfissionaisSheet.Minutes)*time.Minute)
 	}
