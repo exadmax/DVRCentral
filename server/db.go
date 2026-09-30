@@ -50,6 +50,8 @@ var migrations = []string{
 	UPDATE contatos SET servico = trim(nota || CASE WHEN endereco <> '' THEN char(10) || 'Endereço: ' || endereco ELSE '' END);
 	ALTER TABLE contatos DROP COLUMN endereco;
 	ALTER TABLE contatos DROP COLUMN nota;`,
+	// Observações do profissional (coluna "Obs" da planilha).
+	`ALTER TABLE contatos ADD COLUMN obs TEXT NOT NULL DEFAULT '';`,
 }
 
 type store struct {

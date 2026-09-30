@@ -1,6 +1,7 @@
 {
   "listen": ":8080",
   "staticDir": "../src",
+  "profissionaisSheet": {"url": "https://docs.google.com/spreadsheets/d/ID_DA_PLANILHA/gviz/tq?tqx=out:csv&sheet=profissionais", "minutes": 5},
   "calendarCacheMinutes": 5,
   "trafficCacheMinutes": 10,
   "calendars": [

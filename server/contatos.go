@@ -16,11 +16,12 @@ type Contato struct {
 	Contato      string `json:"contato"` // telefone, e-mail ou site
 	Indicacao    string `json:"indicacao"`
 	Servico      string `json:"servico"`
+	Obs          string `json:"obs"`
 	CriadoEm     string `json:"criadoEm"`
 	AtualizadoEm string `json:"atualizadoEm"`
 }
 
-const contatoCols = "id, nome, tipo_servico, contato, indicacao, servico, criado_em, atualizado_em"
+const contatoCols = "id, nome, tipo_servico, contato, indicacao, servico, obs, criado_em, atualizado_em"
 
 func (c *Contato) clean() error {
 	c.Nome = strings.TrimSpace(c.Nome)
@@ -28,10 +29,11 @@ func (c *Contato) clean() error {
 	c.Contato = strings.TrimSpace(c.Contato)
 	c.Indicacao = strings.TrimSpace(c.Indicacao)
 	c.Servico = strings.TrimSpace(c.Servico)
+	c.Obs = strings.TrimSpace(c.Obs)
 	for _, f := range []struct {
 		v, nome string
 		max     int
-	}{{c.Nome, "nome", 120}, {c.TipoServico, "tipo de serviço", 60}, {c.Contato, "contato", 250}, {c.Indicacao, "indicação", 500}, {c.Servico, "serviço", 2000}} {
+	}{{c.Nome, "nome", 120}, {c.TipoServico, "tipo de serviço", 60}, {c.Contato, "contato", 250}, {c.Indicacao, "indicação", 500}, {c.Servico, "serviço", 2000}, {c.Obs, "observação", 2000}} {
 		if utf8.RuneCountInString(f.v) > f.max {
 			return badRequest("%s muito longo (máximo %d caracteres)", f.nome, f.max)
 		}
@@ -47,7 +49,7 @@ func (c *Contato) clean() error {
 
 func scanContato(r interface{ Scan(...interface{}) error }) (Contato, error) {
 	var c Contato
-	err := r.Scan(&c.ID, &c.Nome, &c.TipoServico, &c.Contato, &c.Indicacao, &c.Servico, &c.CriadoEm, &c.AtualizadoEm)
+	err := r.Scan(&c.ID, &c.Nome, &c.TipoServico, &c.Contato, &c.Indicacao, &c.Servico, &c.Obs, &c.CriadoEm, &c.AtualizadoEm)
 	return c, err
 }
 
@@ -78,8 +80,8 @@ func (s *store) contatosAPI() crud {
 			if err := c.clean(); err != nil {
 				return nil, err
 			}
-			res, err := s.db.Exec("INSERT INTO contatos (nome, tipo_servico, contato, indicacao, servico) VALUES (?, ?, ?, ?, ?)",
-				c.Nome, c.TipoServico, c.Contato, c.Indicacao, c.Servico)
+			res, err := s.db.Exec("INSERT INTO contatos (nome, tipo_servico, contato, indicacao, servico, obs) VALUES (?, ?, ?, ?, ?, ?)",
+				c.Nome, c.TipoServico, c.Contato, c.Indicacao, c.Servico, c.Obs)
 			if err != nil {
 				return nil, err
 			}
@@ -94,9 +96,9 @@ func (s *store) contatosAPI() crud {
 			if err := c.clean(); err != nil {
 				return nil, err
 			}
-			res, err := s.db.Exec(`UPDATE contatos SET nome = ?, tipo_servico = ?, contato = ?, indicacao = ?, servico = ?,
+			res, err := s.db.Exec(`UPDATE contatos SET nome = ?, tipo_servico = ?, contato = ?, indicacao = ?, servico = ?, obs = ?,
 				atualizado_em = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?`,
-				c.Nome, c.TipoServico, c.Contato, c.Indicacao, c.Servico, id)
+				c.Nome, c.TipoServico, c.Contato, c.Indicacao, c.Servico, c.Obs, id)
 			if err != nil {
 				return nil, err
 			}

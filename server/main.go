@@ -34,8 +34,12 @@ type Config struct {
 	TrafficCacheMinutes  int         `json:"trafficCacheMinutes"` // intervalo entre consultas dentro da janela
 	ForceIPv4            bool        `json:"forceIPv4"`
 	Games                GamesConfig `json:"games"`
-	DBPath               string      `json:"dbPath"`         // banco SQLite (estoque e contatos); relativo à pasta do hub.config.json
-	AllowedOrigins       []string    `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
+	DBPath               string      `json:"dbPath"` // banco SQLite (estoque e contatos); relativo à pasta do hub.config.json
+	ProfissionaisSheet   struct {
+		URL     string `json:"url"`     // CSV da aba de profissionais (Google Planilhas); vazio desliga a sincronização
+		Minutes int    `json:"minutes"` // intervalo entre sincronizações (padrão 5)
+	} `json:"profissionaisSheet"`
+	AllowedOrigins []string `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
 func loadConfig(path string) Config {
@@ -103,6 +107,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	db.register(mux)
+	if db != nil && cfg.ProfissionaisSheet.URL != "" {
+		go db.sheetLoop(cfg.ProfissionaisSheet.URL, time.Duration(cfg.ProfissionaisSheet.Minutes)*time.Minute)
+	}
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		v, _ := readVersion(verDir)
 		writeJSON(w, map[string]interface{}{"ok": true, "time": time.Now().Format(time.RFC3339), "version": v})

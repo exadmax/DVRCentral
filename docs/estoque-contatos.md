@@ -33,6 +33,19 @@ então o que se cadastra em um aparelho aparece nos outros.
 | Contato | opcional; telefone, e-mail ou site (vira link para ligar, escrever ou abrir) |
 | Indicação | opcional; quem indicou, se recomenda ou não |
 | Serviço | opcional; o que o profissional vai fazer (ou fez) |
+| Obs | opcional; observações |
+
+### Sincronização com o Google Planilhas
+
+Se `profissionaisSheet.url` estiver no `hub.config.json`, a planilha é a **fonte**: o hub lê a aba em CSV ao ligar e a cada
+`minutes` (padrão 5), cria os profissionais novos, atualiza os alterados e **apaga os que saíram da planilha**. Edições feitas
+no painel são sobrescritas na próxima leitura, então edite pela planilha. Se o Google não responder ou a planilha vier
+vazia, nada é alterado (o motivo vai para o log do hub).
+
+- A planilha precisa estar com acesso "Qualquer pessoa com o link" (Leitor).
+- URL: `https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<nome da aba>`.
+- Colunas pelo cabeçalho: Profissional/Empresa, Serviço, Contato, Referência, O que vai fazer, Obs (a ordem não importa).
+- Um profissional é identificado por nome + serviço; linhas sem nome ou sem serviço são ignoradas.
 
 Os tipos viram filtros (Eletricista, Encanador...) e a busca procura em todos os campos.
 
@@ -73,7 +86,7 @@ Os tipos viram filtros (Eletricista, Encanador...) e a busca procura em todos os
 Erros vêm como `{"error": "mensagem"}` com 400 (dado inválido), 404, 415 ou 503 (banco indisponível).
 
 Item: `{"nome", "quantidade", "pesoKg", "validade", "local"}`.
-Contato: `{"nome", "tipoServico", "contato", "indicacao", "servico"}`.
+Contato: `{"nome", "tipoServico", "contato", "indicacao", "servico", "obs"}`.
 
 ```bash
 curl -X POST http://192.168.0.10/api/contatos -H 'Content-Type: application/json' \

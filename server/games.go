@@ -267,7 +267,7 @@ func (g *games) get(force bool) map[string]interface{} {
 		if p.Stats == nil {
 			p.Stats = map[string]interface{}{}
 		}
-		p.NeedsLogin =f.id == "xbox" && f.configured && g.st.XboxRefresh == ""
+		p.NeedsLogin = f.id == "xbox" && f.configured && g.st.XboxRefresh == ""
 		out = append(out, &p)
 	}
 	res := map[string]interface{}{"platforms": out, "refreshing": g.refreshing || started}
