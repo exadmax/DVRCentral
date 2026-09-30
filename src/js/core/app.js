@@ -8,7 +8,7 @@
 
   const state = {
     cfg: cfg, now: new Date(), weather: null, wxStale: false, cal: { demo: true, sources: [] },
-    holidays: [], traffic: null, stock: null, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0
+    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0
   };
   CD.state = state;
 
@@ -33,9 +33,25 @@
     return cfg.night.from > cfg.night.until ? (h >= cfg.night.from || h < cfg.night.until) : (h >= cfg.night.from && h < cfg.night.until);
   }
 
+  // Fim da noite atual: próxima vez em que o relógio marca a hora de saída do modo noturno
+  function nightEnd(now) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), cfg.night.until, 0, 0);
+    if (d <= now) d.setDate(d.getDate() + 1);
+    return d.getTime();
+  }
+
+  // Desligar vale só para esta sessão (nada é guardado: ao recarregar, o modo noturno volta se ainda for a hora) e,
+  // numa TV que fica ligada, só até o fim da noite atual: na próxima noite ele volta sozinho.
+  function setNightOff(off) {
+    state.nightOffUntil = off ? nightEnd(new Date()) : 0;
+    render();
+  }
+
   function render() {
     state.now = new Date();
-    const night = isNight(state.now);
+    const inNight = isNight(state.now);
+    state.nightSkipped = inNight && state.now.getTime() < state.nightOffUntil;   // horário noturno, mas desligado à mão
+    const night = inNight && !state.nightSkipped;
     document.body.classList.toggle('night', night);
     document.documentElement.classList.toggle('night', night);
     const shell = $('#shell');
@@ -143,6 +159,8 @@
     window.addEventListener('online', () => { state.online = true; refreshAll(); });
     window.addEventListener('offline', () => { state.online = false; render(); });
     document.addEventListener('click', e => {
+      const n = e.target.closest && e.target.closest('[data-night]');
+      if (n) return setNightOff(n.getAttribute('data-night') === 'off');
       const b = e.target.closest && e.target.closest('[data-traffic]');
       if (b && b.getAttribute('data-traffic') === 'diogo') showDiogoTraffic();
     });

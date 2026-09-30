@@ -132,13 +132,18 @@ body.night #stage { background: #05070C; }
 .foot { flex: 0 0 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; border-top: 1px solid rgba(255, 255, 255, .06); font-size: 18px; color: rgba(242, 245, 250, .55); }
 .foot .ok, .foot .bad { display: flex; align-items: center; gap: 10px; }
 .foot .bad { color: var(--amber); }
+.nightbtn { padding: 6px 18px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid rgba(242, 245, 250, .2);
+  color: rgba(242, 245, 250, .7); font: 600 16px 'Inter', system-ui, sans-serif; }
+.nightbtn:hover, .nightbtn:focus { outline: none; color: var(--text); border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77, 163, 255, .35); }
 .cdot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; }
 .bad .cdot { background: var(--amber); }
 
 /* ---- modo noturno ---- */
 .night-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #05070C; }
 .n-logo { position: absolute; top: 40px; left: 48px; width: 36px; height: 36px; border-radius: 8px; opacity: .28; }
-.n-label { position: absolute; top: 48px; right: 48px; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(242, 245, 250, .22); }
+.n-off { position: absolute; top: 36px; right: 48px; padding: 12px 26px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid rgba(242, 245, 250, .14);
+  color: rgba(242, 245, 250, .3); font: 600 18px 'Inter', system-ui, sans-serif; letter-spacing: .5px; }
+.n-off:hover, .n-off:focus { outline: none; color: rgba(242, 245, 250, .75); border-color: rgba(77, 163, 255, .6); box-shadow: 0 0 0 3px rgba(77, 163, 255, .3); }
 .n-col { display: flex; flex-direction: column; align-items: center; gap: 56px; width: 720px; }
 .n-clock { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .n-time { font-weight: 700; font-size: 196px; line-height: 1; letter-spacing: -2px; color: rgba(242, 245, 250, .58); }
@@ -170,5 +175,6 @@ body.mobile .lk { flex: 1 1 45%; }
 body.mobile .foot { flex: none; flex-direction: column; align-items: flex-start; gap: 10px; padding: 22px 32px 32px; }
 body.mobile .night-wrap { height: calc(100vh / .6); }
 body.mobile .n-col { width: 100%; padding: 0 32px; }
+body.mobile .n-off { top: 28px; right: 32px; padding: 22px 34px; }
 body.mobile .n-time { font-size: 150px; }
 body.mobile .n-title { width: auto; flex: 1; }

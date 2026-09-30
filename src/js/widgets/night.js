@@ -14,7 +14,7 @@
       : '<div class="n-ev"><span class="n-title" style="text-align:center;width:100%">Nada agendado</span></div>';
 
     return '<div class="night-wrap"><img class="n-logo" src="assets/img/logo-128.png" alt="">' +
-      '<div class="n-label">Modo noturno</div>' +
+      '<button type="button" class="n-off" data-night="off">Desligar modo noturno</button>' +
       '<div class="n-col"><div class="n-clock"><div class="n-time num">' + U.hhmm(s.now) + '</div>' +
       '<div class="n-date">' + U.dataExtenso(s.now) + '</div></div>' +
       '<div class="n-line">' + line + '</div><div class="n-rule"></div>' +
