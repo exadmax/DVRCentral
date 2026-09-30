@@ -1,6 +1,11 @@
 # Conquistas (subsistema de jogos)
 
-Dashboard em `src/jogos.html` (atalho "Conquistas" no rodapé do painel) com jogos, conquistas e troféus de:
+> **A página de Conquistas foi retirada do painel** (o atalho e `jogos.html` não existem mais). O backend continua no
+> hub (`server/games*.go`, `GET /api/games`), sem tela. Para recuperar a página, ela está no histórico do git
+> (commit `b8f576a`: `src/jogos.html`, `src/js/games/`, `src/css/games.css`). As instruções abaixo que falam do
+> dashboard valem só se a página voltar.
+
+Dashboard (removido) com jogos, conquistas e troféus de:
 
 | Plataforma | Conta | Como o hub consulta |
 |---|---|---|

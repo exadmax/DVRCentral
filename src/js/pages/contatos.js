@@ -1,5 +1,5 @@
 (function (CD) {
-  // Aba "Contatos": prestadores de serviço e telefones importantes da casa (eletricista, encanador...), guardados no hub.
+  // Página "Contatos" (contatos.html): prestadores de serviço e telefones importantes da casa (eletricista, encanador...), guardados no hub.
   const U = CD.util, I = CD.icons, esc = U.esc;
 
   // Sugestões para o campo "tipo de serviço" (somadas aos tipos já cadastrados)
@@ -17,7 +17,7 @@
     const $ = s => root.querySelector(s);
 
     root.innerHTML = '<section class="pg">' +
-      '<div class="pg-head"><div class="h2">Contatos importantes</div><div class="pg-sum" id="sum"></div></div>' +
+      '<div class="pg-sum" id="sum"></div>' +
       '<div class="pg-tools"><nav class="chips" id="chips"></nav>' +
       '<label class="search">' + I.svg('search', 'currentColor', 26, 2) + '<input type="search" id="q" placeholder="Buscar contato" autocomplete="off"></label>' +
       '<button type="button" class="btn" data-act="new">' + I.svg('plus', 'currentColor', 26, 2.2) + '<span>Novo contato</span></button></div>' +
@@ -134,5 +134,5 @@
   }
 
   CD.pages = CD.pages || {};
-  CD.pages.contatos = { label: 'Contatos', icon: 'phone', mount: mount };
+  CD.pages.contatos = { label: 'Contatos', sub: 'telefones importantes', icon: 'phone', mount: mount };
 })(window.CD = window.CD || {});

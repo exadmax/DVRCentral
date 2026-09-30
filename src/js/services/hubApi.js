@@ -2,7 +2,7 @@
   // Cliente da API CRUD do hub (/api/estoque, /api/contatos). Erros viram Error com a mensagem do servidor.
   async function call(method, path, body) {
     const base = CD.state && CD.state.hub;
-    if (!base) throw new Error('Sem o hub: abra o painel pelo endereço do servidor da casa para usar esta aba.');
+    if (!base) throw new Error('Sem o hub: abra o painel pelo endereço do servidor da casa para usar esta página.');
     const opt = { method: method };
     if (body !== undefined) { opt.headers = { 'Content-Type': 'application/json' }; opt.body = JSON.stringify(body); }
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;

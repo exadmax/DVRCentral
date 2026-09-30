@@ -8,33 +8,9 @@
 
   const state = {
     cfg: cfg, now: new Date(), weather: null, wxStale: false, cal: { demo: true, sources: [] },
-    holidays: [], traffic: null, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0,
-    tab: 'home', stock: null, wakeUntil: 0, lastInput: Date.now()
+    holidays: [], traffic: null, stock: null, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0
   };
   CD.state = state;
-
-  // ---------- abas ----------
-  const TABS = [{ id: 'home', label: 'Início', icon: 'home' }].concat(Object.keys(CD.pages || {}).map(id => ({ id: id, label: CD.pages[id].label, icon: CD.pages[id].icon })));
-  const IDLE_HOME_MS = 5 * 60 * 1000;      // TV/tablet: volta para o Início sozinha
-  const WAKE_MS = 5 * 60 * 1000;           // à noite, tocar na tela mostra o painel completo por alguns minutos
-
-  const tabFromHash = () => { const h = location.hash.replace('#', ''); return CD.pages && CD.pages[h] ? h : 'home'; };
-
-  function tabs(s) {
-    return '<nav class="tabs" role="tablist">' + TABS.map(t => '<button type="button" class="tab' + (s.tab === t.id ? ' on' : '') + '" role="tab" aria-selected="' +
-      (s.tab === t.id) + '" data-tab="' + t.id + '">' + I.svg(t.icon, 'currentColor', 30, 1.9) + '<span>' + U.esc(t.label) + '</span></button>').join('') + '</nav>';
-  }
-
-  function setTab(id, fromHistory) {
-    if (id !== 'home' && !(CD.pages && CD.pages[id])) id = 'home';
-    if (id === state.tab && !fromHistory) return;
-    state.tab = id; state.lastInput = Date.now();
-    if (!fromHistory) {                    // o botão Voltar do celular/APK volta para o Início
-      try { history.pushState(null, '', id === 'home' ? location.pathname + location.search : '#' + id); } catch (e) { /* file:// restrito */ }
-    }
-    render();
-    window.scrollTo(0, 0);
-  }
 
   // ---------- layout ----------
   function header(s) {
@@ -48,7 +24,7 @@
   }
 
   function day(s) {
-    return header(s) + '<div class="rule"></div>' + tabs(s) + '<main class="main">' +
+    return header(s) + '<div class="rule"></div><main class="main">' +
       CD.widgets.agenda(s) + CD.widgets.weather(s) + CD.widgets.map(s) + '</main>' + CD.widgets.links(s) + CD.widgets.footer(s);
   }
 
@@ -59,40 +35,13 @@
 
   function render() {
     state.now = new Date();
-    const night = state.tab === 'home' && isNight(state.now) && state.now.getTime() > state.wakeUntil;
+    const night = isNight(state.now);
     document.body.classList.toggle('night', night);
     document.documentElement.classList.toggle('night', night);
     const shell = $('#shell');
-    if (night) { shell.innerHTML = CD.widgets.night(state); shell.removeAttribute('data-view'); return; }
-    if (state.tab === 'home') {
-      shell.innerHTML = day(state);
-      shell.setAttribute('data-view', 'home');
-      const list = $('#evlist');
-      if (list) list.scrollTop = state.agTop;
-      return;
-    }
-    // Abas com formulário: montadas uma vez. Depois só o cabeçalho (relógio) é atualizado, para não perder o que está sendo digitado.
-    if (shell.getAttribute('data-view') !== state.tab) {
-      shell.innerHTML = header(state) + '<div class="rule"></div>' + tabs(state) + '<main class="page" id="page"></main>';
-      shell.setAttribute('data-view', state.tab);
-      CD.pages[state.tab].mount($('#page'));
-    } else {
-      const h = shell.querySelector('header.top');
-      if (h) h.outerHTML = header(state);
-    }
-  }
-
-  // Ao longo do dia: a cada 30 s redesenha o Início; na TV/tablet uma aba parada por alguns minutos volta para o Início
-  function tick() {
-    if (state.tab !== 'home' && !document.body.classList.contains('mobile') && Date.now() - state.lastInput > IDLE_HOME_MS) setTab('home');
-    else render();
-  }
-
-  // Qualquer toque ou tecla conta como atividade; à noite acorda o painel (sem isso as abas ficariam inacessíveis no celular)
-  function touched() {
-    state.lastInput = Date.now();
-    if (state.tab === 'home' && document.body.classList.contains('night')) { state.wakeUntil = state.lastInput + WAKE_MS; render(); }
-    else if (isNight(new Date())) state.wakeUntil = Math.max(state.wakeUntil, state.lastInput + WAKE_MS);
+    shell.innerHTML = night ? CD.widgets.night(state) : day(state);
+    const list = $('#evlist');
+    if (list) list.scrollTop = state.agTop;
   }
 
   // TV/web: palco fixo 1920x1080 escalado para caber. Celular (ou retrato): coluna única.
@@ -168,48 +117,39 @@
     render();
   }
 
-  // Validades para o aviso da tela inicial (a aba Geladeira e Dispensa mantém state.stock atualizado enquanto está aberta)
+  // Validades para o item "Geladeira" do menu de atalhos (a lista completa fica em estoque.html)
   async function refreshStock() {
     if (!state.hub) return;
-    try { state.stock = await CD.hubApi.estoque.list(); } catch (e) { /* mantém o anterior */ }
-    if (state.tab === 'home') render();
+    try { state.stock = await CD.hubApi.estoque.list(); render(); } catch (e) { /* mantém o anterior */ }
   }
 
   function refreshAll() { refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); }
 
   // ---------- boot ----------
   async function boot() {
-    fit();
-    const first = tabFromHash();
-    if (first === 'home') render();          // abrindo direto numa aba, espera achar o hub antes de montá-la
+    fit(); render();
     await detectHub();
-    if (first !== 'home') { state.tab = first; render(); }
     refreshAll();
     const min = 60000;
-    setInterval(tick, 30 * 1000);
+    setInterval(render, 30 * 1000);
     setInterval(refreshWeather, Math.max(5, cfg.refreshMinutes || 15) * min);
     setInterval(refreshTraffic, 5 * min);
     setInterval(refreshCalendar, 5 * min);
     setInterval(refreshHolidays, 6 * 60 * min);
+    setInterval(refreshStock, 5 * min);
     setInterval(shift, 3 * min);
     setInterval(autoScroll, 6000);
     window.addEventListener('resize', fit);
     window.addEventListener('online', () => { state.online = true; refreshAll(); });
     window.addEventListener('offline', () => { state.online = false; render(); });
     document.addEventListener('click', e => {
-      const t = e.target.closest && e.target.closest('[data-tab]');
-      if (t) return setTab(t.getAttribute('data-tab'));
       const b = e.target.closest && e.target.closest('[data-traffic]');
       if (b && b.getAttribute('data-traffic') === 'diogo') showDiogoTraffic();
     });
-    window.addEventListener('popstate', () => setTab(tabFromHash(), true));
-    ['pointerdown', 'touchstart', 'input'].forEach(n => document.addEventListener(n, touched, true));
     document.addEventListener('keydown', e => {
-      touched();
-      if (e.keyCode === 13 && state.tab === 'home' && !(e.target.closest && e.target.closest('a,button,input,textarea,select'))) refreshAll();   // OK do controle: atualizar
+      if (e.keyCode === 13 && !(e.target.closest && e.target.closest('a,button'))) refreshAll();                       // OK do controle: atualizar
       if (e.keyCode === 10009) {                                    // Voltar do controle Samsung
-        if (state.tab !== 'home') setTab('home');                   // numa aba: volta para o Início antes de sair
-        else if (window.tizen) { try { tizen.application.getCurrentApplication().exit(); } catch (x) { /* ignore */ } }
+        if (window.tizen) { try { tizen.application.getCurrentApplication().exit(); } catch (x) { /* ignore */ } }
         else if (window.parent !== window) window.parent.postMessage('cd-exit', '*');  // painel dentro do app da TV (iframe)
       }
     });

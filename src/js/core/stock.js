@@ -1,5 +1,5 @@
 (function (CD) {
-  // Regras de estoque compartilhadas pela aba Geladeira e Dispensa e pelo aviso de validades da tela inicial.
+  // Regras de estoque compartilhadas pela página Geladeira e Dispensa e pelo aviso de validades no menu da tela inicial.
   const LOCAIS = [
     { id: 'geladeira', label: 'Geladeira', color: '#4DA3FF', icon: 'fridge' },
     { id: 'freezer', label: 'Freezer', color: '#7EE7F2', icon: 'snow' },

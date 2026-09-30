@@ -122,7 +122,11 @@ body.night #stage { background: #05070C; }
 .lk:hover, .lk:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(77, 163, 255, .35); }
 .lk-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .lk-t b { font-size: 24px; font-weight: 600; }
-.lk-t span { font-size: 16px; color: var(--dim); }
+.lk-t span { font-size: 16px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lk.late { border-color: rgba(255, 107, 107, .55); background: rgba(255, 107, 107, .08); }
+.lk.soon { border-color: rgba(255, 176, 32, .5); background: rgba(255, 176, 32, .07); }
+.lk.late .lk-t span { color: var(--red); }
+.lk.soon .lk-t span { color: var(--amber); }
 
 /* ---- rodapé ---- */
 .foot { flex: 0 0 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; border-top: 1px solid rgba(255, 255, 255, .06); font-size: 18px; color: rgba(242, 245, 250, .55); }

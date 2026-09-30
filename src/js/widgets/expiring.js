@@ -1,23 +1,21 @@
 (function (CD) {
-  // Aviso de validades na tela inicial: tile na fileira de atalhos com os itens vencidos ou perto de vencer.
-  // Só aparece com o hub ligado e itens cadastrados; tocar leva para a aba Geladeira e Dispensa.
-  const U = CD.util, S = CD.stock, I = CD.icons;
+  // Alerta de validades para o item "Geladeira" do menu de atalhos (links.js): itens vencidos ou perto de vencer.
+  // Devolve null (item normal do menu) quando o hub está fora do ar ou não há itens cadastrados.
+  const S = CD.stock;
   const COLOR = { late: '#FF6B6B', soon: '#FFB020', ok: '#33E19A' };
 
-  function render(s) {
-    if (!s.stock || !s.stock.length) return '';
+  function alertFor(s) {
+    if (!s.stock || !s.stock.length) return null;
     const soon = S.soonDays();
-    const due = s.stock.map(it => ({ it: it, x: S.expiry(it, s.now, soon) }))
-      .filter(r => r.x.lvl === 'late' || r.x.lvl === 'soon')
-      .sort((a, b) => a.x.d - b.x.d);
-    const lvl = due.length ? due[0].x.lvl : 'ok';
-    const title = due.length ? 'Validade · ' + due.length : 'Validades';
-    const sub = due.length ? due.map(r => r.it.nome).join(', ') : 'Tudo em dia';
-    return '<button type="button" class="lk xt ' + lvl + '" data-tab="estoque" title="Geladeira e Dispensa">' +
-      I.svg(due.length ? 'alert' : 'check', COLOR[lvl], 36, 1.8) +
-      '<span class="lk-t"><b>' + U.esc(title) + '</b><span>' + U.esc(sub) + '</span></span></button>';
+    let late = 0, warn = 0;
+    s.stock.forEach(it => { const x = S.expiry(it, s.now, soon); if (x.lvl === 'late') late++; else if (x.lvl === 'soon') warn++; });
+    if (!late && !warn) return { lvl: 'ok', icon: 'check', color: COLOR.ok, sub: 'Tudo em dia' };
+    const parts = [];
+    if (late) parts.push(S.plural(late, 'vencido', 'vencidos'));
+    if (warn) parts.push(warn + ' a vencer');
+    return { lvl: late ? 'late' : 'soon', icon: 'alert', color: late ? COLOR.late : COLOR.soon, sub: parts.join(' · ') };
   }
 
   CD.widgets = CD.widgets || {};
-  CD.widgets.expiring = render;
+  CD.widgets.expiring = alertFor;
 })(window.CD = window.CD || {});

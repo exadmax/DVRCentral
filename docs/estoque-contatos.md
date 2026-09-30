@@ -1,10 +1,14 @@
 # Geladeira e Dispensa + Contatos
 
-Duas abas do painel (ao lado de **Início**), com cadastro completo (criar, ver, editar, excluir) guardado em um banco
-**SQLite** no hub. Funcionam na TV, no celular/APK e no navegador: todos falam com o mesmo hub, então o que se cadastra
-em um aparelho aparece nos outros.
+Duas páginas do painel, cada uma com a sua jornada, abertas pelos itens **Geladeira** e **Contatos** do menu de atalhos
+no rodapé do Início (junto de Jogos, Música, Vídeos e ROMs). Têm cadastro completo (criar, ver, editar, excluir)
+guardado em um banco **SQLite** no hub. Funcionam na TV, no celular/APK e no navegador: todos falam com o mesmo hub,
+então o que se cadastra em um aparelho aparece nos outros.
 
-## Aba Geladeira e Dispensa
+- `estoque.html`: Geladeira e Dispensa
+- `contatos.html`: Contatos
+
+## Geladeira e Dispensa
 
 | Campo | Regra |
 |---|---|
@@ -16,10 +20,11 @@ em um aparelho aparece nos outros.
 - A lista vem ordenada pela validade (o que vence primeiro no topo), com filtro por local e busca pelo nome.
 - Cores da validade: **vermelho** = vencido, **âmbar** = vence em até `estoque.soonDays` dias (padrão 3, em
   `src/config/settings.js`), verde = dentro do prazo.
-- Na tela **Início** aparece uma tile "Validade · N" na fileira de atalhos com os itens vencidos ou perto de vencer
-  (ou "Validades — tudo em dia"). Tocar nela abre a aba. Só aparece quando o hub está ligado e há itens cadastrados.
+- O item **Geladeira** do menu do Início avisa sem precisar abrir a página: fica vermelho ou âmbar com o resumo
+  ("1 vencido · 3 a vencer"), ou mostra "Tudo em dia". O aviso vem de `alert: 'estoque'` em `links` (`settings.example.js`)
+  e só aparece com o hub ligado e itens cadastrados; senão o item é um atalho comum.
 
-## Aba Contatos
+## Contatos
 
 | Campo | Regra |
 |---|---|
@@ -32,10 +37,10 @@ Os tipos viram filtros (Eletricista, Encanador...) e a busca procura em todos os
 
 ## Navegação
 
-- **TV (controle):** setas/OK navegam; **Voltar** fecha a janela aberta ou volta ao Início antes de sair do app.
-  Parada por 5 minutos numa aba, a TV volta sozinha ao Início (o modo noturno das 23h às 5h só vale no Início).
-- **Celular/APK:** o botão Voltar volta ao Início; um endereço como `http://192.168.0.10/#contatos` abre direto na aba.
-- À noite, tocar na tela "acorda" o painel por 5 minutos, para dar acesso às abas.
+- As páginas seguem o mesmo molde da tela de Início: botão de voltar ao painel no topo e, na TV, o **Voltar** do
+  controle (com uma janela de cadastro aberta, ele fecha a janela primeiro).
+- Em telas grandes (TV, monitor) o conteúdo é ampliado para leitura à distância; no celular a lista vira coluna única.
+- Endereços diretos: `http://192.168.0.10/estoque.html` e `http://192.168.0.10/contatos.html`.
 
 ## Banco de dados
 
@@ -44,7 +49,7 @@ Os tipos viram filtros (Eletricista, Encanador...) e a busca procura em todos os
 - O `install.sh` **não mexe** no banco: reinstalar o hub preserva os dados.
 - Driver em Go puro (`modernc.org/sqlite`, sem CGO), então `server/build.sh` continua gerando os 4 binários Linux.
   Compilar exige Go 1.26 ou mais novo. O binário ficou uns 5 MB maior.
-- Se o banco não abrir, o resto do hub (agenda, clima, jogos) segue no ar e as duas abas mostram o erro.
+- Se o banco não abrir, o resto do hub (agenda, clima, jogos) segue no ar e as duas páginas mostram o erro.
 - **Backup** (o SQLite usa modo WAL, então não copie só o `.db` com o hub rodando):
   ```bash
   sudo systemctl stop centraldiogo-hub

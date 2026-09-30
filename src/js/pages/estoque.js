@@ -1,5 +1,5 @@
 (function (CD) {
-  // Aba "Geladeira e Dispensa": CRUD dos itens guardados no hub (SQLite). Montada uma vez; não é redesenhada pelo relógio.
+  // Página "Geladeira e Dispensa" (estoque.html): CRUD dos itens guardados no hub (SQLite).
   const U = CD.util, I = CD.icons, S = CD.stock, esc = U.esc;
 
   const sortKey = it => it.validade || '9999-99-99';                        // sem validade vai para o fim
@@ -11,7 +11,7 @@
     const $ = s => root.querySelector(s);
 
     root.innerHTML = '<section class="pg">' +
-      '<div class="pg-head"><div class="h2">Geladeira e Dispensa</div><div class="pg-sum" id="sum"></div></div>' +
+      '<div class="pg-sum" id="sum"></div>' +
       '<div class="pg-tools"><nav class="chips" id="chips"></nav>' +
       '<label class="search">' + I.svg('search', 'currentColor', 26, 2) + '<input type="search" id="q" placeholder="Buscar item" autocomplete="off"></label>' +
       '<button type="button" class="btn" data-act="new">' + I.svg('plus', 'currentColor', 26, 2.2) + '<span>Novo item</span></button></div>' +
@@ -69,15 +69,11 @@
 
     function renderAll() { renderSummary(); renderChips(); renderList(); }
 
-    function changed() {                       // ordena e avisa a tela inicial
-      st.items.sort(byExpiry);
-      CD.state.stock = st.items;
-      renderAll();
-    }
+    function changed() { st.items.sort(byExpiry); renderAll(); }
 
     async function load() {
       st.error = '';
-      try { st.items = await api.list(); CD.state.stock = st.items; }
+      try { st.items = await api.list(); }
       catch (e) { st.error = e.message; }
       renderAll();
     }
@@ -137,5 +133,5 @@
   }
 
   CD.pages = CD.pages || {};
-  CD.pages.estoque = { label: 'Geladeira e Dispensa', icon: 'fridge', mount: mount };
+  CD.pages.estoque = { label: 'Geladeira e Dispensa', sub: 'itens e validades', icon: 'fridge', mount: mount };
 })(window.CD = window.CD || {});

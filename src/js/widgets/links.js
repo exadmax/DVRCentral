@@ -1,5 +1,5 @@
 (function (CD) {
-  // Atalhos para os outros serviços da máquina (WebRCade, Navidrome, vídeos, ROMs).
+  // Atalhos para os outros serviços da máquina (WebRCade, Navidrome, vídeos, ROMs) e para as páginas do próprio hub.
   // Só aparecem quando existe um endereço-base: o hub configurado ou o servidor que entregou a página.
   function base(s) {
     if (s.hub) return s.hub;
@@ -17,10 +17,12 @@
   function render(s) {
     const b = base(s), list = s.cfg.links || [];
     if (!b || !list.length) return '';
-    return '<nav class="links">' + CD.widgets.expiring(s) + list.map(l => {
+    return '<nav class="links">' + list.map(l => {
       const h = href(l, b);
-      return h ? '<a class="lk" target="_top" href="' + CD.util.esc(h) + '">' + CD.icons.svg(l.icon, '#4DA3FF', 36, 1.8) +
-        '<span class="lk-t"><b>' + CD.util.esc(l.label) + '</b><span>' + CD.util.esc(l.sub || '') + '</span></span></a>' : '';
+      if (!h) return '';
+      const a = l.alert === 'estoque' ? CD.widgets.expiring(s) : null;     // item que avisa vencidos/perto de vencer
+      return '<a class="lk' + (a ? ' ' + a.lvl : '') + '" target="_top" href="' + CD.util.esc(h) + '">' + CD.icons.svg(a ? a.icon : l.icon, a ? a.color : '#4DA3FF', 36, 1.8) +
+        '<span class="lk-t"><b>' + CD.util.esc(l.label) + '</b><span>' + CD.util.esc(a ? a.sub : l.sub || '') + '</span></span></a>';
     }).join('') + '</nav>';
   }
 
