@@ -30,8 +30,9 @@ então o que se cadastra em um aparelho aparece nos outros.
 |---|---|
 | Nome | obrigatório |
 | Tipo de serviço | obrigatório (eletricista, encanador...); o campo sugere os tipos já usados |
-| Telefone | obrigatório, com pelo menos 8 dígitos; no celular vira link para ligar |
-| Endereço, Nota | opcionais |
+| Contato | opcional; telefone, e-mail ou site (vira link para ligar, escrever ou abrir) |
+| Indicação | opcional; quem indicou, se recomenda ou não |
+| Serviço | opcional; o que o profissional vai fazer (ou fez) |
 
 Os tipos viram filtros (Eletricista, Encanador...) e a busca procura em todos os campos.
 
@@ -72,11 +73,11 @@ Os tipos viram filtros (Eletricista, Encanador...) e a busca procura em todos os
 Erros vêm como `{"error": "mensagem"}` com 400 (dado inválido), 404, 415 ou 503 (banco indisponível).
 
 Item: `{"nome", "quantidade", "pesoKg", "validade", "local"}`.
-Contato: `{"nome", "tipoServico", "telefone", "endereco", "nota"}`.
+Contato: `{"nome", "tipoServico", "contato", "indicacao", "servico"}`.
 
 ```bash
 curl -X POST http://192.168.0.10/api/contatos -H 'Content-Type: application/json' \
-  -d '{"nome":"João","tipoServico":"Eletricista","telefone":"(11) 98888-7777"}'
+  -d '{"nome":"João","tipoServico":"Eletricista","contato":"(11) 98888-7777"}'
 ```
 
 ### Segurança

@@ -147,17 +147,17 @@ func TestEstoqueValidacao(t *testing.T) {
 
 func TestContatosCRUD(t *testing.T) {
 	_, h := newTestAPI(t)
-	code, v := do(t, h, "POST", "/api/contatos", `{"nome":"João Silva","tipoServico":"Eletricista","telefone":"(11) 98888-7777","endereco":"Rua A, 10","nota":"Atende aos sábados"}`)
+	code, v := do(t, h, "POST", "/api/contatos", `{"nome":"João Silva","tipoServico":"Eletricista","contato":"(11) 98888-7777","indicacao":"Indicado pela Ana","servico":"Trocar o quadro de luz"}`)
 	if code != 201 {
 		t.Fatalf("criar: %d %#v", code, v)
 	}
 	c := obj(t, v)
 	id := itoa(int64(c["id"].(float64)))
-	if c["nome"] != "João Silva" || c["tipoServico"] != "Eletricista" || c["nota"] != "Atende aos sábados" {
+	if c["nome"] != "João Silva" || c["tipoServico"] != "Eletricista" || c["indicacao"] != "Indicado pela Ana" || c["servico"] != "Trocar o quadro de luz" {
 		t.Fatalf("contato criado inesperado: %#v", c)
 	}
-	// endereço e nota são opcionais
-	if code, v = do(t, h, "POST", "/api/contatos", `{"nome":"Ana","tipoServico":"encanadora","telefone":"1133334444"}`); code != 201 {
+	// contato, indicação e serviço são opcionais
+	if code, v = do(t, h, "POST", "/api/contatos", `{"nome":"Ana","tipoServico":"encanadora","contato":"ana@exemplo.com"}`); code != 201 {
 		t.Fatalf("criar mínimo: %d %#v", code, v)
 	}
 	code, v = do(t, h, "GET", "/api/contatos", "")
@@ -165,8 +165,8 @@ func TestContatosCRUD(t *testing.T) {
 	if code != 200 || len(list) != 2 || obj(t, list[0])["nome"] != "João Silva" { // ordena por tipo: Eletricista < encanadora
 		t.Fatalf("lista: %d %#v", code, v)
 	}
-	code, v = do(t, h, "PUT", "/api/contatos/"+id, `{"nome":"João S.","tipoServico":"Eletricista","telefone":"11988887777","endereco":"","nota":""}`)
-	if code != 200 || obj(t, v)["nome"] != "João S." || obj(t, v)["endereco"] != "" {
+	code, v = do(t, h, "PUT", "/api/contatos/"+id, `{"nome":"João S.","tipoServico":"Eletricista","contato":"11988887777","indicacao":"","servico":""}`)
+	if code != 200 || obj(t, v)["nome"] != "João S." || obj(t, v)["servico"] != "" {
 		t.Fatalf("atualizar: %d %#v", code, v)
 	}
 	if code, _ = do(t, h, "DELETE", "/api/contatos/"+id, ""); code != 204 {
@@ -180,12 +180,10 @@ func TestContatosCRUD(t *testing.T) {
 func TestContatosValidacao(t *testing.T) {
 	_, h := newTestAPI(t)
 	ruins := map[string]string{
-		"sem nome":        `{"tipoServico":"x","telefone":"11999999999"}`,
-		"sem tipo":        `{"nome":"x","telefone":"11999999999"}`,
-		"sem telefone":    `{"nome":"x","tipoServico":"x"}`,
-		"telefone curto":  `{"nome":"x","tipoServico":"x","telefone":"123-45"}`,
-		"telefone letras": `{"nome":"x","tipoServico":"x","telefone":"abcdefghij"}`,
-		"nota gigante":    `{"nome":"x","tipoServico":"x","telefone":"11999999999","nota":"` + strings.Repeat("n", 2001) + `"}`,
+		"sem nome":        `{"tipoServico":"x"}`,
+		"sem tipo":        `{"nome":"x"}`,
+		"serviço longo":   `{"nome":"x","tipoServico":"x","servico":"` + strings.Repeat("n", 2001) + `"}`,
+		"indicação longa": `{"nome":"x","tipoServico":"x","indicacao":"` + strings.Repeat("n", 501) + `"}`,
 	}
 	for nome, body := range ruins {
 		if code, _ := do(t, h, "POST", "/api/contatos", body); code != 400 {
@@ -285,7 +283,7 @@ func TestPersisteEntreAberturas(t *testing.T) {
 	}
 	mux := http.NewServeMux()
 	s.register(mux)
-	if code, _ := do(t, mux, "POST", "/api/contatos", `{"nome":"Zé","tipoServico":"Chaveiro","telefone":"1144445555"}`); code != 201 {
+	if code, _ := do(t, mux, "POST", "/api/contatos", `{"nome":"Zé","tipoServico":"Chaveiro","contato":"1144445555"}`); code != 201 {
 		t.Fatalf("criar: %d", code)
 	}
 	s.db.Close()

@@ -1,4 +1,4 @@
-// Contatos importantes da casa: eletricista, encanador etc. (CRUD em /api/contatos).
+// Profissionais e contatos da casa: eletricista, encanador etc. (CRUD em /api/contatos).
 package main
 
 import (
@@ -13,25 +13,25 @@ type Contato struct {
 	ID           int64  `json:"id"`
 	Nome         string `json:"nome"`
 	TipoServico  string `json:"tipoServico"`
-	Telefone     string `json:"telefone"`
-	Endereco     string `json:"endereco"`
-	Nota         string `json:"nota"`
+	Contato      string `json:"contato"` // telefone, e-mail ou site
+	Indicacao    string `json:"indicacao"`
+	Servico      string `json:"servico"`
 	CriadoEm     string `json:"criadoEm"`
 	AtualizadoEm string `json:"atualizadoEm"`
 }
 
-const contatoCols = "id, nome, tipo_servico, telefone, endereco, nota, criado_em, atualizado_em"
+const contatoCols = "id, nome, tipo_servico, contato, indicacao, servico, criado_em, atualizado_em"
 
 func (c *Contato) clean() error {
 	c.Nome = strings.TrimSpace(c.Nome)
 	c.TipoServico = strings.TrimSpace(c.TipoServico)
-	c.Telefone = strings.TrimSpace(c.Telefone)
-	c.Endereco = strings.TrimSpace(c.Endereco)
-	c.Nota = strings.TrimSpace(c.Nota)
+	c.Contato = strings.TrimSpace(c.Contato)
+	c.Indicacao = strings.TrimSpace(c.Indicacao)
+	c.Servico = strings.TrimSpace(c.Servico)
 	for _, f := range []struct {
 		v, nome string
 		max     int
-	}{{c.Nome, "nome", 120}, {c.TipoServico, "tipo de serviço", 60}, {c.Telefone, "telefone", 40}, {c.Endereco, "endereço", 250}, {c.Nota, "nota", 2000}} {
+	}{{c.Nome, "nome", 120}, {c.TipoServico, "tipo de serviço", 60}, {c.Contato, "contato", 250}, {c.Indicacao, "indicação", 500}, {c.Servico, "serviço", 2000}} {
 		if utf8.RuneCountInString(f.v) > f.max {
 			return badRequest("%s muito longo (máximo %d caracteres)", f.nome, f.max)
 		}
@@ -41,24 +41,13 @@ func (c *Contato) clean() error {
 		return badRequest("informe o nome")
 	case c.TipoServico == "":
 		return badRequest("informe o tipo de serviço")
-	case c.Telefone == "":
-		return badRequest("informe o telefone")
-	}
-	digits := 0
-	for _, r := range c.Telefone {
-		if r >= '0' && r <= '9' {
-			digits++
-		}
-	}
-	if digits < 8 {
-		return badRequest("telefone deve ter pelo menos 8 dígitos")
 	}
 	return nil
 }
 
 func scanContato(r interface{ Scan(...interface{}) error }) (Contato, error) {
 	var c Contato
-	err := r.Scan(&c.ID, &c.Nome, &c.TipoServico, &c.Telefone, &c.Endereco, &c.Nota, &c.CriadoEm, &c.AtualizadoEm)
+	err := r.Scan(&c.ID, &c.Nome, &c.TipoServico, &c.Contato, &c.Indicacao, &c.Servico, &c.CriadoEm, &c.AtualizadoEm)
 	return c, err
 }
 
@@ -89,8 +78,8 @@ func (s *store) contatosAPI() crud {
 			if err := c.clean(); err != nil {
 				return nil, err
 			}
-			res, err := s.db.Exec("INSERT INTO contatos (nome, tipo_servico, telefone, endereco, nota) VALUES (?, ?, ?, ?, ?)",
-				c.Nome, c.TipoServico, c.Telefone, c.Endereco, c.Nota)
+			res, err := s.db.Exec("INSERT INTO contatos (nome, tipo_servico, contato, indicacao, servico) VALUES (?, ?, ?, ?, ?)",
+				c.Nome, c.TipoServico, c.Contato, c.Indicacao, c.Servico)
 			if err != nil {
 				return nil, err
 			}
@@ -105,9 +94,9 @@ func (s *store) contatosAPI() crud {
 			if err := c.clean(); err != nil {
 				return nil, err
 			}
-			res, err := s.db.Exec(`UPDATE contatos SET nome = ?, tipo_servico = ?, telefone = ?, endereco = ?, nota = ?,
+			res, err := s.db.Exec(`UPDATE contatos SET nome = ?, tipo_servico = ?, contato = ?, indicacao = ?, servico = ?,
 				atualizado_em = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?`,
-				c.Nome, c.TipoServico, c.Telefone, c.Endereco, c.Nota, id)
+				c.Nome, c.TipoServico, c.Contato, c.Indicacao, c.Servico, id)
 			if err != nil {
 				return nil, err
 			}

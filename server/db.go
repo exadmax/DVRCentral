@@ -42,6 +42,14 @@ var migrations = []string{
 		criado_em TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
 		atualizado_em TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
 	);`,
+	// Contatos viram profissionais: telefone -> contato (telefone, e-mail ou site), nota -> servico (o que será feito),
+	// novo campo indicacao (quem indicou / observações); o endereço, que ninguém usava, vai junto para o serviço.
+	`ALTER TABLE contatos RENAME COLUMN telefone TO contato;
+	ALTER TABLE contatos ADD COLUMN indicacao TEXT NOT NULL DEFAULT '';
+	ALTER TABLE contatos ADD COLUMN servico TEXT NOT NULL DEFAULT '';
+	UPDATE contatos SET servico = trim(nota || CASE WHEN endereco <> '' THEN char(10) || 'Endereço: ' || endereco ELSE '' END);
+	ALTER TABLE contatos DROP COLUMN endereco;
+	ALTER TABLE contatos DROP COLUMN nota;`,
 }
 
 type store struct {
