@@ -1,12 +1,12 @@
-# Geladeira e Dispensa + Contatos
+# Geladeira e Dispensa + Serviços
 
-Duas páginas do painel, cada uma com a sua jornada, abertas pelos itens **Geladeira** e **Contatos** do menu de atalhos
+Duas páginas do painel, cada uma com a sua jornada, abertas pelos itens **Geladeira** e **Serviços** do menu de atalhos
 no rodapé do Início (junto de Jogos, Música, Vídeos e ROMs). Têm cadastro completo (criar, ver, editar, excluir)
 guardado em um banco **SQLite** no hub. Funcionam na TV, no celular/APK e no navegador: todos falam com o mesmo hub,
 então o que se cadastra em um aparelho aparece nos outros.
 
 - `estoque.html`: Geladeira e Dispensa
-- `contatos.html`: Contatos
+- `contatos.html`: Serviços
 
 ## Geladeira e Dispensa
 
@@ -24,7 +24,7 @@ então o que se cadastra em um aparelho aparece nos outros.
   ("1 vencido · 3 a vencer"), ou mostra "Tudo em dia". O aviso vem de `alert: 'estoque'` em `links` (`settings.example.js`)
   e só aparece com o hub ligado e itens cadastrados; senão o item é um atalho comum.
 
-## Contatos
+## Serviços
 
 | Campo | Regra |
 |---|---|

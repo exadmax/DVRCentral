@@ -8,7 +8,7 @@ Central de informações (Tizen + Android APK). Código web único em `src/`, em
 - **Mapa + trânsito** (deslocamento até trabalho do Diogo e da Pessoa 2)
 - **Feriados** (nacional / estadual / municipal)
 - **Geladeira e Dispensa** (`estoque.html`, item do menu de atalhos): itens com quantidade e/ou kg, validade e local (freezer / geladeira / dispensa), CRUD em SQLite; a tela inicial avisa o que está vencendo — ver `docs/estoque-contatos.md`
-- **Contatos** (`contatos.html`, item do menu de atalhos): profissionais e prestadores de serviço (eletricista, encanador...), CRUD em SQLite — ver `docs/estoque-contatos.md`
+- **Serviços** (`contatos.html`, item do menu de atalhos): profissionais e prestadores de serviço (eletricista, encanador...), CRUD em SQLite — ver `docs/estoque-contatos.md`
 
 ## Estrutura
 - `src/` app web compartilhado (index.html, css, js/widgets, js/services)

@@ -1,5 +1,5 @@
 (function (CD) {
-  // Página "Contatos" (contatos.html): profissionais e prestadores de serviço da casa (eletricista, encanador...), guardados no hub.
+  // Página "Serviços" (contatos.html): profissionais e prestadores de serviço da casa (eletricista, encanador...), guardados no hub.
   const U = CD.util, I = CD.icons, esc = U.esc;
 
   // Sugestões para o campo "tipo de serviço" (somadas aos tipos já cadastrados)
@@ -26,8 +26,8 @@
     root.innerHTML = '<section class="pg">' +
       '<div class="pg-sum" id="sum"></div>' +
       '<div class="pg-tools"><nav class="chips" id="chips"></nav>' +
-      '<label class="search">' + I.svg('search', 'currentColor', 26, 2) + '<input type="search" id="q" placeholder="Buscar contato" autocomplete="off"></label>' +
-      '<button type="button" class="btn" data-act="new">' + I.svg('plus', 'currentColor', 26, 2.2) + '<span>Novo contato</span></button></div>' +
+      '<label class="search">' + I.svg('search', 'currentColor', 26, 2) + '<input type="search" id="q" placeholder="Buscar profissional" autocomplete="off"></label>' +
+      '<button type="button" class="btn" data-act="new">' + I.svg('plus', 'currentColor', 26, 2.2) + '<span>Novo profissional</span></button></div>' +
       '<div class="pg-list cards" id="list"></div><div id="modal"></div></section>';
 
     function all() { return st.items || []; }
@@ -45,7 +45,7 @@
       if (st.filter && !chips.some(c => c.key === st.filter)) st.filter = '';        // o último do tipo foi excluído
       $('#chips').innerHTML = chips.map(c => '<button type="button" class="chip' + (st.filter === c.key ? ' on' : '') + '" data-filter="' + esc(c.key) + '">' +
         esc(c.label) + '<b>' + count(c.key) + '</b></button>').join('');
-      $('#sum').innerHTML = all().length ? '<span class="spill ok">' + all().length + (all().length === 1 ? ' contato' : ' contatos') + '</span>' : '';
+      $('#sum').innerHTML = all().length ? '<span class="spill ok">' + all().length + (all().length === 1 ? ' profissional' : ' profissionais') + '</span>' : '';
     }
 
     function contatoHtml(c) {
@@ -75,7 +75,7 @@
       const q = st.q.trim().toLowerCase();
       const list = st.items.filter(c => (!st.filter || tipoKey(c.tipoServico) === st.filter) &&
         (!q || [c.nome, c.tipoServico, c.contato, c.indicacao, c.servico].join(' ').toLowerCase().indexOf(q) >= 0));
-      if (!list.length) h += '<div class="empty">' + (st.items.length ? 'Nenhum contato encontrado' : 'Nenhum contato cadastrado. Toque em “Novo contato” para começar.') + '</div>';
+      if (!list.length) h += '<div class="empty">' + (st.items.length ? 'Nenhum profissional encontrado' : 'Nenhum profissional cadastrado. Toque em “Novo profissional” para começar.') + '</div>';
       else h += list.map(card).join('');
       el.innerHTML = h;
     }
@@ -102,7 +102,7 @@
         CD.ui.field('Serviço', '<textarea name="servico" rows="3" maxlength="2000" placeholder="O que ele vai fazer / fez">' + esc(cur.servico) + '</textarea>', '(opcional)');
 
       CD.ui.modal($('#modal'), {
-        title: c ? 'Editar contato' : 'Novo contato', body: body,
+        title: c ? 'Editar profissional' : 'Novo profissional', body: body,
         read(f) {
           const el = f.elements, d = {
             nome: el.nome.value.trim(), tipoServico: el.tipoServico.value.trim(), contato: el.contato.value.trim(),
@@ -145,5 +145,5 @@
   }
 
   CD.pages = CD.pages || {};
-  CD.pages.contatos = { label: 'Contatos', sub: 'profissionais e telefones', icon: 'phone', mount: mount };
+  CD.pages.contatos = { label: 'Serviços', sub: 'profissionais e prestadores', icon: 'phone', mount: mount };
 })(window.CD = window.CD || {});
