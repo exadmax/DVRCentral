@@ -20,7 +20,8 @@
       ? '<span class="ok"><span class="cdot"></span>Conectado</span>'
       : '<span class="bad"><span class="cdot"></span>Sem conexão — dados em cache</span>';
     const night = s.nightSkipped ? '<button type="button" class="nightbtn" data-night="on">Ativar modo noturno</button>' : '';   // desligado à mão nesta noite
-    return '<footer class="foot"><span>' + (s.updatedAt ? 'Atualizado às ' + U.hhmm(s.updatedAt) : 'Carregando…') + '</span>' + conn + night + '<span>' + nextTxt + '</span></footer>';
+    const ver = s.version ? ' · ' + (/^\d/.test(s.version) ? 'V' : '') + U.esc(s.version) : '';      // versão instalada no hub (V1.0.1; "dev" fora do servidor)
+    return '<footer class="foot"><span>' + (s.updatedAt ? 'Atualizado às ' + U.hhmm(s.updatedAt) : 'Carregando…') + ver + '</span>' + conn + night + '<span>' + nextTxt + '</span></footer>';
   }
 
   CD.widgets = CD.widgets || {};

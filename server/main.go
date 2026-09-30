@@ -98,10 +98,18 @@ func main() {
 		db = nil
 	}
 
+	// Versão instalada: arquivo VERSION ao lado do hub.config.json (o install.sh soma 1 ao terceiro número a cada instalação)
+	verDir := filepath.Dir(*cfgPath)
+
 	mux := http.NewServeMux()
 	db.register(mux)
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, map[string]interface{}{"ok": true, "time": time.Now().Format(time.RFC3339)})
+		v, _ := readVersion(verDir)
+		writeJSON(w, map[string]interface{}{"ok": true, "time": time.Now().Format(time.RFC3339), "version": v})
+	})
+	mux.HandleFunc("/api/version", func(w http.ResponseWriter, r *http.Request) {
+		v, at := readVersion(verDir)
+		writeJSON(w, map[string]interface{}{"version": v, "installedAt": at})
 	})
 	mux.HandleFunc("/api/ics", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, cal.get()) })
 	mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, tr.get(r.URL.Query().Get("diogo") == "1")) })
@@ -137,6 +145,10 @@ func main() {
 		WriteTimeout:      60 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
-	log.Printf("Central Diogo hub em %s (painel: %s)", cfg.Listen, cfg.StaticDir)
+	ver, _ := readVersion(verDir)
+	if ver != "dev" {
+		ver = "V" + ver
+	}
+	log.Printf("Central Diogo hub %s em %s (painel: %s)", ver, cfg.Listen, cfg.StaticDir)
 	log.Fatal(srv.ListenAndServe())
 }

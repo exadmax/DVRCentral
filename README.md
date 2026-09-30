@@ -41,3 +41,16 @@ Design de referência: `docs/design/` e `docs/spec-design.md`.
   As duas páginas precisam do hub: rode localmente com `cd server && go run . -config hub.config.json`.
 - **Painel** (`src/`): HTML/JS. Aberto pelo hub (navegador), pela **TV Samsung** (`platforms/tizen`) ou pelo **APK** (`platforms/android`).
 - TV e APK são só cascas (WebView) que abrem `http://192.168.0.10/`; para mudar o painel basta reenviar o hub.
+
+## Versão instalada
+- O servidor guarda a versão no arquivo `VERSION` (`/opt/centraldiogo/VERSION`, ao lado do `hub.config.json`), no formato
+  `MAIOR.MENOR.PATCH`, por exemplo `1.0.1`.
+- Cada `sudo bash install.sh` **concluído** soma 1 ao terceiro número (`V1.0.1 -> V1.0.2`) e registra a linha em
+  `install.log`. Instalação que falha no meio não muda a versão. Sem o arquivo, a primeira instalação vira `V1.0.1`.
+  Para subir o primeiro ou o segundo número, edite o `VERSION` à mão (ex.: `1.1.0`); as instalações seguintes continuam
+  somando no terceiro.
+- Para conferir a versão instalada:
+  - `bash install.sh --check` na pasta do pacote (sem sudo e sem alterar nada): mostra a instalada e a próxima;
+  - `curl localhost/api/version` no servidor: `{"version":"1.0.1","installedAt":"..."}` (o `/api/health` também traz a versão);
+  - rodapé do painel: "Atualizado às 21:30 · V1.0.1".
+- Fora do servidor (`go run`, sem arquivo `VERSION`) o hub informa `dev`.

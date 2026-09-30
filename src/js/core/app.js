@@ -8,7 +8,7 @@
 
   const state = {
     cfg: cfg, now: new Date(), weather: null, wxStale: false, cal: { demo: true, sources: [] },
-    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0
+    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0
   };
   CD.state = state;
 
@@ -100,7 +100,7 @@
   async function detectHub() {
     const base = (cfg.hub && cfg.hub.url) || (/^https?:/.test(location.protocol) ? location.origin : '');
     if (!base) return;
-    try { await U.getJson(base + '/api/health', 3000); state.hub = base.replace(/\/$/, ''); } catch (e) { state.hub = ''; }
+    try { const h = await U.getJson(base + '/api/health', 3000); state.hub = base.replace(/\/$/, ''); state.version = h.version || ''; } catch (e) { state.hub = ''; state.version = ''; }
   }
 
   // Trânsito vem só do hub (a chave do Google fica lá). Diogo só é consultado enquanto o "Ver trânsito" está ativo.

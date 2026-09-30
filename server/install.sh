@@ -1,11 +1,30 @@
 #!/usr/bin/env bash
 # Roda NO Linux, com sudo:  sudo bash install.sh
 # Instala o hub em /opt/centraldiogo, libera a porta 80 e ativa o serviço.
+# Cada instalação concluída soma 1 ao terceiro número da versão (arquivo VERSION: 1.0.1 -> 1.0.2).
+# Só consultar a versão instalada, sem sudo e sem alterar nada:  bash install.sh --check
 set -e
-[ "$(id -u)" = 0 ] || { echo "rode com sudo: sudo bash install.sh"; exit 1; }
 cd "$(dirname "$0")"
-USER_RUN="${SUDO_USER:-root}"
 D=/opt/centraldiogo
+
+# Versão instalada = arquivo VERSION ("MAIOR.MENOR.PATCH"). Sem o arquivo ainda não há instalação versionada: parte de 1.0.0.
+# Para subir o MAIOR ou o MENOR, edite o VERSION à mão (ex.: 1.1.0); as instalações seguintes continuam somando no terceiro.
+OLD=1.0.0
+[ -f "$D/VERSION" ] && OLD="$(tr -d '[:space:]' < "$D/VERSION")"
+if ! echo "$OLD" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+  echo "!! $D/VERSION inválido: '$OLD' (esperado algo como 1.0.1). Corrija o arquivo e rode de novo."; exit 1
+fi
+NEW="${OLD%.*}.$((10#${OLD##*.} + 1))"
+
+if [ "$1" = "--check" ]; then
+  if [ -f "$D/VERSION" ]; then echo "versão instalada: V$OLD (desde $(date -r "$D/VERSION" '+%F %T'))"
+  else echo "versão instalada: nenhuma registrada ainda"; fi
+  echo "a próxima instalação será: V$NEW"
+  exit 0
+fi
+
+[ "$(id -u)" = 0 ] || { echo "rode com sudo: sudo bash install.sh"; exit 1; }
+USER_RUN="${SUDO_USER:-root}"
 
 case "$(uname -m)" in
   x86_64) A=amd64;; i?86) A=386;; aarch64|arm64) A=arm64;; armv6*|armv7*|arm) A=arm;;
@@ -36,4 +55,10 @@ systemctl enable centraldiogo-hub
 systemctl restart centraldiogo-hub
 sleep 1.5
 systemctl is-active centraldiogo-hub
+
+# instalação concluída (o serviço subiu): registra a nova versão. O hub lê o arquivo, então /api/health já mostra a nova.
+echo "$NEW" > "$D/VERSION.tmp" && mv "$D/VERSION.tmp" "$D/VERSION"
+echo "$(date '+%F %T')  V$OLD -> V$NEW" >> "$D/install.log"
+chown "$USER_RUN" "$D/VERSION" "$D/install.log"
+echo ">> versão instalada: V$NEW (era V$OLD)"
 curl -s localhost/api/health && echo && echo ">> pronto: http://$(hostname -I | awk '{print $1}')/"
