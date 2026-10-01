@@ -1,7 +1,7 @@
 # Geladeira e Dispensa + Serviços
 
 Duas páginas do painel, cada uma com a sua jornada, abertas pelos itens **Geladeira** e **Serviços** do menu de atalhos
-no rodapé do Início (junto de Jogos, Música, Vídeos e ROMs). Têm cadastro completo (criar, ver, editar, excluir)
+no rodapé do Início (junto de Jogos, Música e Vídeos). Têm cadastro completo (criar, ver, editar, excluir)
 guardado em um banco **SQLite** no hub. Funcionam na TV, no celular/APK e no navegador: todos falam com o mesmo hub,
 então o que se cadastra em um aparelho aparece nos outros.
 
@@ -100,3 +100,11 @@ O hub é aberto à rede de casa (sem login), como o resto do painel. As gravaç�
 hub. Assim uma página de outro site aberta no celular de alguém da casa não consegue alterar o estoque. `curl` e
 scripts (sem `Origin`) passam. Para liberar outra origem, por exemplo o painel em desenvolvimento na porta 5173 falando
 com o hub na 8080, use `"allowedOrigins": ["http://localhost:5173"]` no `hub.config.json`.
+
+## Vídeos (`videos.html`)
+Lista a pasta de vídeos do servidor (`/home/usuario/Videos`, a mesma que o nginx serve em `:8080/videos/`) com os botões **Tocar aqui** (player embutido, só aparece para formatos que o navegador toca: mp4/webm/mov/mkv), **Abrir no VLC**,
+**Copiar link** e **Link direto**. O hub só lista os nomes (`GET /api/videos`, `server/videos.go`; pasta em `videos.dir` do `hub.config.json`);
+o arquivo vem do nginx, sem copiar nada. Legenda com o mesmo nome (`.srt`/`.vtt`/`.ass`) é carregada junto.
+- Android: abre o VLC direto (intent). iPhone/iPad: `vlc-x-callback`. PC: baixa um `.m3u` que o VLC abre.
+- Porta e caminho do nginx: `videos: { port: 8080, path: '/videos/' }` em `settings.js`.
+- O player embutido decodifica no aparelho (o servidor só entrega o arquivo). A legenda `.srt` é convertida para WebVTT pelo hub (`GET /api/videos/sub?name=`). Se o navegador não conseguir tocar (codec x265/AC3), aparece o aviso para abrir no VLC.

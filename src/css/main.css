@@ -143,6 +143,7 @@ body.night #stage { background: #05070C; }
 .foot { flex: 0 0 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; border-top: 1px solid rgba(255, 255, 255, .06); font-size: 18px; color: rgba(242, 245, 250, .55); }
 .foot .ok, .foot .bad { display: flex; align-items: center; gap: 10px; }
 .foot .bad { color: var(--amber); }
+.foot .sysinfo { font-size: 15px; white-space: nowrap; }
 .nightbtn { padding: 6px 18px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid rgba(242, 245, 250, .2);
   color: rgba(242, 245, 250, .7); font: 600 16px 'Inter', system-ui, sans-serif; }
 .nightbtn:hover, .nightbtn:focus { outline: none; color: var(--text); border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77, 163, 255, .35); }

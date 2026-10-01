@@ -9,7 +9,7 @@
 
   const state = {
     cfg: cfg, now: new Date(), weather: null, wxStale: false, cal: { demo: true, sources: [] },
-    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0,
+    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', sys: null, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0,
     cams: [], midIdx: 0            // câmeras do hub e o que ocupa o meio: 0 = Clima, 1..n = câmeras (rodízio)
   };
   CD.state = state;
@@ -142,6 +142,16 @@
     try { state.stock = await CD.hubApi.estoque.list(); render(); } catch (e) { /* mantém o anterior */ }
   }
 
+  // Uso de CPU/memória do hub e da máquina: atualiza só o texto do rodapé (sem refazer a tela, para não reiniciar o vídeo)
+  async function refreshSystem() {
+    if (!state.hub) return;
+    try {
+      state.sys = await U.getJson(state.hub + '/api/system', 4000);
+      const el = $('#sysinfo');
+      if (el) el.textContent = CD.widgets.sysText(state.sys);
+    } catch (e) { /* mantém o anterior */ }
+  }
+
   // Câmeras ao vivo: a lista vem do hub; o meio da tela alterna Clima e cada câmera (uma por minuto)
   async function refreshCameras() {
     if (!state.hub) { state.cams = []; state.midIdx = 0; return; }
@@ -160,7 +170,7 @@
     render();
   }
 
-  function refreshAll() { refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); refreshCameras(); }
+  function refreshAll() { refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); refreshCameras(); refreshSystem(); }
 
   // ---------- boot ----------
   async function boot() {
@@ -174,6 +184,7 @@
     setInterval(refreshCalendar, 5 * min);
     setInterval(refreshHolidays, 6 * 60 * min);
     setInterval(refreshStock, 5 * min);
+    setInterval(refreshSystem, 10 * 1000);
     setInterval(shift, 3 * min);
     const q = /[?&]rotate=(\d+)/.exec(location.search);                   // ?rotate=15 acelera o rodízio (teste)
     setInterval(rotateMid, Math.max(5, q ? +q[1] : cfg.cameras.rotateSeconds || 60) * 1000);

@@ -39,12 +39,14 @@ type Config struct {
 		URL     string `json:"url"`     // CSV da aba de profissionais (Google Planilhas); vazio desliga a sincronização
 		Minutes int    `json:"minutes"` // intervalo entre sincronizações (padrão 5)
 	} `json:"profissionaisSheet"`
-	Cameras        []CameraConfig `json:"cameras"`        // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
-	AllowedOrigins []string       `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
+	Videos         VideosConfig     `json:"videos"`         // pasta dos vídeos servida pelo nginx em /videos/ (lista da página Vídeos)
+	Cameras        []CameraConfig   `json:"cameras"`        // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
+	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
+	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
 func loadConfig(path string) Config {
-	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db"}
+	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db", Videos: VideosConfig{Dir: "/home/usuario/Videos"}}
 	b, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatalf("não foi possível ler %s: %v (copie hub.config.example.json para hub.config.json)", path, err)
@@ -108,7 +110,13 @@ func main() {
 
 	mux := http.NewServeMux()
 	db.register(mux)
-	newCameras(cfg.Cameras).register(mux)
+	cams := newCameras(cfg.Cameras)
+	cams.register(mux)
+	rec := newRecMgr(cfg.Recordings, filepath.Join(filepath.Dir(*cfgPath), "recordings.state.json"), cams)
+	rec.register(mux)
+	rec.start()
+	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
+	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
 	if db != nil && cfg.ProfissionaisSheet.URL != "" {
 		go db.sheetLoop(cfg.ProfissionaisSheet.URL, time.Duration(cfg.ProfissionaisSheet.Minutes)*time.Minute)
 	}
@@ -120,6 +128,11 @@ func main() {
 		v, at := readVersion(verDir)
 		writeJSON(w, map[string]interface{}{"version": v, "installedAt": at})
 	})
+	sys := newSysMon()
+	go sys.loop()
+	mux.HandleFunc("/api/system", sys.handler)
+	mux.HandleFunc("/api/admin/desktop-off", powerHandler(sys, dmUnit, false))
+	mux.HandleFunc("/api/admin/hub-off", powerHandler(sys, "centraldiogo-hub.service", true))
 	mux.HandleFunc("/api/ics", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, cal.get()) })
 	mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, tr.get(r.URL.Query().Get("diogo") == "1")) })
 	mux.HandleFunc("/api/games", func(w http.ResponseWriter, r *http.Request) {

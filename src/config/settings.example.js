@@ -14,9 +14,12 @@ window.CD_SETTINGS = {
     { label: 'Serviços', sub: 'Profissionais', icon: 'phone', path: '/contatos.html' },
     { label: 'Câmeras', sub: 'Ao vivo', icon: 'camera', path: '/camaras.html' },
     { label: 'Música', sub: 'Navidrome', icon: 'music',   port: 4533, path: '/' },
-    { label: 'Vídeos', sub: 'Pasta',     icon: 'film',    port: 8080, path: '/videos/' },
-    { label: 'ROMs',   sub: 'Arquivos',  icon: 'folder',  port: 8080, path: '/roms/' }
+    { label: 'Vídeos', sub: 'Abrir no VLC', icon: 'film', path: '/videos.html' },
+    { label: 'Config', sub: 'Servidor', icon: 'gear', path: '/config.html' }
   ],
+
+  // Página Vídeos: os arquivos são servidos pelo nginx do servidor (porta e caminho abaixo); o hub só lista a pasta.
+  videos: { port: 8080, path: '/videos/' },
 
   // Câmeras no meio da tela inicial (no lugar do Clima): cada câmera fica N segundos, depois volta o Clima e segue o rodízio. Precisa do hub.
   cameras: { rotateSeconds: 60 },

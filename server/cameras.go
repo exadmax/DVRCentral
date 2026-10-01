@@ -1,7 +1,8 @@
 // Câmeras ao vivo: o hub lê o RTSP (H.264) de cada câmera e entrega ao navegador como MP4 fragmentado contínuo
 // (/api/cameras/{id}/stream), que a página toca com Media Source Extensions. O hub só repassa o vídeo (sem recodificar),
 // então não gasta CPU nem precisa de ffmpeg. A URL da câmera (com a senha) fica só no hub.config.json: o navegador nunca a vê.
-// A conexão com a câmera só existe enquanto alguém assiste (fecha 15 s depois do último espectador), compartilhada entre todos.
+// A conexão com a câmera só existe enquanto alguém assiste (fecha 15 s depois do último espectador), compartilhada entre todos,
+// ou enquanto a gravação (recorder.go) está ligada para ela.
 package main
 
 import (
@@ -54,6 +55,8 @@ type camera struct {
 	codec   string   // "avc1.64001F": o navegador precisa dele para abrir o MP4
 	gop     [][]byte // do último quadro-chave até agora: quem chega no meio já começa com imagem
 	lastErr string
+	wantRec bool      // gravação ligada: mantém a conexão mesmo sem espectadores
+	rec     *recorder // gravação em arquivos de 1 hora (recorder.go)
 }
 
 type cameras struct {
@@ -118,9 +121,7 @@ func (c *camera) attach() *camViewer {
 	return v
 }
 
-func (c *camera) subscribe() *camViewer {
-	v := c.attach()
-	c.mu.Lock()
+func (c *camera) startLocked() {
 	if !c.running {
 		c.running = true
 		c.gen++
@@ -128,25 +129,61 @@ func (c *camera) subscribe() *camViewer {
 		c.stop = cancel
 		go c.run(ctx, c.gen)
 	}
+}
+
+func (c *camera) subscribe() *camViewer {
+	v := c.attach()
+	c.mu.Lock()
+	c.startLocked()
 	c.mu.Unlock()
 	return v
+}
+
+// idleLocked agenda o fim da conexão quando não sobrou espectador nem gravação.
+func (c *camera) idleLocked() {
+	if len(c.viewers) == 0 && !c.wantRec && c.running && c.idle == nil {
+		c.idle = time.AfterFunc(camIdleClose, func() {
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			c.idle = nil
+			if len(c.viewers) == 0 && !c.wantRec && c.running {
+				c.running = false
+				c.stop()
+				c.resetLocked()
+			}
+		})
+	}
 }
 
 func (c *camera) unsubscribe(v *camViewer) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.removeLocked(v)
-	if len(c.viewers) == 0 && c.running && c.idle == nil {
-		c.idle = time.AfterFunc(camIdleClose, func() {
-			c.mu.Lock()
-			defer c.mu.Unlock()
+	c.idleLocked()
+}
+
+// setRecording liga ou desliga a gravação: ligada, a conexão com a câmera fica aberta mesmo sem ninguém assistindo.
+func (c *camera) setRecording(on bool) {
+	c.mu.Lock()
+	c.wantRec = on
+	if on {
+		if c.idle != nil {
+			c.idle.Stop()
 			c.idle = nil
-			if len(c.viewers) == 0 && c.running {
-				c.running = false
-				c.stop()
-				c.resetLocked()
-			}
-		})
+		}
+		c.startLocked()
+	} else {
+		c.idleLocked()
+	}
+	init := c.initSeg
+	c.mu.Unlock()
+	if c.rec == nil {
+		return
+	}
+	if !on {
+		c.rec.close()
+	} else if init != nil {
+		c.rec.ensureInit(init)
 	}
 }
 
@@ -200,6 +237,8 @@ func (c *camera) pushFrame(gen int, frag []byte, key bool) {
 // ---- conexão com a câmera ----
 
 func (c *camera) run(ctx context.Context, gen int) {
+	var lastLog string
+	var lastLogAt time.Time
 	for ctx.Err() == nil {
 		err := c.session(ctx, gen)
 		if ctx.Err() != nil {
@@ -211,7 +250,10 @@ func (c *camera) run(ctx context.Context, gen int) {
 			c.resetLocked()
 		}
 		c.mu.Unlock()
-		log.Printf("câmera %s: %v (nova tentativa em %s)", c.cfg.ID, err, camRetry)
+		if msg := err.Error(); msg != lastLog || time.Since(lastLogAt) > 10*time.Minute { // câmera fora do ar não enche o log
+			lastLog, lastLogAt = msg, time.Now()
+			log.Printf("câmera %s: %v (nova tentativa em %s)", c.cfg.ID, err, camRetry)
+		}
 		select {
 		case <-ctx.Done():
 		case <-time.After(camRetry):
@@ -291,6 +333,9 @@ func (c *camera) session(ctx context.Context, gen int) error {
 				return
 			}
 			c.setInit(gen, init, fmt.Sprintf("avc1.%02X%02X%02X", sps[1], sps[2], sps[3]))
+			if c.rec != nil {
+				c.rec.setInit(init)
+			}
 			haveInit, firstPTS = true, pts
 		}
 		dur := int64(camTimescale / 15) // duração do primeiro quadro: estimativa
@@ -314,6 +359,9 @@ func (c *camera) session(ctx context.Context, gen int) error {
 			return
 		}
 		c.pushFrame(gen, buf.Bytes(), !sample.IsNonSyncSample)
+		if c.rec != nil {
+			c.rec.sample(sample, !sample.IsNonSyncSample)
+		}
 	})
 
 	if _, err = cl.Play(nil); err != nil {

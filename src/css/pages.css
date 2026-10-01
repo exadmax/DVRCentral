@@ -166,3 +166,61 @@ a { color: inherit; }
   .modal { padding: 12px; }
   .dlg { padding: 18px; }
 }
+
+/* vídeos (videos.html): lista de arquivos com botão "Abrir no VLC" */
+.vids { display: flex; flex-direction: column; gap: 12px; }
+.vid { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 16px; border-radius: 14px; background: var(--card); min-width: 0; }
+.vid-main { flex: 1 1 260px; min-width: 0; }
+.vid-name { font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
+.vid-meta { margin-top: 4px; font-size: 13px; color: var(--dim); }
+.vid-act { display: flex; gap: 8px; flex-wrap: wrap; flex: none; }
+.vbtn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 0; border-radius: 10px; cursor: pointer; text-decoration: none;
+  font: 600 14px 'Inter', system-ui, sans-serif; background: rgba(242, 245, 250, .08); color: var(--text); }
+.vbtn.main { background: var(--blue); color: #06101F; }
+.vbtn:hover, .vbtn:focus { outline: none; box-shadow: 0 0 0 3px rgba(77, 163, 255, .4); }
+
+/* player embutido da página Vídeos */
+.vp { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 50; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; background: #000; }
+.vp-top { display: flex; align-items: center; gap: 10px; }
+.vp-name { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vp video { flex: 1; min-height: 0; width: 100%; background: #000; object-fit: contain; }
+.vp-msg { font-size: 13px; color: var(--faint); text-align: center; }
+.vp-msg.err { color: #FFB3B3; font-size: 15px; }
+
+/* config (config.html): medidores do servidor e botões de liberar memória */
+.cfg { display: flex; flex-direction: column; gap: 16px; max-width: 900px; }
+.cfg-card { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; border-radius: 14px; background: var(--card); min-width: 0; }
+.cfg-card h2 { margin: 0; font: 700 20px/1.1 'Poppins', 'Inter', sans-serif; }
+.cfg-ms { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.cfg-mh { display: flex; justify-content: space-between; font-size: 15px; }
+.cfg-bar { height: 8px; margin: 8px 0 6px; border-radius: 99px; background: rgba(242, 245, 250, .1); overflow: hidden; }
+.cfg-bar i { display: block; height: 100%; border-radius: 99px; background: var(--blue); }
+.cfg-md { font-size: 13px; color: var(--dim); }
+.cfg-a { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cfg-at { flex: 1 1 280px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cfg-at b { font-size: 17px; }
+.cfg-at span { font-size: 14px; color: var(--dim); }
+.cfg-msg { padding: 10px 12px; border-radius: 10px; font-size: 14px; background: rgba(77, 163, 255, .12); overflow-wrap: anywhere; }
+
+/* câmeras: abas Ao vivo / Gravações e lista de gravações */
+.cams-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.vbtn.on { background: var(--blue); color: #06101F; }
+.recs { display: flex; flex-direction: column; gap: 10px; max-width: 900px; }
+.recs-f { display: flex; gap: 8px; flex-wrap: wrap; }
+.rec-day { margin-top: 10px; font-size: 14px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+.rec-live { margin-left: 8px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(255, 107, 107, .18); color: var(--red); }
+
+/* config: chave liga/desliga e linhas de ajuste */
+.cfg-sw { flex: none; position: relative; width: 52px; height: 30px; padding: 0; border: 0; border-radius: 99px; cursor: pointer; background: rgba(242, 245, 250, .18); }
+.cfg-sw::after { content: ''; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: left .15s; }
+.cfg-sw.on { background: var(--green); }
+.cfg-sw.on::after { left: 25px; }
+.cfg-sw:focus { outline: none; box-shadow: 0 0 0 3px rgba(77, 163, 255, .4); }
+.cfg-sel { min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #101A2C; color: var(--text); font: 600 14px 'Inter', system-ui, sans-serif; }
+.cfg-sub { margin: 4px 0 -4px; font-size: 13px; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+.cfg-ok { color: var(--green); }
+.cfg-bad { color: #FFB3B3; }
+
+.cams[hidden], .recs[hidden] { display: none; }
+.cfg-cam { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.cfg-opts { display: flex; flex-direction: column; gap: 12px; padding-left: 14px; border-left: 2px solid var(--line); }

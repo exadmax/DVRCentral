@@ -1,5 +1,5 @@
 (function (CD) {
-  // Atalhos para os outros serviços da máquina (WebRCade, Navidrome, vídeos, ROMs) e para as páginas do próprio hub.
+  // Atalhos para os outros serviços da máquina (WebRCade, Navidrome, vídeos) e para as páginas do próprio hub.
   // Só aparecem quando existe um endereço-base: o hub configurado ou o servidor que entregou a página.
   function base(s) {
     if (s.hub) return s.hub;
