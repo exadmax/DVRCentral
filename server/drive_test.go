@@ -210,30 +210,149 @@ func TestDriveRunSplitsAndRetries(t *testing.T) {
 }
 
 func TestDriveDue(t *testing.T) {
-	now := time.Date(2026, 10, 4, 2, 59, 0, 0, time.Local)
-	d, _, _ := testDrive(t, now, 0)
-	cur := now
+	at := func(day, h, m int) time.Time { return time.Date(2026, 10, day, h, m, 0, 0, time.Local) }
+	cur := at(4, 2, 59)
+	d, _, _ := testDrive(t, cur, 0)
 	d.now = func() time.Time { return cur }
-	d.st.LastAttempt = time.Date(2026, 10, 3, 3, 0, 5, 0, time.Local)
+	d.st.Cycle, d.st.Attempts, d.st.LastOK = at(3, 3, 0), 1, true // rodada de ontem concluída
+	d.st.LastAttempt = at(3, 3, 5)
 	if d.due() {
 		t.Error("antes das 3:00 não roda")
 	}
-	cur = time.Date(2026, 10, 4, 3, 0, 0, 0, time.Local)
+	cur = at(4, 3, 0)
 	if !d.due() {
-		t.Error("às 3:00 roda")
+		t.Error("às 3:00 começa a rodada nova")
 	}
-	d.st.LastAttempt, d.st.LastOK = cur, true
-	cur = cur.Add(2 * time.Hour)
+	// 1ª tentativa falha às 3:00
+	d.st.Cycle, d.st.Attempts, d.st.LastOK, d.st.LastAttempt = at(4, 3, 0), 1, false, at(4, 3, 0)
+	cur = at(4, 3, 59)
 	if d.due() {
-		t.Error("já rodou hoje")
+		t.Error("a 2ª tentativa espera 1 h")
 	}
-	d.st.LastOK = false
+	cur = at(4, 4, 0)
 	if !d.due() {
-		t.Error("rodada com erro deve tentar de novo depois de 30 min")
+		t.Error("2ª tentativa 1 h depois")
 	}
-	cur = time.Date(2026, 10, 4, 10, 0, 0, 0, time.Local)
+	// 2ª falha às 4:00: a 3ª espera 4 h
+	d.st.Attempts, d.st.LastAttempt = 2, at(4, 4, 0)
+	cur = at(4, 7, 59)
 	if d.due() {
-		t.Error("não insiste depois de 6 h do horário marcado")
+		t.Error("a 3ª tentativa espera 4 h")
+	}
+	cur = at(4, 8, 0)
+	if !d.due() {
+		t.Error("3ª tentativa 4 h depois")
+	}
+	// 3 tentativas gastas: para
+	d.st.Attempts, d.st.LastAttempt = 3, at(4, 8, 0)
+	cur = at(4, 20, 0)
+	if d.due() {
+		t.Error("no máximo 3 tentativas por rodada")
+	}
+	// prazo: depois de 1:00 do dia seguinte não tenta mais, mesmo com tentativas sobrando
+	d.st.Attempts, d.st.LastAttempt = 2, at(4, 20, 0)
+	cur = at(5, 0, 59)
+	if !d.due() {
+		t.Error("ainda dentro do prazo (até 1:00)")
+	}
+	cur = at(5, 1, 0)
+	if d.due() {
+		t.Error("passou de 1:00 do dia seguinte: sem nova tentativa")
+	}
+	cur = at(5, 3, 0)
+	if !d.due() {
+		t.Error("às 3:00 seguinte começa outra rodada")
+	}
+	// hub desligado na hora marcada: ao voltar (dentro do prazo) faz a rodada atrasada
+	d.st.Cycle, d.st.Attempts, d.st.LastOK = at(5, 3, 0), 1, true
+	cur = at(6, 10, 0)
+	if !d.due() {
+		t.Error("rodada perdida deve ser feita ao voltar")
+	}
+	cur = at(7, 1, 30) // a rodada de 6/10 passou do prazo, mas a de 7/10 ainda não começou
+	d.st.Cycle = at(6, 3, 0)
+	if d.due() {
+		t.Error("rodada vencida e a nova ainda não é hora")
+	}
+}
+
+func TestDriveRunCountsAttempts(t *testing.T) {
+	now := time.Date(2026, 10, 4, 3, 0, 0, 0, time.Local)
+	d, _, _ := testDrive(t, now, 1024)
+	d.check = func(ctx context.Context) error { return errors.New("sem rede") }
+	wait := func() {
+		for i := 0; i < 200; i++ {
+			d.mu.Lock()
+			r := d.running
+			d.mu.Unlock()
+			if !r {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		t.Fatal("rodada não terminou")
+	}
+	if !d.run() {
+		t.Fatal("não iniciou")
+	}
+	wait()
+	if d.st.Attempts != 1 || d.st.LastOK || !d.st.Cycle.Equal(now) || !strings.Contains(d.st.LastMsg, "sem rede") {
+		t.Errorf("estado após falha: %+v", d.st)
+	}
+	d.run("sala") // só uma câmera: não conta como tentativa da rodada
+	wait()
+	if d.st.Attempts != 1 {
+		t.Errorf("rodada parcial contou como tentativa: %d", d.st.Attempts)
+	}
+	d.check = func(ctx context.Context) error { return nil }
+	d.now = func() time.Time { return now.Add(time.Hour) }
+	d.run()
+	wait()
+	if d.st.Attempts != 2 || !d.st.LastOK {
+		t.Errorf("2ª tentativa: %+v", d.st)
+	}
+}
+
+func TestDriveSingleCameraAndSkip(t *testing.T) {
+	now := time.Date(2026, 10, 4, 12, 0, 0, 0, time.Local)
+	cs := newCameras([]CameraConfig{{ID: "sala", Name: "Sala de Estar", URL: "rtsp://x/y"}, {ID: "garagem", Name: "Garagem", URL: "rtsp://x/z"}})
+	cur := now
+	m := newRecMgr(RecordingsConfig{Dir: filepath.Join(t.TempDir(), "securityCam")}, filepath.Join(t.TempDir(), "state.json"), cs)
+	m.now = func() time.Time { return cur }
+	var sent []string
+	d := newDriveSync(DriveSyncConfig{Enabled: true, Remote: "GDrive:CameraSeguranca", Hour: 3}, filepath.Join(t.TempDir(), "drive.state.json"), m)
+	d.now = func() time.Time { return cur }
+	d.check = func(ctx context.Context) error { return nil }
+	d.upload = func(ctx context.Context, src, dest string) error { sent = append(sent, dest); return nil }
+	d.list = func(ctx context.Context, path string) ([]string, error) { return nil, nil }
+	old, recent := now.Add(-3*24*time.Hour), now.Add(-3*time.Hour)
+	writeRec(t, m.dir, "Sala_de_Estar_2026100112.mp4", 100, old)
+	writeRec(t, m.dir, "Sala_de_Estar_2026100409.mp4", 100, recent)
+	writeRec(t, m.dir, "Garagem_2026100112.mp4", 100, old)
+	writeRec(t, m.dir, "Garagem_2026100409.mp4", 100, recent)
+
+	only, bad := d.prefixes([]string{"garagem"})
+	if bad != "" || len(only) != 1 || !only["Garagem"] {
+		t.Fatalf("prefixes: %v %q", only, bad)
+	}
+	if _, bad := d.prefixes([]string{"nada"}); bad != "nada" {
+		t.Errorf("câmera desconhecida deveria ser recusada: %q", bad)
+	}
+	// só a Garagem
+	if ok, msg := d.runOnceFor(only); !ok || len(sent) != 2 || strings.Contains(strings.Join(sent, " "), "Sala") {
+		t.Errorf("só Garagem: ok=%v msg=%q enviados=%v", ok, msg, sent)
+	}
+	// pula o que tem mais de 2 dias (só da Sala; a Garagem já foi) e envia o resto
+	sent = nil
+	if n := d.skip(2, nil); n != 1 {
+		t.Errorf("pulados = %d, queria 1 (Sala de 01/10)", n)
+	}
+	if ok, _ := d.runOnce(); !ok || len(sent) != 1 || !strings.Contains(sent[0], "Sala_de_Estar_2026100409.mp4") {
+		t.Errorf("depois de pular: enviados=%v", sent)
+	}
+	st := d.status()
+	if st["skipped"] != 1 || st["uploaded"] != 3 {
+		t.Errorf("status: uploaded=%v skipped=%v", st["uploaded"], st["skipped"])
 	}
 }
 

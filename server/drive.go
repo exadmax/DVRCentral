@@ -35,13 +35,20 @@ type DriveSyncConfig struct {
 }
 
 const (
-	driveMinAge     = 5 * time.Minute  // arquivo mexido há menos que isso ainda pode estar sendo gravado
-	driveRetryAfter = 30 * time.Minute // depois de uma rodada com erro, tenta de novo
-	driveRetryFor   = 6 * time.Hour    // ...até este tempo depois do horário marcado
-	driveFileLimit  = 3 * time.Hour    // tempo máximo para enviar um arquivo
+	driveMinAge      = 5 * time.Minute // arquivo mexido há menos que isso ainda pode estar sendo gravado
+	driveMaxAttempts = 3               // tentativas por rodada (a rodada falha se o envio der erro)
+	driveRetryWindow = 22 * time.Hour  // só tenta até este tempo depois do horário marcado: 3:00 -> 1:00 do dia seguinte
+	driveFileLimit   = 3 * time.Hour   // tempo máximo para enviar um arquivo
+	driveStartDelay  = 5 * time.Minute // espera ao subir o hub antes da primeira conferência da hora marcada
 )
 
+// driveRetryDelays: espera antes da 2ª e da 3ª tentativa, contada do início da anterior. Espaçadas para cobrir uma queda de internet
+// de algumas horas sem gastar as tentativas em minutos.
+var driveRetryDelays = []time.Duration{time.Hour, 4 * time.Hour}
+
 type driveState struct {
+	Cycle       time.Time        `json:"cycle"`    // horário marcado da rodada em curso (a das 3:00 de um dia)
+	Attempts    int              `json:"attempts"` // tentativas já feitas nessa rodada
 	LastAttempt time.Time        `json:"lastAttempt"`
 	LastOK      bool             `json:"lastOK"`
 	LastMsg     string           `json:"lastMsg"`
@@ -64,6 +71,7 @@ type driveSync struct {
 	st       driveState
 	running  bool
 	progress string
+	scope    string // nomes das câmeras da rodada em andamento ("" = todas)
 }
 
 func newDriveSync(cfg DriveSyncConfig, statePath string, m *recMgr) *driveSync {
@@ -150,13 +158,14 @@ func (d *driveSync) start() {
 		return
 	}
 	d.mu.Lock()
-	if d.st.LastAttempt.IsZero() {
-		d.st.LastAttempt = d.now()
+	if d.st.LastAttempt.IsZero() { // primeira instalação: nada atrasado para recuperar
+		d.st.LastAttempt, d.st.Cycle, d.st.Attempts = d.now(), d.latestTrigger(d.now()), driveMaxAttempts
 		d.save()
 	}
 	d.mu.Unlock()
 	log.Printf("drive: cópia diária das gravações para %s às %02d:00", d.cfg.Remote, d.cfg.Hour)
 	go func() {
+		time.Sleep(driveStartDelay) // depois de reiniciar o hub, dá tempo de ajustar o que será enviado antes de uma rodada atrasada começar
 		for {
 			if d.due() {
 				d.run()
@@ -166,27 +175,43 @@ func (d *driveSync) start() {
 	}()
 }
 
+// latestTrigger: o último horário marcado (driveSync.hour) que já passou, que identifica a rodada em curso.
+func (d *driveSync) latestTrigger(now time.Time) time.Time {
+	t := time.Date(now.Year(), now.Month(), now.Day(), d.cfg.Hour, 0, 0, 0, now.Location())
+	if now.Before(t) {
+		t = t.AddDate(0, 0, -1)
+	}
+	return t
+}
+
+// due: hora de começar a rodada, ou de tentar de novo uma que falhou. Cada rodada (a das 3:00 de um dia) faz no máximo driveMaxAttempts
+// tentativas, espaçadas por driveRetryDelays, e só até driveRetryWindow depois do horário marcado (1:00 do dia seguinte, antes da próxima).
 func (d *driveSync) due() bool {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	now := d.now()
-	trigger := time.Date(now.Year(), now.Month(), now.Day(), d.cfg.Hour, 0, 0, 0, now.Location())
-	if now.Before(trigger) || d.running {
+	t := d.latestTrigger(now)
+	if d.running || !now.Before(t.Add(driveRetryWindow)) {
 		return false
 	}
-	if d.st.LastAttempt.Before(trigger) {
+	if !d.st.Cycle.Equal(t) { // rodada ainda não começou (inclui o hub que estava desligado na hora marcada)
 		return true
 	}
-	return !d.st.LastOK && now.Sub(d.st.LastAttempt) >= driveRetryAfter && now.Sub(trigger) < driveRetryFor
+	if d.st.LastOK || d.st.Attempts >= driveMaxAttempts || d.st.Attempts < 1 {
+		return false
+	}
+	return now.Sub(d.st.LastAttempt) >= driveRetryDelays[d.st.Attempts-1]
 }
 
 type drivePending struct {
 	name, path, camera, day string
+	start                   time.Time // início da hora gravada
 	size                    int64
 }
 
 // pending: gravações fechadas (a hora acabou e ninguém mexe nelas há alguns minutos) que ainda não foram enviadas, das mais antigas às mais novas.
-func (d *driveSync) pending() []drivePending {
+// only (prefixo do nome de arquivo das câmeras): se não for nil, só dessas câmeras.
+func (d *driveSync) pending(only map[string]bool) []drivePending {
 	entries, err := os.ReadDir(d.m.dir)
 	if err != nil {
 		return nil
@@ -197,7 +222,7 @@ func (d *driveSync) pending() []drivePending {
 	var out []drivePending
 	for _, e := range entries {
 		g := recFileRe.FindStringSubmatch(e.Name())
-		if e.IsDir() || g == nil {
+		if e.IsDir() || g == nil || (only != nil && !only[g[1]]) {
 			continue
 		}
 		if _, done := d.st.Uploaded[e.Name()]; done {
@@ -212,7 +237,7 @@ func (d *driveSync) pending() []drivePending {
 		if day < d.cutoffDay(g[1]) { // já passou da retenção da câmera: a limpeza do Drive apagaria na hora
 			continue
 		}
-		out = append(out, drivePending{name: e.Name(), path: filepath.Join(d.m.dir, e.Name()), camera: g[1], day: day, size: info.Size()})
+		out = append(out, drivePending{name: e.Name(), path: filepath.Join(d.m.dir, e.Name()), camera: g[1], day: day, start: t, size: info.Size()})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].name < out[j].name })
 	return out
@@ -225,7 +250,9 @@ func (d *driveSync) setProgress(s string) {
 }
 
 // run envia o que está pendente. Uma rodada por vez; falha em um arquivo não impede os outros.
-func (d *driveSync) run() (started bool) {
+// ids: ids das câmeras a enviar; vazio = todas (é a rodada completa, que também apaga do Drive o que passou da retenção).
+// Rodada só de algumas câmeras (botão da página Config) não conta como a rodada do dia: a das 3:00 continua valendo.
+func (d *driveSync) run(ids ...string) (started bool) {
 	d.mu.Lock()
 	if d.running {
 		d.mu.Unlock()
@@ -233,12 +260,39 @@ func (d *driveSync) run() (started bool) {
 	}
 	d.running = true
 	started0 := d.now() // a rodada vale a partir de quando começou: uma rodada longa que passa das 3:00 não "consome" a das 3:00, que então só envia o diferencial
+	var only map[string]bool
+	var names []string
+	if len(ids) > 0 {
+		only = map[string]bool{}
+		for _, c := range d.m.cams.list {
+			for _, id := range ids {
+				if c.cfg.ID == id {
+					only[recName(c.cfg.Name, c.cfg.ID)] = true
+					names = append(names, c.cfg.Name)
+				}
+			}
+		}
+	}
+	d.scope = strings.Join(names, ", ")
+	if only == nil { // rodada completa: conta como tentativa da rodada atual (salvo já, para um hub que reinicia no meio não tentar sem fim)
+		if t := d.latestTrigger(started0); !d.st.Cycle.Equal(t) {
+			d.st.Cycle, d.st.Attempts = t, 0
+		}
+		d.st.Attempts++
+		d.st.LastAttempt, d.st.LastOK = started0, false
+		d.save()
+	}
 	d.mu.Unlock()
 	go func() {
-		ok, msg := d.runOnce()
+		ok, msg := d.runOnceFor(only)
 		d.mu.Lock()
-		d.running, d.progress = false, ""
-		d.st.LastAttempt, d.st.LastOK, d.st.LastMsg = started0, ok, msg
+		d.running, d.progress, d.scope = false, "", ""
+		if only == nil {
+			d.st.LastOK = ok
+		} else {
+			msg = strings.Join(names, ", ") + ": " + msg
+		}
+		d.st.LastMsg = msg
 		d.save()
 		d.mu.Unlock()
 		log.Printf("drive: %s", msg)
@@ -246,8 +300,10 @@ func (d *driveSync) run() (started bool) {
 	return true
 }
 
-func (d *driveSync) runOnce() (bool, string) {
-	files := d.pending()
+func (d *driveSync) runOnce() (bool, string) { return d.runOnceFor(nil) }
+
+func (d *driveSync) runOnceFor(only map[string]bool) (bool, string) {
+	files := d.pending(only)
 	ctx := context.Background()
 	cctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	err := d.check(cctx)
@@ -284,7 +340,10 @@ func (d *driveSync) runOnce() (bool, string) {
 	if failed > 0 {
 		msg = fmt.Sprintf("%s, %d com erro (último: %s)", msg, failed, lastErr)
 	}
-	removed, perr := d.prune(ctx)
+	removed, perr := 0, error(nil)
+	if only == nil { // a limpeza do Drive é da rodada completa
+		removed, perr = d.prune(ctx)
+	}
 	if removed > 0 {
 		msg += fmt.Sprintf("; %d pasta(s) de câmera/dia fora da retenção apagada(s) do Drive", removed)
 	}
@@ -636,7 +695,21 @@ func setTfdtBase(moof []byte, v uint64) {
 
 // ---- HTTP ----
 
+type drivePend struct {
+	Files int   `json:"files"` // gravações fechadas ainda não enviadas
+	Bytes int64 `json:"bytes"`
+}
+
 func (d *driveSync) status() map[string]interface{} {
+	pend := map[string]drivePend{} // por id da câmera: o que falta enviar
+	byPrefix := d.m.camByPrefix()
+	for _, f := range d.pending(nil) {
+		id := byPrefix[f.camera]
+		p := pend[id]
+		p.Files++
+		p.Bytes += f.size
+		pend[id] = p
+	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	next := d.now()
@@ -645,17 +718,28 @@ func (d *driveSync) status() map[string]interface{} {
 		trigger = trigger.AddDate(0, 0, 1)
 	}
 	out := map[string]interface{}{"enabled": d.cfg.Enabled && d.cfg.Remote != "", "remote": d.cfg.Remote, "hour": d.cfg.Hour,
-		"maxFileMB": d.cfg.MaxFileMB, "running": d.running, "progress": d.progress, "uploaded": len(d.st.Uploaded),
-		"lastOK": d.st.LastOK, "lastMsg": d.st.LastMsg, "nextRun": trigger.Format(time.RFC3339)}
+		"maxFileMB": d.cfg.MaxFileMB, "running": d.running, "progress": d.progress, "scope": d.scope, "uploaded": d.sentCount(), "skipped": len(d.st.Uploaded) - d.sentCount(),
+		"pending": pend, "lastOK": d.st.LastOK, "lastMsg": d.st.LastMsg, "nextRun": trigger.Format(time.RFC3339)}
 	if !d.st.LastAttempt.IsZero() {
 		out["lastAttempt"] = d.st.LastAttempt.Format(time.RFC3339)
+	}
+	out["maxAttempts"] = driveMaxAttempts
+	if t := d.latestTrigger(d.now()); d.st.Cycle.Equal(t) {
+		out["attempts"] = d.st.Attempts
+		if !d.st.LastOK && d.st.Attempts >= 1 && d.st.Attempts < driveMaxAttempts && !d.running {
+			if at := d.st.LastAttempt.Add(driveRetryDelays[d.st.Attempts-1]); at.Before(t.Add(driveRetryWindow)) {
+				out["nextRetry"] = at.Format(time.RFC3339)
+			}
+		}
 	}
 	return out
 }
 
 func (d *driveSync) register(mux *http.ServeMux) {
+	d.registerSkip(mux)
 	mux.HandleFunc("GET /api/recordings/drive", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, d.status()) })
-	// POST com X-CD-Action: confirm: copia agora, sem esperar a hora marcada.
+	// POST com X-CD-Action: confirm: envia agora, sem esperar a hora marcada. Corpo opcional {"cameras": ["id", ...]}: só essas câmeras
+	// (sem corpo ou lista vazia = todas, como a rodada das 3:00).
 	mux.HandleFunc("POST /api/recordings/drive/run", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-CD-Action") != "confirm" {
 			jsonError(w, http.StatusMethodNotAllowed, "use o cabeçalho X-CD-Action: confirm")
@@ -665,11 +749,116 @@ func (d *driveSync) register(mux *http.ServeMux) {
 			jsonError(w, http.StatusConflict, "A cópia para o Drive está desligada (driveSync no hub.config.json).")
 			return
 		}
-		if !d.run() {
+		var in struct {
+			Cameras []string `json:"cameras"`
+		}
+		if r.ContentLength != 0 {
+			if err := json.NewDecoder(io.LimitReader(r.Body, 1<<16)).Decode(&in); err != nil && err != io.EOF {
+				jsonError(w, http.StatusBadRequest, "JSON inválido")
+				return
+			}
+		}
+		known := map[string]bool{}
+		for _, c := range d.m.cams.list {
+			known[c.cfg.ID] = true
+		}
+		for _, id := range in.Cameras {
+			if !known[id] {
+				jsonError(w, http.StatusBadRequest, "Câmera desconhecida: "+id)
+				return
+			}
+		}
+		if !d.run(in.Cameras...) {
 			jsonError(w, http.StatusConflict, "Já há uma cópia em andamento.")
 			return
 		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
 		w.WriteHeader(http.StatusAccepted)
-		writeJSON(w, d.status())
+		json.NewEncoder(w).Encode(d.status())
 	})
+}
+
+// sentCount: arquivos realmente enviados (no estado, os pulados têm tamanho 0). Chamar com d.mu travado.
+func (d *driveSync) sentCount() int {
+	n := 0
+	for _, sz := range d.st.Uploaded {
+		if sz > 0 {
+			n++
+		}
+	}
+	return n
+}
+
+// skip marca como "já enviadas" (sem enviar) as gravações pendentes com mais de days dias, das câmeras em only (nil = todas), para não
+// subir um acúmulo antigo. Os arquivos continuam no servidor até a retenção apagar. Devolve quantos foram pulados.
+func (d *driveSync) skip(days int, only map[string]bool) int {
+	cutoff := d.now().Add(-time.Duration(days) * 24 * time.Hour)
+	files := d.pending(only)
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	n := 0
+	for _, f := range files {
+		if f.start.Before(cutoff) {
+			d.st.Uploaded[f.name] = 0
+			n++
+		}
+	}
+	if n > 0 {
+		d.save()
+	}
+	return n
+}
+
+func (d *driveSync) registerSkip(mux *http.ServeMux) {
+	// POST com X-CD-Action: confirm e {"olderThanDays": N, "cameras": [...]}: marca como já enviadas (sem enviar) as gravações pendentes
+	// com mais de N dias, para pular um acúmulo antigo. Não roda durante uma cópia.
+	mux.HandleFunc("POST /api/recordings/drive/skip", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-CD-Action") != "confirm" {
+			jsonError(w, http.StatusMethodNotAllowed, "use o cabeçalho X-CD-Action: confirm")
+			return
+		}
+		var in struct {
+			OlderThanDays int      `json:"olderThanDays"`
+			Cameras       []string `json:"cameras"`
+		}
+		if err := json.NewDecoder(io.LimitReader(r.Body, 1<<16)).Decode(&in); err != nil || in.OlderThanDays < 0 || in.OlderThanDays > 365 {
+			jsonError(w, http.StatusBadRequest, "Informe olderThanDays (0 a 365).")
+			return
+		}
+		only, bad := d.prefixes(in.Cameras)
+		if bad != "" {
+			jsonError(w, http.StatusBadRequest, "Câmera desconhecida: "+bad)
+			return
+		}
+		d.mu.Lock()
+		busy := d.running
+		d.mu.Unlock()
+		if busy {
+			jsonError(w, http.StatusConflict, "Há uma cópia em andamento; espere terminar.")
+			return
+		}
+		n := d.skip(in.OlderThanDays, only)
+		writeJSON(w, map[string]interface{}{"skipped": n})
+	})
+}
+
+// prefixes traduz ids de câmeras para os prefixos de nome de arquivo (nil se ids está vazio = todas). O segundo valor é o primeiro id desconhecido.
+func (d *driveSync) prefixes(ids []string) (map[string]bool, string) {
+	if len(ids) == 0 {
+		return nil, ""
+	}
+	byID := map[string]string{}
+	for _, c := range d.m.cams.list {
+		byID[c.cfg.ID] = recName(c.cfg.Name, c.cfg.ID)
+	}
+	out := map[string]bool{}
+	for _, id := range ids {
+		p, ok := byID[id]
+		if !ok {
+			return nil, id
+		}
+		out[p] = true
+	}
+	return out, ""
 }

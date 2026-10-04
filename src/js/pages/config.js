@@ -15,13 +15,13 @@
   function mount(root) {
     root.innerHTML = '<section class="pg"><div class="cfg" id="cfg"></div></section>';
     const box = root.querySelector('#cfg');
-    let sys = null, rec = null, msg = '', recMsg = '', armed = '', armTimer = 0;
+    let sys = null, rec = null, drv = null, msg = '', recMsg = '', armed = '', armTimer = 0;
 
     function draw() {
       if (!CD.state.hub) { box.innerHTML = '<div class="empty">Sem o hub: abra o painel pelo endereço do servidor da casa.</div>'; return; }
       if (!sys) { box.innerHTML = '<div class="empty">Carregando…</div>'; return; }
       const can = sys.control;
-      box.innerHTML = recCard() +
+      box.innerHTML = recCard() + driveCard() +
         '<div class="cfg-card"><h2>Servidor</h2><div class="cfg-ms">' +
         meter('Hub · CPU', sys.appCpuPercent, 'da CPU total (' + sys.cores + ' núcleos)') +
         meter('Hub · memória', sys.appMemPercent, bytes(sys.appMem) + ' da RAM') +
@@ -54,6 +54,33 @@
     const GBS = [[0, 'Sem limite']].concat([5, 10, 20, 50, 100, 200, 500].map(g => [g, g + ' GB']));
     const SENS = [[1, '1 · baixa'], [2, '2'], [3, '3 · média'], [4, '4'], [5, '5 · alta']];
 
+    const when = iso => new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const driveBusy = () => !!(drv && drv.running);
+    function driveBtn(id, label) {
+      return '<button type="button" class="btn ghost" data-drv="' + esc(id) + '"' + (driveBusy() ? ' disabled' : '') + '>' + esc(label) + '</button>';
+    }
+    // Linha "Google Drive" de uma câmera: o que falta enviar e o botão que envia só ela.
+    function driveRow(c) {
+      if (!drv || !drv.enabled) return '';
+      const p = (drv.pending || {})[c.id] || { files: 0, bytes: 0 };
+      const sending = driveBusy() && (!drv.scope || drv.scope.split(', ').indexOf(c.name) >= 0);
+      const text = sending ? 'Enviando agora…' : p.files ? p.files + ' gravação(ões) para enviar (' + bytes(p.bytes) + ').' : 'Nada novo para enviar.';
+      return row('Google Drive', text, driveBtn(c.id, 'Sincronizar'));
+    }
+    function driveCard() {
+      if (!drv) return '';
+      if (!drv.enabled) return '<div class="cfg-card"><h2>Google Drive</h2><div class="cfg-msg">A cópia para o Drive está desligada (driveSync no hub.config.json do servidor).</div></div>';
+      const lines = [];
+      if (drv.running) lines.push('Enviando' + (drv.scope ? ' (' + drv.scope + ')' : '') + (drv.progress ? ': ' + drv.progress : '…'));
+      else if (drv.lastMsg) lines.push((drv.lastOK ? '' : 'Erro: ') + drv.lastMsg);
+      if (!drv.running && drv.attempts && !drv.lastOK && drv.attempts < drv.maxAttempts)
+        lines.push('Tentativa ' + drv.attempts + ' de ' + drv.maxAttempts + (drv.nextRetry ? '; a próxima é às ' + when(drv.nextRetry) + '.' : '; sem tempo para outra até 1:00.'));
+      const text = 'Pasta ' + drv.remote.replace(/^.*:/, '') + ' no Drive, uma subpasta por dia e por câmera. Envio automático todo dia às ' + String(drv.hour).padStart(2, '0') +
+        ':00 (próximo: ' + when(drv.nextRun) + '). ' + drv.uploaded + ' arquivo(s) enviado(s)' + (drv.skipped ? ', ' + drv.skipped + ' pulado(s)' : '') + '.';
+      return '<div class="cfg-card"><h2>Google Drive</h2>' + row('Sincronizar todas as câmeras', text, driveBtn('', 'Sincronizar tudo')) +
+        (lines.length ? '<div class="cfg-msg">' + lines.map(esc).join('<br>') + '</div>' : '') + '</div>';
+    }
+
     function camBlock(c) {
       const motion = c.mode === 'motion';
       const state = !rec.enabled ? 'gravação geral desligada' : !c.enabled ? 'desligada para esta câmera' : c.error ? c.error :
@@ -61,7 +88,7 @@
         c.recording ? 'gravando agora' : 'iniciando…';
       const cls = rec.enabled && c.enabled ? (c.error ? 'cfg-bad' : c.recording ? 'cfg-ok' : '') : '';
       return '<div class="cfg-cam"><div class="cfg-a"><div class="cfg-at"><b>' + esc(c.name) + '</b><span class="' + cls + '">' + esc(state) + ' · ' +
-        c.files + ' arquivo(s), ' + bytes(c.usedBytes) + '</span></div>' + sw('cam:' + c.id, c.enabled, 'Gravar ' + c.name) + '</div>' +
+        c.files + ' arquivo(s), ' + bytes(c.usedBytes) + '</span></div>' + sw('cam:' + c.id, c.enabled, 'Gravar ' + c.name) + '</div>' + driveRow(c) +
         (c.enabled ? '<div class="cfg-opts">' +
           row('Modo', motion ? 'Só grava quando detecta movimento (com alguns segundos antes e depois).' : 'Grava o tempo todo, 1 arquivo por hora.',
             sel(c.id, 'mode', c.mode, [['continuous', 'Contínuo'], ['motion', 'Só com movimento']])) +
@@ -96,6 +123,7 @@
       if (!CD.state.hub) return draw();
       try { sys = await CD.hubApi.system(); } catch (e) { /* mantém o anterior */ }
       try { rec = await CD.hubApi.recordings.settings(); } catch (e) { if (!rec) recMsg = e.message; }
+      try { drv = await CD.hubApi.recordings.drive(); } catch (e) { /* hub antigo, sem a cópia para o Drive */ }
       draw();
     }
 
@@ -114,6 +142,15 @@
         const id = t.getAttribute('data-sw');
         if (id === 'master') saveRec({ enabled: !rec.enabled });
         else { const c = (rec.cameras || []).filter(x => 'cam:' + x.id === id)[0]; if (c) { const o = {}; o[c.id] = { enabled: !c.enabled }; saveRec({ cameras: o }); } }
+        return;
+      }
+      const dv = e.target.closest && e.target.closest('[data-drv]');
+      if (dv) {
+        if (dv.disabled) return;
+        const id = dv.getAttribute('data-drv');
+        dv.disabled = true; recMsg = '';
+        try { drv = await CD.hubApi.recordings.driveRun(id ? [id] : []); } catch (err) { recMsg = err.message; }
+        draw();
         return;
       }
       const b = e.target.closest && e.target.closest('[data-act]');

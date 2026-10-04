@@ -108,7 +108,8 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `GET /api/recordings/settings` | Estado e configuração das gravações, por câmera | `recorder.go` |
 | `PUT /api/recordings/settings` | Altera a configuração (exige `X-CD-Action: confirm`) | `recorder.go` |
 | `GET /api/recordings/drive` | Estado da cópia diária para o Drive | `drive.go` |
-| `POST /api/recordings/drive/run` | Copia para o Drive agora (exige `X-CD-Action: confirm`) | `drive.go` |
+| `POST /api/recordings/drive/run` | Copia para o Drive agora; corpo opcional `{"cameras":[ids]}` (exige `X-CD-Action: confirm`) | `drive.go` |
+| `POST /api/recordings/drive/skip` | Marca como já enviadas as pendentes mais velhas que N dias (exige `X-CD-Action: confirm`) | `drive.go` |
 | `GET /api/videos` | Lista da pasta de vídeos | `videos.go` |
 | `GET /api/videos/sub?name=` | Legenda do vídeo em WebVTT (converte SRT) | `videos.go` |
 | `GET /api/system` | CPU/memória da máquina e do hub, `control`, `desktop` | `sysinfo.go` |
@@ -132,7 +133,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | Sessão RTSP das câmeras | sob demanda | Abre a câmera quando há espectador ou gravação; fecha 15 s após o último; reconecta em 4 s se cair | `cameras.go: run/session` |
 | Detecção de movimento | por quadro | Compara o tamanho do quadro P com a média; dispara com 3 de 8 quadros acima do limite; pré-roll até o quadro-chave e 15 s de cauda | `motion.go` |
 | Rotação de arquivo | virada da hora | Fecha o MP4 e abre o seguinte no primeiro quadro-chave | `recorder.go: rotateLocked` |
-| Cópia para o Google Drive | diária às 3:00 (`driveSync.hour`); confere a cada minuto | Envia as gravações novas com rclone para `CameraSeguranca/AAAA-MM-DD/CAMERA/`; divide arquivos acima de `maxFileMB`; apaga do Drive o que passou da retenção da câmera (a da página Config); refaz em 30 min se falhar | `drive.go: start/run` |
+| Cópia para o Google Drive | diária às 3:00 (`driveSync.hour`); confere a cada minuto | Envia as gravações novas com rclone para `CameraSeguranca/AAAA-MM-DD/CAMERA/`; divide arquivos acima de `maxFileMB`; apaga do Drive o que passou da retenção da câmera (a da página Config); até 3 tentativas se falhar (1 h e 4 h depois), até 1:00 do dia seguinte | `drive.go: start/run` |
 
 ## 5. Mapa do código
 

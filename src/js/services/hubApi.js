@@ -45,7 +45,10 @@
       settings() { return call('GET', '/api/recordings/settings'); },
       save(obj) { return call('PUT', '/api/recordings/settings', obj, { 'X-CD-Action': 'confirm' }); },
       remove(name) { return call('DELETE', '/api/recordings/file/' + encodeURIComponent(name), undefined, { 'X-CD-Action': 'confirm' }); },
-      fileUrl(name, download) { return CD.state.hub + '/api/recordings/file/' + encodeURIComponent(name) + (download ? '?download=1' : ''); }
+      fileUrl(name, download) { return CD.state.hub + '/api/recordings/file/' + encodeURIComponent(name) + (download ? '?download=1' : ''); },
+      // cópia das gravações para o Google Drive: estado e envio imediato (ids das câmeras; vazio = todas)
+      drive() { return call('GET', '/api/recordings/drive'); },
+      driveRun(ids) { return call('POST', '/api/recordings/drive/run', { cameras: ids || [] }, { 'X-CD-Action': 'confirm' }); }
     },
     cameras: { list() { return call('GET', '/api/cameras'); }, streamUrl(id) { return CD.state.hub + '/api/cameras/' + encodeURIComponent(id) + '/stream'; } }
   };
