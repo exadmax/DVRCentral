@@ -61,6 +61,29 @@ O hub grava o mesmo vídeo H.264 que já repassa ao navegador (sem recodificar, 
   API: `GET /api/recordings`, `GET /api/recordings/file/{nome}` (com Range), `GET|PUT /api/recordings/settings`.
 - A qualidade é a do endereço RTSP da câmera (`subtype=1` = substream, baixa resolução). Ver o espaço: ~0,3–1 GB/dia por câmera no substream.
 
+## Cópia diária para o Google Drive (rclone)
+Todo dia às **3:00** o hub (`server/drive.go`) envia as gravações novas para o Google Drive usando o `rclone` já instalado no servidor:
+- Destino: `GDrive:CameraSeguranca/AAAA-MM-DD/NOME_DA_CAMERA/arquivo.mp4`. O dia é o da gravação (a pasta do dia é criada se não existir).
+  Ex.: `CameraSeguranca/2026-10-03/Sala_de_Estar/Sala_de_Estar_2026100314.mp4`.
+- "Novas" = ainda não enviadas e já fechadas (a hora acabou e ninguém escreve no arquivo há 5 min). O que já subiu fica em `drive.state.json`
+  (ao lado do `hub.config.json`), então nada é enviado duas vezes. As gravações locais seguem a retenção da página Config; a cópia não apaga nada.
+- **Arquivo maior que `maxFileMB`** (padrão 1024) é dividido em `..._parte1.mp4`, `_parte2.mp4`... nos limites dos trechos do MP4, sem
+  recodificar; cada parte toca sozinha. Arquivo que falhou no meio não é marcado como enviado e é refeito inteiro na próxima tentativa.
+- **Limpeza no Drive**: depois de enviar, apaga do Drive o que passou da **mesma retenção da página Config** ("Guardar por N dias", por câmera; padrão 7), ou seja, o Drive e o servidor guardam o mesmo período. A cada rodada remove `CameraSeguranca/AAAA-MM-DD/NOME_DA_CAMERA` quando o dia é mais velho que a retenção daquela câmera e a pasta do dia quando fica vazia. Só mexe em pastas com nome de data e, dentro delas, com nome de câmera; qualquer outra coisa na `CameraSeguranca` é ignorada. As pastas vão para a **lixeira do Drive** (recuperáveis por 30 dias). Gravação já vencida que ainda está no disco não é enviada.
+- Rodada com erro (sem internet, token vencido...) tenta de novo a cada 30 min, por até 6 h. Se o hub estava desligado às 3:00, copia ao voltar.
+- Config (`hub.config.json`): `"driveSync": {"enabled": true, "remote": "GDrive:CameraSeguranca", "hour": 3, "maxFileMB": 1024}`.
+- API: `GET /api/recordings/drive` (estado, última rodada, próxima) e `POST /api/recordings/drive/run` (copia agora; exige `X-CD-Action: confirm`).
+- Ver o resultado: `journalctl -u centraldiogo-hub | grep drive:`.
+
+### Configurar o rclone no servidor (uma vez)
+O remote `GDrive` precisa de um token da sua conta Google. O servidor não tem navegador, então o login é feito neste PC por um túnel SSH:
+```bash
+ssh -i ~/.ssh/centraldiogo_deploy -L 53682:127.0.0.1:53682 usuario@192.168.0.10 'rclone config reconnect GDrive: --auto-confirm'
+```
+Abra no navegador do PC o link `http://127.0.0.1:53682/auth?state=...` que o comando imprime, entre com a conta Google e clique em Permitir.
+Conferir: `ssh usuario@192.168.0.10 'rclone lsd GDrive:'`. Opcional: criar um *client ID* próprio no Google Cloud (`rclone config`) para não
+dividir a cota da chave pública do rclone. O serviço do hub roda como `diogo`, então usa `~/.config/rclone/rclone.conf` desse usuário.
+
 ## Limites
 - Só H.264 (H.265 mostra o erro "não entrega H.264 neste endereço").
 - Precisa do hub; aberto fora dele (ex.: só `python -m http.server`) a página avisa que está sem o hub.

@@ -42,6 +42,7 @@ type Config struct {
 	Videos         VideosConfig     `json:"videos"`         // pasta dos vídeos servida pelo nginx em /videos/ (lista da página Vídeos)
 	Cameras        []CameraConfig   `json:"cameras"`        // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
 	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
+	DriveSync      DriveSyncConfig  `json:"driveSync"`      // cópia diária das gravações para o Google Drive via rclone (drive.go)
 	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
@@ -115,6 +116,9 @@ func main() {
 	rec := newRecMgr(cfg.Recordings, filepath.Join(filepath.Dir(*cfgPath), "recordings.state.json"), cams)
 	rec.register(mux)
 	rec.start()
+	ds := newDriveSync(cfg.DriveSync, filepath.Join(filepath.Dir(*cfgPath), "drive.state.json"), rec)
+	ds.register(mux)
+	ds.start()
 	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
 	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
 	if db != nil && cfg.ProfissionaisSheet.URL != "" {

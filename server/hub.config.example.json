@@ -137,6 +137,7 @@
     {"id": "sala-de-estar", "name": "Sala de Estar", "url": "rtsp://192.168.0.23:554/live/mpeg4"}
   ],
   "recordings": {"dir": "/home/usuario/securityCam"},
+  "driveSync": {"enabled": false, "remote": "GDrive:CameraSeguranca", "hour": 3, "maxFileMB": 1024},
   "dbPath": "centraldiogo.db",
   "allowedOrigins": []
 }

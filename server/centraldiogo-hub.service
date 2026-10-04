@@ -13,8 +13,8 @@ CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 Restart=always
 RestartSec=5
-# máquina com pouca memória
-MemoryMax=150M
+# máquina com pouca memória (o rclone da cópia diária para o Drive roda dentro deste limite)
+MemoryMax=400M
 
 [Install]
 WantedBy=multi-user.target

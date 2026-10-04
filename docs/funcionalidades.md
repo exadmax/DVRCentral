@@ -107,6 +107,8 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `GET /api/recordings/file/{nome}[?download=1]` | Arquivo MP4 com suporte a Range | `recorder.go` |
 | `GET /api/recordings/settings` | Estado e configuração das gravações, por câmera | `recorder.go` |
 | `PUT /api/recordings/settings` | Altera a configuração (exige `X-CD-Action: confirm`) | `recorder.go` |
+| `GET /api/recordings/drive` | Estado da cópia diária para o Drive | `drive.go` |
+| `POST /api/recordings/drive/run` | Copia para o Drive agora (exige `X-CD-Action: confirm`) | `drive.go` |
 | `GET /api/videos` | Lista da pasta de vídeos | `videos.go` |
 | `GET /api/videos/sub?name=` | Legenda do vídeo em WebVTT (converte SRT) | `videos.go` |
 | `GET /api/system` | CPU/memória da máquina e do hub, `control`, `desktop` | `sysinfo.go` |
@@ -130,6 +132,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | Sessão RTSP das câmeras | sob demanda | Abre a câmera quando há espectador ou gravação; fecha 15 s após o último; reconecta em 4 s se cair | `cameras.go: run/session` |
 | Detecção de movimento | por quadro | Compara o tamanho do quadro P com a média; dispara com 3 de 8 quadros acima do limite; pré-roll até o quadro-chave e 15 s de cauda | `motion.go` |
 | Rotação de arquivo | virada da hora | Fecha o MP4 e abre o seguinte no primeiro quadro-chave | `recorder.go: rotateLocked` |
+| Cópia para o Google Drive | diária às 3:00 (`driveSync.hour`); confere a cada minuto | Envia as gravações novas com rclone para `CameraSeguranca/AAAA-MM-DD/CAMERA/`; divide arquivos acima de `maxFileMB`; apaga do Drive o que passou da retenção da câmera (a da página Config); refaz em 30 min se falhar | `drive.go: start/run` |
 
 ## 5. Mapa do código
 
@@ -145,6 +148,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `traffic.go` | Google Routes: janelas de consulta, cache, nível de trânsito, polilinha decodificada e amostrada |
 | `cameras.go` | Sessão RTSP compartilhada, MP4 fragmentado, cache do último GOP, `stream` HTTP |
 | `recorder.go` | Gerente de gravações (`recMgr`), gravador por câmera, retenção, API de configuração e arquivos |
+| `drive.go` | Cópia diária das gravações para o Google Drive (rclone), divisão de MP4 grande em partes, estado em `drive.state.json` |
 | `motion.go` | Detector de movimento por tamanho de quadro |
 | `videos.go` | Listagem de vídeos e conversão SRT → VTT |
 | `sysinfo.go` + `_linux/_windows/_other.go` | Amostragem de CPU/memória por plataforma |
@@ -187,6 +191,7 @@ Erros viram `Error` com a mensagem do servidor; há timeout de 12 s.
 | `VERSION` | servidor | `MAIOR.MENOR.PATCH`; o `install.sh` soma 1 ao último número |
 | `centraldiogo.db` | servidor | SQLite (WAL) com `itens` e `contatos`; o `install.sh` não mexe |
 | `recordings.state.json` | servidor | Configuração das gravações por câmera |
+| `drive.state.json` | servidor | Gravações já copiadas para o Drive e resultado da última rodada |
 | `games.state.json` | servidor | Cache e tokens dos jogos (permissão 600) |
 
 ## 7. Testes
