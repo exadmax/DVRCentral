@@ -79,7 +79,7 @@ func newDriveSync(cfg DriveSyncConfig, statePath string, m *recMgr) *driveSync {
 	d := &driveSync{cfg: cfg, statePath: statePath, m: m, now: time.Now, st: driveState{Uploaded: map[string]int64{}}}
 	d.maxBytes = int64(cfg.MaxFileMB) << 20
 	d.upload = func(ctx context.Context, src, dest string) error {
-		return d.rclone(ctx, "copyto", "--transfers", "1", "--retries", "3", "--low-level-retries", "10", "--buffer-size", "4M", src, dest)
+		return d.rclone(ctx, "copyto", "--transfers", "1", "--retries", "3", "--low-level-retries", "10", "--buffer-size", "4M", "--drive-chunk-size", "32M", src, dest)
 	}
 	d.check = func(ctx context.Context) error { return d.rclone(ctx, "mkdir", cfg.Remote) }
 	at := func(path string) string { return strings.TrimRight(cfg.Remote, "/") + "/" + path }
@@ -232,12 +232,13 @@ func (d *driveSync) run() (started bool) {
 		return false
 	}
 	d.running = true
+	started0 := d.now() // a rodada vale a partir de quando começou: uma rodada longa que passa das 3:00 não "consome" a das 3:00, que então só envia o diferencial
 	d.mu.Unlock()
 	go func() {
 		ok, msg := d.runOnce()
 		d.mu.Lock()
 		d.running, d.progress = false, ""
-		d.st.LastAttempt, d.st.LastOK, d.st.LastMsg = d.now(), ok, msg
+		d.st.LastAttempt, d.st.LastOK, d.st.LastMsg = started0, ok, msg
 		d.save()
 		d.mu.Unlock()
 		log.Printf("drive: %s", msg)

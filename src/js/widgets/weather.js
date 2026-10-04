@@ -21,7 +21,7 @@
       '<div class="wx-big">' + I.weather(w.now.code, w.now.isDay, '#4DA3FF', 96, 1.6) +
       '<div class="wx-big-t"><div class="num big-temp">' + w.now.temp + '°</div>' +
       '<div class="sub">Mín ' + w.min + '° · Máx ' + w.max + '° · Sensação ' + w.now.feels + '°</div></div></div>' +
-      alert + '<div class="periods">' + periods + '</div>' +
+      alert + '<div class="periods">' + periods + '</div>' + CD.widgets.thumbs(s) +
       '<div class="wx-foot"><span>Nascer ' + w.sunrise + ' · Pôr do sol ' + w.sunset + '</span><span>Umidade ' + w.now.humidity + '%</span></div></section>';
   }
 

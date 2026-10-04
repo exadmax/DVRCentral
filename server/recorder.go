@@ -483,6 +483,32 @@ func (m *recMgr) register(mux *http.ServeMux) {
 		}
 		http.ServeContent(w, r, name, info.ModTime(), f)
 	})
+	// DELETE com X-CD-Action: confirm; nunca apaga o arquivo que está sendo gravado.
+	mux.HandleFunc("DELETE /api/recordings/file/{name}", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-CD-Action") != "confirm" {
+			jsonError(w, http.StatusMethodNotAllowed, "use o cabeçalho X-CD-Action: confirm")
+			return
+		}
+		name := r.PathValue("name")
+		if !recFileRe.MatchString(name) || filepath.Base(name) != name {
+			http.NotFound(w, r)
+			return
+		}
+		if m.writingNames()[name] {
+			jsonError(w, http.StatusConflict, "Esta gravação está em andamento e não pode ser excluída agora.")
+			return
+		}
+		if err := os.Remove(filepath.Join(m.dir, name)); err != nil {
+			if os.IsNotExist(err) {
+				http.NotFound(w, r)
+				return
+			}
+			log.Printf("gravações: excluir %s: %v", name, err)
+			jsonError(w, http.StatusInternalServerError, "Não foi possível excluir a gravação no servidor.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
 }
 
 func jsonError(w http.ResponseWriter, code int, msg string) {

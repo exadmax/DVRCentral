@@ -15,7 +15,7 @@
     const c = cur(s);
     const names = ['Clima'].concat(s.cams.map(x => x.name));
     return '<section class="col camcol"><div class="h2">' + esc(c.name) + ' <span class="tag">ao vivo</span></div><div id="camslot"></div>' +
-      '<div class="cam-dots">' + names.map((n, i) => '<span class="cam-dot' + (i === s.midIdx ? ' on' : '') + '">' + esc(n) + '</span>').join('') + '</div></section>';
+      '<div class="cam-dots">' + names.map((n, i) => '<span class="cam-dot' + (i === s.midIdx ? ' on' : '') + '">' + esc(n) + '</span>').join('') + '</div>' + CD.widgets.thumbs(s) + '</section>';
   }
 
   function dispose() {

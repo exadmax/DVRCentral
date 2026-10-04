@@ -26,8 +26,8 @@
   }
 
   function day(s) {
-    return header(s) + '<div class="rule"></div><main class="main">' +
-      CD.widgets.agenda(s) + (CD.widgets.cameraCur(s) ? CD.widgets.cameraSlot(s) : CD.widgets.weather(s)) + CD.widgets.map(s) + '</main>' + CD.widgets.links(s) + CD.widgets.footer(s);
+    return header(s) + '<div class="rule"></div>' + CD.widgets.links(s) + '<main class="main">' +
+      CD.widgets.agenda(s) + (CD.widgets.cameraCur(s) ? CD.widgets.cameraSlot(s) : CD.widgets.weather(s)) + CD.widgets.map(s) + '</main>' + CD.widgets.footer(s);
   }
 
   function isNight(now) {

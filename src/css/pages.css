@@ -208,6 +208,9 @@ a { color: inherit; }
 .recs { display: flex; flex-direction: column; gap: 10px; max-width: 900px; }
 .recs-f { display: flex; gap: 8px; flex-wrap: wrap; }
 .rec-day { margin-top: 10px; font-size: 14px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+.vbtn.danger { background: rgba(255, 107, 107, .18); color: var(--red); }
+.vbtn[disabled] { opacity: .4; cursor: default; }
+.rec-ck { flex: none; width: 24px; height: 24px; margin-right: 4px; accent-color: var(--blue); }
 .rec-live { margin-left: 8px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(255, 107, 107, .18); color: var(--red); }
 
 /* config: chave liga/desliga e linhas de ajuste */

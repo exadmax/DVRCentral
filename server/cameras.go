@@ -6,11 +6,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -57,6 +59,10 @@ type camera struct {
 	lastErr string
 	wantRec bool      // gravação ligada: mantém a conexão mesmo sem espectadores
 	rec     *recorder // gravação em arquivos de 1 hora (recorder.go)
+
+	snapMu sync.Mutex // um ffmpeg por vez por câmera
+	snapAt time.Time
+	snap   []byte // último JPEG (miniatura da tela inicial)
 }
 
 type cameras struct {
@@ -397,6 +403,7 @@ func (cs *cameras) register(mux *http.ServeMux) {
 		writeJSON(w, out)
 	})
 	mux.HandleFunc("GET /api/cameras/{id}/stream", cs.stream)
+	mux.HandleFunc("GET /api/cameras/{id}/snapshot.jpg", cs.snapshot)
 }
 
 func (cs *cameras) stream(w http.ResponseWriter, r *http.Request) {
@@ -460,4 +467,70 @@ func (cs *cameras) stream(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+// ---- miniatura (JPEG) ----
+
+const camSnapTTL = 4 * time.Second // várias telas pedindo ao mesmo tempo dividem o mesmo JPEG
+
+// snapshot devolve um JPEG pequeno do último quadro-chave. O hub não decodifica vídeo: quem faz isso é o ffmpeg do
+// sistema (apt install ffmpeg), chamado só aqui. Sem ffmpeg a resposta é 501 e a tela inicial simplesmente esconde as miniaturas.
+func (cs *cameras) snapshot(w http.ResponseWriter, r *http.Request) {
+	c := cs.byID[r.PathValue("id")]
+	if c == nil {
+		http.Error(w, "câmera não encontrada", http.StatusNotFound)
+		return
+	}
+	bin, err := exec.LookPath("ffmpeg")
+	if err != nil {
+		http.Error(w, "ffmpeg não instalado no servidor", http.StatusNotImplemented)
+		return
+	}
+	c.snapMu.Lock()
+	defer c.snapMu.Unlock()
+	if c.snap == nil || time.Since(c.snapAt) > camSnapTTL {
+		jpg, err := c.grabJPEG(r.Context(), bin)
+		if err != nil {
+			http.Error(w, "sem imagem: "+err.Error(), http.StatusServiceUnavailable)
+			return
+		}
+		c.snap, c.snapAt = jpg, time.Now()
+	}
+	h := w.Header()
+	h.Set("Content-Type", "image/jpeg")
+	h.Set("Cache-Control", "private, max-age=30") // a URL leva um carimbo de tempo; refazer a tela não baixa de novo
+	w.Write(c.snap)
+}
+
+func (c *camera) grabJPEG(ctx context.Context, bin string) ([]byte, error) {
+	v := c.subscribe()
+	defer c.unsubscribe(v)
+	var in bytes.Buffer
+	parts := 0
+	timeout := time.After(10 * time.Second)
+	for parts < 2 { // segmento de inicialização + quadro-chave
+		select {
+		case b, ok := <-v.ch:
+			if !ok {
+				return nil, errors.New("conexão encerrada")
+			}
+			in.Write(b)
+			parts++
+		case <-timeout:
+			return nil, errors.New("câmera indisponível")
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+	cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(cctx, bin, "-loglevel", "error", "-f", "mp4", "-i", "pipe:0", "-frames:v", "1",
+		"-vf", "scale=320:-2", "-q:v", "6", "-f", "mjpeg", "pipe:1")
+	cmd.Stdin = &in
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil || out.Len() == 0 {
+		return nil, errors.New("falha ao gerar a imagem")
+	}
+	return out.Bytes(), nil
 }

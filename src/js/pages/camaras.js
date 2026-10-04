@@ -34,7 +34,7 @@
       '<button type="button" class="vbtn" data-v="recs">Gravações</button></div>' +
       '<div class="cams" id="cams"></div><div class="recs" id="recs" hidden></div></section>';
     const box = root.querySelector('#cams'), recsBox = root.querySelector('#recs'), players = [];
-    let view = 'live', recCam = '';
+    let view = 'live', recCam = '', selMode = false, picked = {};
 
     function note(msg) { box.innerHTML = '<div class="empty">' + esc(msg) + '</div>'; }
 
@@ -83,23 +83,63 @@
         html += '<div class="recs-f"><button type="button" class="vbtn' + (recCam ? '' : ' on') + '" data-cam="">Todas</button>' +
           cams.map(c => '<button type="button" class="vbtn' + (recCam === c ? ' on' : '') + '" data-cam="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>';
       }
+      // o arquivo que está sendo gravado não pode ser excluído (o hub recusa); fora da seleção
+      const deletable = shown.filter(f => !f.recording);
+      Object.keys(picked).forEach(n => { if (!deletable.some(f => f.name === n)) delete picked[n]; });
+      const nPick = Object.keys(picked).length;
+      if (shown.length) {
+        html += '<div class="recs-f"><button type="button" class="vbtn' + (selMode ? ' on' : '') + '" data-sel="mode">' + (selMode ? 'Cancelar seleção' : 'Selecionar') + '</button>';
+        if (selMode) {
+          html += '<button type="button" class="vbtn" data-sel="all">' + (nPick === deletable.length && nPick ? 'Limpar seleção' : 'Selecionar todas') + '</button>' +
+            '<button type="button" class="vbtn danger" data-sel="del"' + (nPick ? '' : ' disabled') + '>Excluir selecionadas' + (nPick ? ' (' + nPick + ')' : '') + '</button>';
+        }
+        html += '</div>';
+      }
       if (!shown.length) html += '<div class="empty">Nenhuma gravação ainda.</div>';
       let day = '';
       shown.forEach((f, i) => {
         const d = new Date(f.start * 1000), key = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
         if (key !== day) { day = key; html += '<div class="rec-day">' + esc(key) + '</div>'; }
         const end = new Date((f.start + 3600) * 1000);
-        html += '<article class="vid"><div class="vid-main"><div class="vid-name">' + esc(f.camera) + (f.recording ? '<span class="rec-live">gravando</span>' : '') + '</div>' +
+        html += '<article class="vid">' +
+          (selMode ? '<input type="checkbox" class="rec-ck" data-pick="' + i + '" aria-label="Selecionar gravação"' + (f.recording ? ' disabled' : '') + (picked[f.name] ? ' checked' : '') + '>' : '') +
+          '<div class="vid-main"><div class="vid-name">' + esc(f.camera) + (f.recording ? '<span class="rec-live">gravando</span>' : '') + '</div>' +
           '<div class="vid-meta">' + d.toLocaleDateString('pt-BR') + ' · ' + hhmm(d) + ' – ' + hhmm(end) + ' · ' + size(f.size) + '</div></div><div class="vid-act">' +
           '<button type="button" class="vbtn main" data-play="' + i + '">Assistir</button>' +
-          '<a class="vbtn" href="' + esc(CD.hubApi.recordings.fileUrl(f.name, true)) + '">Baixar</a></div></article>';
+          '<a class="vbtn" href="' + esc(CD.hubApi.recordings.fileUrl(f.name, true)) + '">Baixar</a>' +
+          (f.recording ? '' : '<button type="button" class="vbtn danger" data-del="' + i + '">Excluir</button>') + '</div></article>';
       });
       recsBox.innerHTML = html;
+
+      async function remove(files, what) {
+        if (!files.length || !confirm('Excluir ' + what + '? Isso não pode ser desfeito.')) return;
+        let fail = 0, last = '';
+        for (const f of files) {
+          try { await CD.hubApi.recordings.remove(f.name); delete picked[f.name]; } catch (e) { fail++; last = e.message; }
+        }
+        if (!Object.keys(picked).length) selMode = false;
+        await loadRecs();
+        if (fail) { const m = document.createElement('div'); m.className = 'cfg-msg'; m.textContent = fail + ' gravação(ões) não foram excluídas: ' + last; recsBox.insertBefore(m, recsBox.firstChild); }
+      }
       recsBox.onclick = e => {
         const b = e.target.closest && e.target.closest('button');
         if (!b) return;
         if (b.hasAttribute('data-cam')) { recCam = b.getAttribute('data-cam'); loadRecs(); }
         else if (b.hasAttribute('data-play')) player(shown[+b.getAttribute('data-play')]);
+        else if (b.hasAttribute('data-del')) { const f = shown[+b.getAttribute('data-del')]; remove([f], 'esta gravação'); }
+        else if (b.hasAttribute('data-sel')) {
+          const a = b.getAttribute('data-sel');
+          if (a === 'mode') { selMode = !selMode; picked = {}; loadRecs(); }
+          else if (a === 'all') { const all = nPick === deletable.length && nPick; picked = {}; if (!all) deletable.forEach(f => { picked[f.name] = 1; }); loadRecs(); }
+          else if (a === 'del') remove(deletable.filter(f => picked[f.name]), nPick + ' gravação(ões) selecionada(s)');
+        }
+      };
+      recsBox.onchange = e => {
+        const c = e.target;
+        if (!c.hasAttribute || !c.hasAttribute('data-pick')) return;
+        const f = shown[+c.getAttribute('data-pick')];
+        if (c.checked) picked[f.name] = 1; else delete picked[f.name];
+        loadRecs();
       };
     }
 
