@@ -401,3 +401,35 @@ func TestDrivePrune(t *testing.T) {
 		t.Errorf("destino na raiz do Drive deve ser recusado: err=%v purged=%v", err, purged)
 	}
 }
+
+func TestDriveCameraOff(t *testing.T) {
+	now := time.Date(2026, 10, 4, 12, 0, 0, 0, time.Local)
+	cs := newCameras([]CameraConfig{{ID: "sala", Name: "Sala de Estar", URL: "rtsp://x/y"}, {ID: "garagem", Name: "Garagem", URL: "rtsp://x/z"}})
+	m := newRecMgr(RecordingsConfig{Dir: filepath.Join(t.TempDir(), "securityCam")}, filepath.Join(t.TempDir(), "state.json"), cs)
+	m.now = func() time.Time { return now }
+	var sent []string
+	d := newDriveSync(DriveSyncConfig{Enabled: true, Remote: "GDrive:CameraSeguranca", Hour: 3}, filepath.Join(t.TempDir(), "drive.state.json"), m)
+	d.now = func() time.Time { return now }
+	d.check = func(ctx context.Context) error { return nil }
+	d.upload = func(ctx context.Context, src, dest string) error { sent = append(sent, dest); return nil }
+	d.list = func(ctx context.Context, path string) ([]string, error) { return nil, nil }
+	recent := now.Add(-3 * time.Hour)
+	writeRec(t, m.dir, "Sala_de_Estar_2026100409.mp4", 100, recent)
+	writeRec(t, m.dir, "Garagem_2026100409.mp4", 100, recent)
+	setCam(m, "sala", func(c *recCamSet) { c.DriveOff = true })
+
+	// rodada automática / "Sincronizar tudo": só a Garagem
+	if ok, _ := d.runOnce(); !ok || len(sent) != 1 || !strings.Contains(sent[0], "/Garagem/") {
+		t.Fatalf("automática: enviados=%v", sent)
+	}
+	// o status ainda mostra o que a Sala enviaria (botão Sincronizar da câmera)
+	if p := d.status()["pending"].(map[string]drivePend); p["sala"].Files != 1 {
+		t.Errorf("pendências da Sala desligada: %+v", p)
+	}
+	// botão da própria câmera: envia mesmo desligada
+	sent = nil
+	only, _ := d.prefixes([]string{"sala"})
+	if ok, _ := d.runOnceFor(only); !ok || len(sent) != 1 || !strings.Contains(sent[0], "/Sala_de_Estar/") {
+		t.Errorf("botão da câmera: enviados=%v", sent)
+	}
+}

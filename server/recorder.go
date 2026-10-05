@@ -44,6 +44,7 @@ type recCamSet struct {
 	RetentionDays int    `json:"retentionDays"` // 1 a 365
 	MaxGB         int    `json:"maxGB"`         // 0 = sem limite; passou disso, apaga as mais antigas desta câmera
 	Sensitivity   int    `json:"sensitivity"`   // 1 a 5 (só no modo movimento)
+	DriveOff      bool   `json:"driveOff"`      // true = não envia esta câmera ao Google Drive nas rodadas automáticas (drive.go); padrão: envia
 }
 
 type recSettings struct {
@@ -370,6 +371,7 @@ type recCamPatch struct {
 	RetentionDays *int    `json:"retentionDays"`
 	MaxGB         *int    `json:"maxGB"`
 	Sensitivity   *int    `json:"sensitivity"`
+	DriveOff      *bool   `json:"driveOff"`
 }
 
 func (p recCamPatch) validate() string {
@@ -401,6 +403,9 @@ func (p recCamPatch) apply(c recCamSet) recCamSet {
 	}
 	if p.Sensitivity != nil {
 		c.Sensitivity = *p.Sensitivity
+	}
+	if p.DriveOff != nil {
+		c.DriveOff = *p.DriveOff
 	}
 	return c
 }

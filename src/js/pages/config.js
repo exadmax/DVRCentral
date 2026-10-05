@@ -64,8 +64,10 @@
       if (!drv || !drv.enabled) return '';
       const p = (drv.pending || {})[c.id] || { files: 0, bytes: 0 };
       const sending = driveBusy() && (!drv.scope || drv.scope.split(', ').indexOf(c.name) >= 0);
-      const text = sending ? 'Enviando agora…' : p.files ? p.files + ' gravação(ões) para enviar (' + bytes(p.bytes) + ').' : 'Nada novo para enviar.';
-      return row('Google Drive', text, driveBtn(c.id, 'Sincronizar'));
+      const todo = p.files ? p.files + ' gravação(ões) para enviar (' + bytes(p.bytes) + ').' : 'Nada novo para enviar.';
+      const text = sending ? 'Enviando agora…' : c.driveOff ?
+        'Desligado: não vai ao Drive nas rodadas automáticas nem em “Sincronizar tudo”. ' + todo.replace('para enviar', 'se você clicar em Sincronizar') : todo;
+      return row('Enviar ao Google Drive', text, '<span class="cfg-ctl">' + driveBtn(c.id, 'Sincronizar') + sw('drv:' + c.id, !c.driveOff, 'Enviar ' + c.name + ' ao Google Drive') + '</span>');
     }
     function driveCard() {
       if (!drv) return '';
@@ -141,6 +143,7 @@
       if (t && rec) {
         const id = t.getAttribute('data-sw');
         if (id === 'master') saveRec({ enabled: !rec.enabled });
+        else if (id.indexOf('drv:') === 0) { const c = (rec.cameras || []).filter(x => 'drv:' + x.id === id)[0]; if (c) { const o = {}; o[c.id] = { driveOff: !c.driveOff }; saveRec({ cameras: o }); } }
         else { const c = (rec.cameras || []).filter(x => 'cam:' + x.id === id)[0]; if (c) { const o = {}; o[c.id] = { enabled: !c.enabled }; saveRec({ cameras: o }); } }
         return;
       }

@@ -133,7 +133,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | Sessão RTSP das câmeras | sob demanda | Abre a câmera quando há espectador ou gravação; fecha 15 s após o último; reconecta em 4 s se cair | `cameras.go: run/session` |
 | Detecção de movimento | por quadro | Compara o tamanho do quadro P com a média; dispara com 3 de 8 quadros acima do limite; pré-roll até o quadro-chave e 15 s de cauda | `motion.go` |
 | Rotação de arquivo | virada da hora | Fecha o MP4 e abre o seguinte no primeiro quadro-chave | `recorder.go: rotateLocked` |
-| Cópia para o Google Drive | diária às 3:00 (`driveSync.hour`); confere a cada minuto | Envia as gravações novas com rclone para `CameraSeguranca/AAAA-MM-DD/CAMERA/`; divide arquivos acima de `maxFileMB`; apaga do Drive o que passou da retenção da câmera (a da página Config); até 3 tentativas se falhar (1 h e 4 h depois), até 1:00 do dia seguinte | `drive.go: start/run` |
+| Cópia para o Google Drive | diária às 3:00 (`driveSync.hour`); confere a cada minuto | Envia as gravações novas (das câmeras com o envio ligado na página Config) com rclone para `CameraSeguranca/AAAA-MM-DD/CAMERA/`; divide arquivos acima de `maxFileMB`; apaga do Drive o que passou da retenção da câmera (a da página Config); até 3 tentativas se falhar (1 h e 4 h depois), até 1:00 do dia seguinte | `drive.go: start/run` |
 
 ## 5. Mapa do código
 

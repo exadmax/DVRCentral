@@ -210,8 +210,18 @@ type drivePending struct {
 }
 
 // pending: gravações fechadas (a hora acabou e ninguém mexe nelas há alguns minutos) que ainda não foram enviadas, das mais antigas às mais novas.
-// only (prefixo do nome de arquivo das câmeras): se não for nil, só dessas câmeras.
+// only (prefixo do nome de arquivo das câmeras): se não for nil, só dessas câmeras; nil = as automáticas, ou seja, todas menos as que têm
+// o envio ao Drive desligado na página Config.
 func (d *driveSync) pending(only map[string]bool) []drivePending {
+	var off map[string]bool
+	if only == nil {
+		off = map[string]bool{}
+		for prefix, id := range d.m.camByPrefix() {
+			if d.m.camSet(id).DriveOff {
+				off[prefix] = true
+			}
+		}
+	}
 	entries, err := os.ReadDir(d.m.dir)
 	if err != nil {
 		return nil
@@ -222,7 +232,7 @@ func (d *driveSync) pending(only map[string]bool) []drivePending {
 	var out []drivePending
 	for _, e := range entries {
 		g := recFileRe.FindStringSubmatch(e.Name())
-		if e.IsDir() || g == nil || (only != nil && !only[g[1]]) {
+		if e.IsDir() || g == nil || (only != nil && !only[g[1]]) || off[g[1]] {
 			continue
 		}
 		if _, done := d.st.Uploaded[e.Name()]; done {
@@ -703,7 +713,11 @@ type drivePend struct {
 func (d *driveSync) status() map[string]interface{} {
 	pend := map[string]drivePend{} // por id da câmera: o que falta enviar
 	byPrefix := d.m.camByPrefix()
-	for _, f := range d.pending(nil) {
+	all := map[string]bool{} // inclui as câmeras com o envio desligado: o botão Sincronizar delas mostra o que enviaria
+	for prefix := range byPrefix {
+		all[prefix] = true
+	}
+	for _, f := range d.pending(all) {
 		id := byPrefix[f.camera]
 		p := pend[id]
 		p.Files++

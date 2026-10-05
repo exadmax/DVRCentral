@@ -219,6 +219,7 @@ a { color: inherit; }
 .cfg-sw.on { background: var(--green); }
 .cfg-sw.on::after { left: 25px; }
 .cfg-sw:focus { outline: none; box-shadow: 0 0 0 3px rgba(77, 163, 255, .4); }
+.cfg-ctl { display: flex; align-items: center; gap: 14px; }
 .cfg-sel { min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #101A2C; color: var(--text); font: 600 14px 'Inter', system-ui, sans-serif; }
 .cfg-sub { margin: 4px 0 -4px; font-size: 13px; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
 .cfg-ok { color: var(--green); }
