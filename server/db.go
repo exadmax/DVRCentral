@@ -52,10 +52,28 @@ var migrations = []string{
 	ALTER TABLE contatos DROP COLUMN nota;`,
 	// Observações do profissional (coluna "Obs" da planilha).
 	`ALTER TABLE contatos ADD COLUMN obs TEXT NOT NULL DEFAULT '';`,
+	// Os locais do estoque deixam de ser fixos (freezer/geladeira/dispensa): sai o CHECK da coluna local; quem valida agora é o hub.
+	`CREATE TABLE itens_novo (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		nome TEXT NOT NULL,
+		quantidade REAL CHECK (quantidade IS NULL OR quantidade >= 0),
+		peso_kg REAL CHECK (peso_kg IS NULL OR peso_kg >= 0),
+		validade TEXT,
+		local TEXT NOT NULL,
+		criado_em TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+		atualizado_em TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+		CHECK (quantidade IS NOT NULL OR peso_kg IS NOT NULL)
+	);
+	INSERT INTO itens_novo (id, nome, quantidade, peso_kg, validade, local, criado_em, atualizado_em)
+		SELECT id, nome, quantidade, peso_kg, validade, local, criado_em, atualizado_em FROM itens;
+	DROP TABLE itens;
+	ALTER TABLE itens_novo RENAME TO itens;
+	CREATE INDEX itens_validade ON itens (validade);`,
 }
 
 type store struct {
 	db      *sql.DB
+	locais  func() []string // ids dos locais do estoque em uso (nil = os padrão)
 	origins []string // origens extras com permissão de gravar (além do próprio endereço do hub)
 }
 

@@ -18,32 +18,39 @@ import (
 type Config struct {
 	Listen    string `json:"listen"`
 	StaticDir string `json:"staticDir"`
-	Calendars []struct {
-		Who   string `json:"who"`   // identificador
-		Label string `json:"label"` // nome exibido no painel
-		Color string `json:"color"` // cor (CSS) da categoria
-		URL   string `json:"url"`
-	} `json:"calendars"`
-	Traffic struct {
-		Key    string `json:"key"`  // chave do Google Routes API
-		Home   string `json:"home"` // endereço de saída padrão
-		Diogo  Person `json:"diogo"`
-		Cassia Person `json:"cassia"`
-	} `json:"traffic"`
+	Calendars []CalendarConfig `json:"calendars"`
+	Traffic   TrafficConfig    `json:"traffic"`
 	CalendarCacheMinutes int         `json:"calendarCacheMinutes"`
 	TrafficCacheMinutes  int         `json:"trafficCacheMinutes"` // intervalo entre consultas dentro da janela
 	ForceIPv4            bool        `json:"forceIPv4"`
 	Games                GamesConfig `json:"games"`
 	DBPath               string      `json:"dbPath"` // banco SQLite (estoque e contatos); relativo à pasta do hub.config.json
-	ProfissionaisSheet   struct {
-		URL     string `json:"url"`     // CSV da aba de profissionais (Google Planilhas); vazio desliga a sincronização
-		Minutes int    `json:"minutes"` // intervalo entre sincronizações (padrão 5)
-	} `json:"profissionaisSheet"`
+	ProfissionaisSheet   SheetConfig `json:"profissionaisSheet"`
 	Videos         VideosConfig     `json:"videos"`         // pasta dos vídeos servida pelo nginx em /videos/ (lista da página Vídeos)
 	Cameras        []CameraConfig   `json:"cameras"`        // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
 	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
 	DriveSync      DriveSyncConfig  `json:"driveSync"`      // cópia diária das gravações para o Google Drive via rclone (drive.go)
 	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
+}
+
+type CalendarConfig struct {
+	Who   string `json:"who"`   // identificador
+	Label string `json:"label"` // nome exibido no painel
+	Color string `json:"color"` // cor (CSS) da categoria
+	URL   string `json:"url"`
+}
+
+type TrafficConfig struct {
+	Key    string   `json:"key"`  // chave do Google Routes API
+	Home   string   `json:"home"` // endereço de saída padrão
+	People []Person `json:"people"`
+	Diogo  Person   `json:"diogo"`  // formato antigo: vira o primeiro item de People (normalize)
+	Cassia Person   `json:"cassia"` // idem
+}
+
+type SheetConfig struct {
+	URL     string `json:"url"`     // CSV da aba de profissionais (Google Planilhas); vazio desliga a sincronização
+	Minutes int    `json:"minutes"` // intervalo entre sincronizações (padrão 5)
 }
 
 func loadConfig(path string) Config {
@@ -55,6 +62,7 @@ func loadConfig(path string) Config {
 	if err := json.Unmarshal(b, &c); err != nil {
 		log.Fatalf("hub.config.json inválido: %v", err)
 	}
+	c.Traffic.normalize()
 	return c
 }
 
@@ -86,6 +94,10 @@ func main() {
 	xboxLogin := flag.Bool("xbox-login", false, "autoriza a conta Xbox (uma vez) e sai")
 	flag.Parse()
 	cfg := loadConfig(*cfgPath)
+	// Câmeras, agendas, rotas e menu editados na página Config ficam em hub.settings.json e valem mais que o hub.config.json.
+	settingsPath := filepath.Join(filepath.Dir(*cfgPath), "hub.settings.json")
+	saved := loadSettings(settingsPath)
+	saved.applyTo(&cfg)
 	if *xboxLogin {
 		xboxLoginCLI(cfg, *cfgPath)
 		return
@@ -105,6 +117,10 @@ func main() {
 		log.Printf("banco de dados %s: %v", cfg.DBPath, err)
 		db = nil
 	}
+	sm := newSettingsMgr(settingsPath, saved, &cfg, db, nil, nil, nil, nil)
+	if db != nil {
+		db.locais = sm.localIDs
+	}
 
 	// Versão instalada: arquivo VERSION ao lado do hub.config.json (o install.sh soma 1 ao terceiro número a cada instalação)
 	verDir := filepath.Dir(*cfgPath)
@@ -119,6 +135,8 @@ func main() {
 	ds := newDriveSync(cfg.DriveSync, filepath.Join(filepath.Dir(*cfgPath), "drive.state.json"), rec)
 	ds.register(mux)
 	ds.start()
+	sm.cams, sm.rec, sm.cal, sm.tr = cams, rec, cal, tr
+	sm.register(mux)
 	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
 	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
 	if db != nil && cfg.ProfissionaisSheet.URL != "" {
@@ -138,7 +156,17 @@ func main() {
 	mux.HandleFunc("/api/admin/desktop-off", powerHandler(sys, dmUnit, false))
 	mux.HandleFunc("/api/admin/hub-off", powerHandler(sys, "centraldiogo-hub.service", true))
 	mux.HandleFunc("/api/ics", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, cal.get()) })
-	mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, tr.get(r.URL.Query().Get("diogo") == "1")) })
+	mux.HandleFunc("/api/traffic", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		ask := map[string]bool{}
+		for _, id := range strings.Split(q.Get("ask"), ",") { // pessoas que o painel pediu agora (as "só quando eu pedir")
+			ask[strings.TrimSpace(id)] = true
+		}
+		if q.Get("diogo") == "1" { // formato antigo
+			ask["diogo"] = true
+		}
+		writeJSON(w, tr.get(ask))
+	})
 	mux.HandleFunc("/api/games", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, gm.get(r.URL.Query().Get("refresh") == "1"))
 	})

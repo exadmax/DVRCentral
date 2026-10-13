@@ -1,7 +1,7 @@
 # Central Diogo (Omega Diogo)
 
 Painel de informações da casa: agenda, clima, trânsito, feriados, câmeras ao vivo, estoque da cozinha e lista de profissionais.
-Roda na **TV Samsung** (Tizen), no **Android** (APK) e em qualquer navegador, tudo a partir de um único código web em `src/`,
+Roda em qualquer navegador (TV, celular, tablet ou computador), tudo a partir de um único código web em `src/`,
 servido por um **hub** em Go que fica no servidor Linux da casa ("servidor").
 
 ## Sumário
@@ -11,7 +11,6 @@ servido por um **hub** em Go que fica no servidor Linux da casa ("servidor").
 - [Começando](#começando)
 - [Configuração](#configuração)
 - [Implantação no servidor](#implantação-no-servidor)
-- [Apps (TV e Android)](#apps-tv-e-android)
 - [Versão instalada](#versão-instalada)
 - [Testes](#testes)
 - [Documentação](#documentação)
@@ -37,9 +36,8 @@ O inventário completo, com fontes de dados, endpoints e arquivos de código, es
 ## Arquitetura
 
 ```
-TV Samsung ─┐
-APK Android ├─ WebView ─►  http://192.168.0.10/  ─►  Hub Go (server/)
-Navegador  ─┘                                          ├─ serve o painel (src/)
+TV / celular / PC ─►  navegador  ─►  http://192.168.0.10/  ─►  Hub Go (server/)
+                                                                 ├─ serve o painel (src/)
                                                        ├─ /api/*  agenda, trânsito, estoque, serviços, câmeras, vídeos, sistema
                                                        ├─ SQLite  (centraldiogo.db)
                                                        └─ guarda as chaves e senhas (nunca vão para os aparelhos)
@@ -48,8 +46,8 @@ Navegador  ─┘                                          ├─ serve o painel
 - **Hub** (`server/`, Go 1.26, sem CGO): roda no Linux na porta 80, só com biblioteca padrão mais SQLite em Go puro e RTSP.
   Pensado para máquinas de 2 GB (o serviço limita a 150 MB). Guarda as URLs iCal, a chave do Google Routes, as senhas das câmeras
   e resolve o CORS do Google.
-- **Painel** (`src/`): HTML e JS clássicos (sem módulos ES, para funcionar até via `file://` na TV). Aberto pelo hub, pela TV ou pelo APK.
-- **TV e APK** são só cascas (WebView) que abrem `http://192.168.0.10/`: para mudar o painel basta reenviar o hub.
+- **Painel** (`src/`): HTML e JS clássicos (sem módulos ES, para funcionar também em navegadores de TV). Aberto pelo hub em qualquer navegador.
+- Para abrir na **TV**, use o navegador dela em `http://192.168.0.10/` (e na Config ligue o *Modo compatibilidade* se as câmeras não carregarem). Para mudar o painel basta reenviar o hub.
 - **Sem hub**, o painel ainda abre e mostra clima e feriados; agenda e trânsito aparecem com dados de **exemplo** (etiqueta "exemplo")
   e as páginas de estoque, serviços, câmeras, vídeos e config avisam que precisam do hub.
 - O hub é aberto à rede de casa, **sem login**. Não exponha à internet.
@@ -60,9 +58,6 @@ Navegador  ─┘                                          ├─ serve o painel
 |---|---|
 | `src/` | Painel web: `*.html`, `css/`, `js/{core,services,widgets,pages}`, `config/`, `assets/` |
 | `server/` | Hub em Go, testes, `hub.config.example.json`, scripts de build/instalação e unidade systemd |
-| `platforms/tizen/` | App da TV Samsung (`.wgt`); guia em [`app/SETUP.md`](platforms/tizen/app/SETUP.md) |
-| `platforms/android/` | Casca Android (WebView) em Java puro, sem Gradle |
-| `cadastro-apk/` | App Android "Cadastro Casa" para cadastrar estoque e serviços; ver [`cadastro-apk/README.md`](cadastro-apk/README.md) |
 | `docs/` | Documentação por área e design de referência (`docs/design/`) |
 | `scripts/` | Índice de build e empacotamento ([`scripts/README.md`](scripts/README.md)) |
 | `.claude/` | Agente e skill do Claude Code para operar o servidor Debian |
@@ -111,7 +106,6 @@ Depois de editar: `sudo systemctl restart centraldiogo-hub`.
 É mesclado sobre `settings.example.js`; coloque só o que mudar.
 ```js
 window.CD_SETTINGS_LOCAL = {
-  hub: { url: 'http://192.168.0.10' },          // necessário na TV e no APK (abertos fora do hub)
   cameras: { rotateSeconds: 60 },                 // tempo de cada câmera no rodízio
   estoque: { soonDays: 3 },                       // "a vencer" = até N dias
   night: { from: 23, until: 5 }                   // modo noturno
@@ -140,11 +134,6 @@ sudo systemctl stop centraldiogo-hub
 cp -a /opt/centraldiogo/centraldiogo.db* ~/backup-centraldiogo/
 sudo systemctl start centraldiogo-hub
 ```
-
-## Apps (TV e Android)
-- **TV Samsung**: `platforms/tizen/app/` (guia em `app/SETUP.md`). Gera o `.wgt` pelo Tizen Studio, precisa de certificado Samsung com o DUID da TV.
-- **Painel Android**: `platforms/android/build.sh [URL]` gera `build/central-diogo.apk` sem Gradle (usa o Android SDK instalado).
-- **Cadastro Casa**: `cadastro-apk/build.sh` gera `build/cadastro-casa.apk` (~45 KB) para cadastrar estoque e serviços pelo celular.
 
 ## Versão instalada
 - O servidor guarda a versão no arquivo `VERSION` (`/opt/centraldiogo/VERSION`), formato `MAIOR.MENOR.PATCH`, por exemplo `1.0.1`.

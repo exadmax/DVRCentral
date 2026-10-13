@@ -48,7 +48,7 @@ Não é interativo no dia a dia: fica ligado como painel passivo. Controle remot
 - Modo noturno (após 23h): brilho reduzido, mostra só hora, clima e agenda de amanhã.
 
 ## Responsivo
-- Celular/APK: coluna única, ordem Barra superior → Agenda → Clima → Deslocamento.
+- Celular: coluna única, ordem Barra superior → Agenda → Clima → Deslocamento.
 - Web/tablet: 2 colunas.
 
 ## Entregáveis esperados do design

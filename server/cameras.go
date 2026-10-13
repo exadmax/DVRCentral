@@ -66,8 +66,14 @@ type camera struct {
 }
 
 type cameras struct {
-	list []*camera
-	byID map[string]*camera
+	mu    sync.RWMutex // a lista muda quando a página Config adiciona ou remove câmeras (settings.go)
+	list  []*camera
+	byID  map[string]*camera
+	onAdd func(*camera) // chamado para cada câmera nova, antes de ela aparecer na lista (liga o gravador)
+}
+
+func newCamera(cc CameraConfig) *camera {
+	return &camera{cfg: cc, viewers: map[*camViewer]struct{}{}}
 }
 
 func newCameras(cfgs []CameraConfig) *cameras {
@@ -79,11 +85,77 @@ func newCameras(cfgs []CameraConfig) *cameras {
 		if cc.Name == "" {
 			cc.Name = cc.ID
 		}
-		c := &camera{cfg: cc, viewers: map[*camViewer]struct{}{}}
+		c := newCamera(cc)
 		cs.list = append(cs.list, c)
 		cs.byID[cc.ID] = c
 	}
 	return cs
+}
+
+// all devolve uma cópia da lista atual (seguro para percorrer enquanto a lista muda).
+func (cs *cameras) all() []*camera {
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	return append([]*camera(nil), cs.list...)
+}
+
+func (cs *cameras) get(id string) *camera {
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	return cs.byID[id]
+}
+
+// replace troca o conjunto de câmeras em funcionamento: as iguais seguem como estão (sem derrubar vídeo nem gravação),
+// as novas ou alteradas são criadas e as que saíram são desligadas.
+func (cs *cameras) replace(cfgs []CameraConfig) {
+	cs.mu.Lock()
+	old := cs.byID
+	cs.list, cs.byID = nil, map[string]*camera{}
+	for _, cc := range cfgs {
+		if cc.ID == "" || cc.URL == "" || cs.byID[cc.ID] != nil {
+			continue
+		}
+		if cc.Name == "" {
+			cc.Name = cc.ID
+		}
+		c := old[cc.ID]
+		if c != nil && c.cfg == cc {
+			delete(old, cc.ID)
+		} else {
+			c = newCamera(cc)
+			if cs.onAdd != nil {
+				cs.onAdd(c)
+			}
+		}
+		cs.list = append(cs.list, c)
+		cs.byID[cc.ID] = c
+	}
+	cs.mu.Unlock()
+	for _, c := range old { // sobrou: removida ou substituída por uma versão nova
+		c.shutdown()
+	}
+}
+
+// shutdown encerra a conexão com a câmera, desconecta quem assistia e fecha o arquivo de gravação.
+func (c *camera) shutdown() {
+	c.mu.Lock()
+	c.wantRec = false
+	if c.idle != nil {
+		c.idle.Stop()
+		c.idle = nil
+	}
+	if c.running {
+		c.running = false
+		c.stop()
+	}
+	c.resetLocked()
+	for v := range c.viewers {
+		c.removeLocked(v)
+	}
+	c.mu.Unlock()
+	if c.rec != nil {
+		c.rec.close()
+	}
 }
 
 // ---- espectadores ----
@@ -396,8 +468,9 @@ func buildInit(sps, pps []byte) ([]byte, error) {
 
 func (cs *cameras) register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/cameras", func(w http.ResponseWriter, r *http.Request) {
-		out := make([]map[string]string, 0, len(cs.list))
-		for _, c := range cs.list {
+		list := cs.all()
+		out := make([]map[string]string, 0, len(list))
+		for _, c := range list {
 			out = append(out, map[string]string{"id": c.cfg.ID, "name": c.cfg.Name})
 		}
 		writeJSON(w, out)
@@ -407,7 +480,7 @@ func (cs *cameras) register(mux *http.ServeMux) {
 }
 
 func (cs *cameras) stream(w http.ResponseWriter, r *http.Request) {
-	c := cs.byID[r.PathValue("id")]
+	c := cs.get(r.PathValue("id"))
 	if c == nil {
 		http.Error(w, "câmera não encontrada", http.StatusNotFound)
 		return
@@ -476,7 +549,7 @@ const camSnapTTL = 4 * time.Second // várias telas pedindo ao mesmo tempo divid
 // snapshot devolve um JPEG pequeno do último quadro-chave. O hub não decodifica vídeo: quem faz isso é o ffmpeg do
 // sistema (apt install ffmpeg), chamado só aqui. Sem ffmpeg a resposta é 501 e a tela inicial simplesmente esconde as miniaturas.
 func (cs *cameras) snapshot(w http.ResponseWriter, r *http.Request) {
-	c := cs.byID[r.PathValue("id")]
+	c := cs.get(r.PathValue("id"))
 	if c == nil {
 		http.Error(w, "câmera não encontrada", http.StatusNotFound)
 		return

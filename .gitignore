@@ -1,10 +1,7 @@
 node_modules/
 src/config/settings.js
-platforms/android/android/
 build/
-*.wgt
 
-platforms/tizen/www/
 server/hub.config.json
 server/dist/
 server/games.state.json

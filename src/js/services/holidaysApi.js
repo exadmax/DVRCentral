@@ -23,7 +23,7 @@
     const map = {};
     FIXOS.forEach(f => { map[year + '-' + f[0]] = { date: year + '-' + f[0], name: f[1], type: 'nacional' }; });
     (await nacionaisApi(year)).forEach(x => { map[x.date] = x; });
-    (window.CD_LOCAL_HOLIDAYS || []).forEach(x => {
+    ((CD.state && CD.state.cfg && CD.state.cfg.localHolidays) || window.CD_LOCAL_HOLIDAYS || []).forEach(x => {
       const date = year + '-' + x.date;
       if (!map[date]) map[date] = { date: date, name: x.name, type: x.type };
     });

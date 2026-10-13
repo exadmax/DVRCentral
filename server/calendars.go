@@ -74,3 +74,17 @@ func (c *calendars) get() map[string]interface{} {
 	}
 	return map[string]interface{}{"sources": c.data}
 }
+
+// setSources troca as agendas em uso (página Config) e descarta o cache para a próxima leitura já trazer a lista nova.
+func (c *calendars) setSources(list []CalendarConfig) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cfg.Calendars = list
+	c.data = nil
+}
+
+func (c *calendars) sources() []CalendarConfig {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return append([]CalendarConfig(nil), c.cfg.Calendars...)
+}

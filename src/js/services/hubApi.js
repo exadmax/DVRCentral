@@ -38,6 +38,22 @@
     // Config: uso de CPU/memória e os botões que param o desktop / o hub (o cabeçalho X-CD-Action evita disparo por outra página)
     system() { return call('GET', '/api/system'); },
     power(what) { return call('POST', '/api/admin/' + what, undefined, { 'X-CD-Action': 'confirm' }); },
+    // câmeras, agendas (iCal), rotas do trânsito e atalhos do menu: editados na página Config e guardados no hub (segredos ficam mascarados)
+    settings: {
+      // Configurações da tela inicial editadas na Config (localização, modo noturno, rodízio, validade, vídeos, feriados locais, locais do estoque):
+      // mescla na configuração em uso. O que não foi editado continua com o padrão do settings.js.
+      async loadPanel(cfg) {
+        const j = await call('GET', '/api/settings/panel');
+        ['location', 'night', 'cameras', 'estoque', 'videos'].forEach(k => { if (j[k]) cfg[k] = Object.assign(cfg[k] || {}, j[k]); });
+        if (j.refreshMinutes) cfg.refreshMinutes = j.refreshMinutes;
+        if (j.localHolidays) cfg.localHolidays = j.localHolidays;
+        if (j.locais && CD.stock) CD.stock.setLocais(j.locais);
+        return j;
+      },
+      restartHub() { return call('POST', '/api/settings/hub/restart', undefined, { 'X-CD-Action': 'confirm' }); },
+      get(section) { return call('GET', '/api/settings/' + section); },
+      save(section, obj) { return call('PUT', '/api/settings/' + section, obj, { 'X-CD-Action': 'confirm' }); }
+    },
     videos: { list() { return call('GET', '/api/videos'); } },
     // gravações das câmeras: arquivos de 1 hora no servidor; as configurações (liga/desliga, câmeras, retenção) ficam na página Config
     recordings: {

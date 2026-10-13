@@ -24,9 +24,23 @@ type Item struct {
 
 const itemCols = "id, nome, quantidade, peso_kg, validade, local, criado_em, atualizado_em"
 
-var locais = map[string]bool{"freezer": true, "geladeira": true, "dispensa": true}
+// Locais padrão; a página Config pode trocar a lista (settings.go) e o store passa a consultar a lista atual.
+var defaultLocais = []string{"geladeira", "freezer", "dispensa"}
 
-func (it *Item) clean() error {
+func (s *store) localOK(id string) bool {
+	list := defaultLocais
+	if s.locais != nil {
+		list = s.locais()
+	}
+	for _, l := range list {
+		if l == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (it *Item) clean(localOK func(string) bool) error {
 	it.Nome = strings.TrimSpace(it.Nome)
 	if it.Nome == "" {
 		return badRequest("informe o nome do item")
@@ -35,8 +49,8 @@ func (it *Item) clean() error {
 		return badRequest("nome muito longo (máximo 120 caracteres)")
 	}
 	it.Local = strings.ToLower(strings.TrimSpace(it.Local))
-	if !locais[it.Local] {
-		return badRequest("local deve ser freezer, geladeira ou dispensa")
+	if !localOK(it.Local) {
+		return badRequest("local inválido (veja os locais cadastrados em Config → Painel)")
 	}
 	if it.Quantidade == nil && it.PesoKg == nil {
 		return badRequest("informe a quantidade e/ou o peso em kg")
@@ -105,7 +119,7 @@ func (s *store) itensAPI() crud {
 			if err := json.Unmarshal(body, &it); err != nil {
 				return nil, badRequest("JSON inválido")
 			}
-			if err := it.clean(); err != nil {
+			if err := it.clean(s.localOK); err != nil {
 				return nil, err
 			}
 			res, err := s.db.Exec("INSERT INTO itens (nome, quantidade, peso_kg, validade, local) VALUES (?, ?, ?, ?, ?)",
@@ -121,7 +135,7 @@ func (s *store) itensAPI() crud {
 			if err := json.Unmarshal(body, &it); err != nil {
 				return nil, badRequest("JSON inválido")
 			}
-			if err := it.clean(); err != nil {
+			if err := it.clean(s.localOK); err != nil {
 				return nil, err
 			}
 			res, err := s.db.Exec(`UPDATE itens SET nome = ?, quantidade = ?, peso_kg = ?, validade = ?, local = ?,

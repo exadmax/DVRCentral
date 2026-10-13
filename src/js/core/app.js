@@ -6,10 +6,11 @@
   cfg.calendar = cfg.calendar || { sources: [], proxy: '' };
   cfg.night = cfg.night || { from: 23, until: 5 };
   cfg.cameras = cfg.cameras || { rotateSeconds: 60 };
+  const defaultLinks = cfg.links;                 // menu padrão (settings.js); o hub pode ter um personalizado
 
   const state = {
     cfg: cfg, now: new Date(), weather: null, wxStale: false, cal: { demo: true, sources: [] },
-    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', sys: null, hub: '', showDiogoUntil: 0, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0,
+    holidays: [], traffic: null, stock: null, nightOffUntil: 0, nightSkipped: false, version: '', sys: null, hub: '', asked: {}, trafficBusy: false, online: navigator.onLine, updatedAt: null, agTop: 0,
     cams: [], midIdx: 0            // câmeras do hub e o que ocupa o meio: 0 = Clima, 1..n = câmeras (rodízio)
   };
   CD.state = state;
@@ -99,9 +100,9 @@
     render();
   }
 
-  // Hub (servidor): endereço em settings (TV/APK) ou o próprio servidor que entregou a página
+  // Hub (servidor): o próprio servidor que entregou a página
   async function detectHub() {
-    const base = (cfg.hub && cfg.hub.url) || (/^https?:/.test(location.protocol) ? location.origin : '');
+    const base = /^https?:/.test(location.protocol) ? location.origin : '';
     if (!base) return;
     try { const h = await U.getJson(base + '/api/health', 3000); state.hub = base.replace(/\/$/, ''); state.version = h.version || ''; } catch (e) { state.hub = ''; state.version = ''; }
   }
@@ -109,18 +110,19 @@
   // Trânsito vem só do hub (a chave do Google fica lá). Diogo só é consultado enquanto o "Ver trânsito" está ativo.
   async function refreshTraffic() {
     if (state.hub) {
-      const asked = Date.now() < state.showDiogoUntil;
+      const ask = Object.keys(state.asked).filter(id => state.asked[id] > Date.now());     // pessoas "só quando eu pedir" consultadas agora
       try {
-        const j = await U.getJson(state.hub + '/api/traffic' + (asked ? '?diogo=1' : ''), 25000);
-        if (j.configured) { state.traffic = { demo: false, stale: !!j.stale, diogo: j.diogo, cassia: j.cassia }; return render(); }
+        const j = await U.getJson(state.hub + '/api/traffic' + (ask.length ? '?ask=' + ask.map(encodeURIComponent).join(',') : ''), 25000);
+        if (j.configured) { state.traffic = { demo: false, stale: !!j.stale, people: j.people || [] }; return render(); }
       } catch (e) { if (state.traffic && !state.traffic.demo) { state.traffic.stale = true; return render(); } }
     }
-    state.traffic = Object.assign({ demo: true }, CD.trafficApi.demo());
+    const d = CD.trafficApi.demo();
+    state.traffic = { demo: true, people: [{ id: 'diogo', label: 'Diogo', result: d.diogo }, { id: 'cassia', label: 'Cássia', result: d.cassia }] };
     render();
   }
 
-  async function showDiogoTraffic() {
-    state.showDiogoUntil = Date.now() + 10 * 60 * 1000;     // mostra por 10 min e volta a desligar
+  async function showTraffic(id) {
+    state.asked[id] = Date.now() + 10 * 60 * 1000;          // mostra por 10 min e volta a desligar
     state.trafficBusy = true; render();
     await refreshTraffic();
     state.trafficBusy = false; render();
@@ -170,24 +172,49 @@
     render();
   }
 
-  function refreshAll() { refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); refreshCameras(); refreshSystem(); }
+  // Configurações da tela inicial editadas na Config (localização, modo noturno, rodízio, validade, feriados locais, locais do estoque)
+  async function loadPanel() {
+    if (!state.hub) return;
+    try { await CD.hubApi.settings.loadPanel(cfg); } catch (e) { /* hub antigo: vale o padrão do settings.js */ }
+  }
+
+  // Atalhos do menu: se foram personalizados na página Config, o hub os entrega; senão vale o padrão do painel
+  async function refreshMenu() {
+    if (!state.hub) return;
+    const before = JSON.stringify([cfg.location, cfg.localHolidays]);
+    await loadPanel();
+    const after = JSON.stringify([cfg.location, cfg.localHolidays]);
+    if (before !== after && state.weather) { refreshWeather(); refreshHolidays(); }       // mudou a cidade ou os feriados locais
+    try {
+      const j = await U.getJson(state.hub + '/api/settings/menu', 4000);
+      const next = Array.isArray(j.links) ? j.links : defaultLinks;
+      if (JSON.stringify(next) !== JSON.stringify(cfg.links)) { cfg.links = next; render(); }
+    } catch (e) { /* hub antigo ou fora do ar: mantém o menu atual */ }
+  }
+
+  function refreshAll() { refreshMenu(); refreshWeather(); refreshTraffic(); refreshCalendar(); refreshHolidays(); refreshStock(); refreshCameras(); refreshSystem(); }
+
+  // Repete fn no intervalo que ms() disser no momento (assim uma mudança feita na Config vale sem recarregar a tela)
+  function loop(fn, ms) { setTimeout(() => { fn(); loop(fn, ms); }, ms()); }
 
   // ---------- boot ----------
   async function boot() {
     fit(); render();
     await detectHub();
+    await loadPanel();
     refreshAll();
     const min = 60000;
     setInterval(render, 30 * 1000);
-    setInterval(refreshWeather, Math.max(5, cfg.refreshMinutes || 15) * min);
+    loop(refreshWeather, () => Math.max(5, cfg.refreshMinutes || 15) * min);
     setInterval(refreshTraffic, 5 * min);
     setInterval(refreshCalendar, 5 * min);
     setInterval(refreshHolidays, 6 * 60 * min);
     setInterval(refreshStock, 5 * min);
+    setInterval(refreshMenu, 5 * min);
     setInterval(refreshSystem, 10 * 1000);
     setInterval(shift, 3 * min);
     const q = /[?&]rotate=(\d+)/.exec(location.search);                   // ?rotate=15 acelera o rodízio (teste)
-    setInterval(rotateMid, Math.max(5, q ? +q[1] : cfg.cameras.rotateSeconds || 60) * 1000);
+    loop(rotateMid, () => Math.max(5, q ? +q[1] : cfg.cameras.rotateSeconds || 60) * 1000);
     setInterval(autoScroll, 6000);
     window.addEventListener('resize', fit);
     window.addEventListener('online', () => { state.online = true; refreshAll(); });
@@ -196,14 +223,10 @@
       const n = e.target.closest && e.target.closest('[data-night]');
       if (n) return setNightOff(n.getAttribute('data-night') === 'off');
       const b = e.target.closest && e.target.closest('[data-traffic]');
-      if (b && b.getAttribute('data-traffic') === 'diogo') showDiogoTraffic();
+      if (b) showTraffic(b.getAttribute('data-traffic'));
     });
     document.addEventListener('keydown', e => {
       if (e.keyCode === 13 && !(e.target.closest && e.target.closest('a,button'))) refreshAll();                       // OK do controle: atualizar
-      if (e.keyCode === 10009) {                                    // Voltar do controle Samsung
-        if (window.tizen) { try { tizen.application.getCurrentApplication().exit(); } catch (x) { /* ignore */ } }
-        else if (window.parent !== window) window.parent.postMessage('cd-exit', '*');  // painel dentro do app da TV (iframe)
-      }
     });
   }
 

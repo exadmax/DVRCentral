@@ -8,19 +8,14 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 ## 1. Visão geral
 
 ```
- TV Samsung (platforms/tizen) ─┐
- APK Central (platforms/android)├─ WebView ──►  http://192.168.0.10/  ──►  Hub Go (server/)  ──►  SQLite, RTSP, Google, TomTom/Google Routes,
- Navegador / celular ──────────┘                                            serve src/ + /api/*       Steam, PSN, Xbox, RetroAchievements
- APK Cadastro Casa (cadastro-apk) ── HTTP/JSON ──► /api/estoque, /api/contatos
+ TV / celular / PC ── navegador ──►  http://192.168.0.10/  ──►  Hub Go (server/)  ──►  SQLite, RTSP, Google, Google Routes,
+                                                                   serve src/ + /api/*       Steam, PSN, Xbox, RetroAchievements
 ```
 
 | Parte | Pasta | Tecnologia |
 |---|---|---|
-| Painel web (único para todas as telas) | `src/` | HTML + JS clássico (sem módulos ES, roda via `file://` na TV), CSS |
+| Painel web (único para todas as telas) | `src/` | HTML + JS clássico (sem módulos ES, roda também em navegadores de TV), CSS |
 | Hub (servidor + API) | `server/` | Go 1.26, só biblioteca padrão + `modernc.org/sqlite`, `gortsplib`, `mediacommon` |
-| Casca TV Samsung | `platforms/tizen/app/` | App web Tizen que abre o hub em tela cheia |
-| Casca Android | `platforms/android/` | Java puro + WebView, sem Gradle |
-| App de cadastro | `cadastro-apk/` | Java puro, sem WebView, ~45 KB |
 
 ## 2. Páginas e funcionalidades do painel
 
@@ -46,7 +41,7 @@ As páginas avulsas usam `js/pages/boot.js`, que lê `<body data-page="...">`, d
 | Selo de feriado | Feriado nacional/estadual/municipal (cor por tipo), "Fim de semana" ou "Dia útil" | BrasilAPI + `config/holidays-sp.js` | `widgets/holidays.js`, `services/holidaysApi.js` |
 | Clima | Temperatura atual, previsão do dia, alerta "leve guarda-chuva", mín/máx de amanhã | Open-Meteo (sem chave) | `widgets/weather.js`, `services/weatherApi.js` |
 | Agenda do dia | Eventos do casal por cor/pessoa, próximo evento com contagem regressiva, rolagem automática se longa; suporta recorrência iCal (RRULE, EXDATE, COUNT, `nº` dia da semana) | Google Calendar (iCal) via `/api/ics` | `widgets/agenda.js`, `services/calendar.js` |
-| Trânsito | Tempo até o trabalho (Pessoa 2 automático na janela da manhã; Diogo sob demanda por 10 min via "Ver trânsito"), nível livre/moderado/congestionado, horário de saída, mini-mapa do trajeto | Google Routes via `/api/traffic` | `widgets/map.js`, `services/trafficApi.js` |
+| Trânsito | Tempo até o trabalho de cada pessoa cadastrada (automático na janela configurada, ou sob demanda por 10 min via "Ver trânsito"), nível livre/moderado/congestionado, horário de saída, mini-mapa do trajeto | Google Routes via `/api/traffic` | `widgets/map.js`, `services/trafficApi.js` |
 | Rodízio Clima ↔ Câmeras | O card do meio alterna Clima e cada câmera (60 s cada; `?rotate=15` acelera para teste). Para no modo noturno e com a aba escondida | `/api/cameras` | `widgets/cameras.js`, `services/cameraPlayer.js` |
 | Atalhos | Rodapé com os links; o da Geladeira vira alerta | `settings.js` (`links`) | `widgets/links.js` |
 | Alerta de validades | "1 vencido · 3 a vencer" / "Tudo em dia" no atalho Geladeira | `/api/estoque` | `widgets/expiring.js`, `core/stock.js` |
@@ -54,7 +49,7 @@ As páginas avulsas usam `js/pages/boot.js`, que lê `<body data-page="...">`, d
 | Modo noturno | Das 23h às 5h (configurável): tela escura com clima e eventos de amanhã; botão para desligar até o fim da noite | relógio | `widgets/night.js`, `core/app.js` |
 | Anti burn-in | Desloca o conteúdo ±4 px a cada 3 min | — | `core/app.js` (`shift`) |
 | Escala TV/celular | Palco fixo 1920×1080 escalado para caber; coluna única se largura < 900 px ou retrato | — | `core/app.js` (`fit`) |
-| Controle remoto | **OK** atualiza tudo; **Voltar** (tecla 10009) sai do app / fecha o iframe | — | `core/app.js` |
+| Controle remoto | **OK** atualiza tudo; **Voltar** (tecla 10009 do controle Samsung) fecha janelas e volta ao painel | — | `core/app.js` |
 | Funcionamento offline | Sem internet usa o último clima em cache (`localStorage`) e marca como desatualizado | — | `core/app.js`, `core/util.js` |
 | Sem configuração | Agenda e trânsito mostram dados de **exemplo** com a etiqueta "exemplo" | — | `services/calendar.js`, `services/trafficApi.js` |
 
@@ -85,6 +80,16 @@ sistema 10 s, tela 30 s.
 ### 2.6 Config
 - Medidores: CPU e memória do hub e da máquina (atualiza a cada 5 s).
 - **Gravação das câmeras**: chave geral e, por câmera: liga/desliga, modo (contínuo ou só movimento), sensibilidade 1–5, guardar por N dias, limite em GB.
+- **A Config tem subseções (abas)**: Servidor · Câmeras · Agendas e rotas · Painel · Menu · Integrações · Compatibilidade · Ajuda. Tudo que era fixo em arquivo agora se edita aqui e fica em `hub.settings.json` (ao lado do `hub.config.json`, que continua valendo para o que ainda não foi editado). Segredos (senhas, chaves, tokens) voltam mascarados; campo em branco = manter.
+  - **Câmeras**: cadastro (nome + endereço RTSP), gravação por câmera, pasta das gravações e envio ao Drive (ligar, destino do rclone, hora, tamanho máximo).
+  - **Agendas e rotas**: agendas iCal e **pessoas do trânsito** (adicionar/remover), cada uma com nome, horário de chegada, rotas (origem, destino, dias, "a partir de") e a **regra de consulta da API**: *só quando eu pedir* (botão "Ver trânsito", como o Diogo), *automático numa janela de horário* com "esconder depois de" (como a Pessoa 2) ou *sempre*.
+  - **Painel** (vale na hora, até 5 min nas telas abertas): localização/clima e intervalo de atualização, modo noturno, tempo do rodízio das câmeras, dias do aviso de validade, **locais do estoque** (um local só sai se estiver vazio), endereço da página Vídeos e feriados locais.
+  - **Menu**: atalhos do rodapé (o da Config não pode ser removido).
+  - **Integrações**: planilha de profissionais, contas de jogos (Steam, PSN, Xbox, RetroAchievements), pasta de vídeos, tempos de cache e IPv4. **Essas opções do hub só valem depois de reiniciar o hub**: a tela mostra "aguardando reinício" e um botão que reinicia pelo systemd.
+  - **Ajuda**: manual completo de cada configuração, com busca e índice (`js/pages/configHelp.js`); cada aba tem o link "Ajuda desta aba". Ao mudar uma opção, atualize o texto desse arquivo.
+  - **Compatibilidade** (só no aparelho): em navegador de TV (user agent: Samsung/Tizen, LG/webOS, Chromecast...) ou forçado, a página Câmeras mostra uma câmera por vez (`js/core/compat.js`).
+  - Ainda fica em arquivo: `listen`/`staticDir`/`dbPath`/`allowedOrigins` e o executável do rclone.
+- **Modo compatibilidade** (último cartão, vale só para o aparelho): em navegador de TV (detectado pelo user agent: Tizen, webOS, Chromecast etc.; ou forçado), a página Câmeras mostra uma câmera por vez, com botões para trocar (`js/core/compat.js`).
 - **Liberar memória**: *Desligar o desktop* (display manager) e *Desativar a central* (para o hub). Exigem dois toques (botão arma por 5 s, o segundo confirma) e só funcionam no Linux com a regra do polkit instalada pelo `install.sh`.
 
 ## 3. API do hub
@@ -96,13 +101,15 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `GET /api/health` | `{ok, time, version}` — usado pelo painel para detectar o hub | `main.go` |
 | `GET /api/version` | `{version, installedAt}` do arquivo `VERSION` (`dev` fora do servidor) | `main.go`, `version.go` |
 | `GET /api/ics` | Texto iCal de cada agenda configurada (com cache e fallback "stale") | `calendars.go` |
-| `GET /api/traffic[?diogo=1]` | Tempo de trajeto, nível, trajeto codificado; Diogo só com `?diogo=1` | `traffic.go` |
+| `GET /api/traffic[?ask=id,id]` | `people: [{id, label, onDemand, result}]` (tempo, nível, trajeto codificado); quem é "só quando eu pedir" só vem com `?ask=` (`?diogo=1` e as chaves `diogo`/`pessoa2` continuam por compatibilidade) | `traffic.go` |
 | `GET /api/games[?refresh=1]` | Conquistas/troféus Steam, PSN, Xbox, RetroAchievements (subsistema sem tela; ver [jogos.md](jogos.md)) | `games*.go` |
 | `GET /api/games/xbox-login` · `POST` `{url}` | URL de login Microsoft · conclui a autorização do Xbox | `main.go`, `games_xbox.go` |
 | `GET/POST /api/estoque` · `GET/PUT/DELETE /api/estoque/{id}` | CRUD de itens | `db.go`, `estoque.go` |
 | `GET/POST /api/contatos` · `GET/PUT/DELETE /api/contatos/{id}` | CRUD de profissionais | `db.go`, `contatos.go` |
 | `GET /api/cameras` | `[{id, name}]` (a URL RTSP com senha nunca sai do hub) | `cameras.go` |
 | `GET /api/cameras/{id}/stream` | MP4 fragmentado contínuo (cabeçalho `X-Codec`) | `cameras.go` |
+| `GET/PUT /api/settings/{cameras,calendars,traffic,menu,panel,hub}` | Lê/grava o que a página Config edita; PUT exige `X-CD-Action: confirm`; segredos mascarados na leitura. `panel` mescla por grupo; `hub` só vale após reiniciar | `settings.go`, `settings_panel.go` |
+| `POST /api/settings/hub/restart` | Reinicia o hub (systemd sobe de novo); exige `X-CD-Action: confirm` | `settings_panel.go` |
 | `GET /api/recordings` | Lista dos arquivos de gravação | `recorder.go` |
 | `GET /api/recordings/file/{nome}[?download=1]` | Arquivo MP4 com suporte a Range | `recorder.go` |
 | `GET /api/recordings/settings` | Estado e configuração das gravações, por câmera | `recorder.go` |
@@ -176,9 +183,6 @@ Erros viram `Error` com a mensagem do servidor; há timeout de 12 s.
 
 | Item | Função |
 |---|---|
-| `platforms/tizen/app/` | Casca da TV: abre o hub em tela cheia, testa a conexão a cada 10 s, mantém a tela acesa, sai com Voltar |
-| `platforms/android/` | Casca Android (WebView) em `central-diogo.apk`; `build.sh [URL]` |
-| `cadastro-apk/` | App nativo "Cadastro Casa": abas Geladeira/Serviços, busca, criar/editar/excluir; engrenagem para o endereço do hub |
 | `.claude/agents/operador-infra-servidor.md` | Agente do Claude Code para operar o servidor via SSH |
 | `.claude/skills/debian/` | Skill de administração Debian |
 
@@ -188,7 +192,7 @@ Erros viram `Error` com a mensagem do servidor; há timeout de 12 s.
 |---|---|---|
 | `hub.config.json` | servidor (`/opt/centraldiogo/`) | Porta, pasta do painel, agendas iCal, trânsito, câmeras (RTSP com senha), chaves de jogos, planilha, pastas de vídeos/gravações, `dbPath`, `allowedOrigins`. **Nunca versionar** (está no `.gitignore`) |
 | `hub.config.example.json` | repositório | Modelo para copiar |
-| `settings.js` | `src/config/` | Local, cidade, atalhos, `cameras.rotateSeconds`, `estoque.soonDays`, `videos`, modo noturno, `hub.url` (TV/APK) |
+| `settings.js` | `src/config/` | Local, cidade, atalhos, `cameras.rotateSeconds`, `estoque.soonDays`, `videos`, modo noturno |
 | `VERSION` | servidor | `MAIOR.MENOR.PATCH`; o `install.sh` soma 1 ao último número |
 | `centraldiogo.db` | servidor | SQLite (WAL) com `itens` e `contatos`; o `install.sh` não mexe |
 | `recordings.state.json` | servidor | Configuração das gravações por câmera |

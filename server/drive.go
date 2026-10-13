@@ -274,7 +274,7 @@ func (d *driveSync) run(ids ...string) (started bool) {
 	var names []string
 	if len(ids) > 0 {
 		only = map[string]bool{}
-		for _, c := range d.m.cams.list {
+		for _, c := range d.m.cams.all() {
 			for _, id := range ids {
 				if c.cfg.ID == id {
 					only[recName(c.cfg.Name, c.cfg.ID)] = true
@@ -401,7 +401,7 @@ func (d *driveSync) prune(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	minDays := defaultCamSet().RetentionDays // dias mais novos que a menor retenção (de qualquer câmera) não têm o que apagar
-	for _, c := range d.m.cams.list {
+	for _, c := range d.m.cams.all() {
 		if r := d.m.camSet(c.cfg.ID).RetentionDays; r < minDays {
 			minDays = r
 		}
@@ -773,7 +773,7 @@ func (d *driveSync) register(mux *http.ServeMux) {
 			}
 		}
 		known := map[string]bool{}
-		for _, c := range d.m.cams.list {
+		for _, c := range d.m.cams.all() {
 			known[c.cfg.ID] = true
 		}
 		for _, id := range in.Cameras {
@@ -863,7 +863,7 @@ func (d *driveSync) prefixes(ids []string) (map[string]bool, string) {
 		return nil, ""
 	}
 	byID := map[string]string{}
-	for _, c := range d.m.cams.list {
+	for _, c := range d.m.cams.all() {
 		byID[c.cfg.ID] = recName(c.cfg.Name, c.cfg.ID)
 	}
 	out := map[string]bool{}

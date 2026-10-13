@@ -13,22 +13,55 @@
   }
 
   function mount(root) {
-    root.innerHTML = '<section class="pg"><div class="cfg" id="cfg"></div></section>';
+    // Subseções: cada cartão tem data-tab e só os da aba escolhida aparecem (o CSS esconde os outros; nada é redesenhado ao trocar de aba)
+    const TABS = [['servidor', 'Servidor'], ['cameras', 'Câmeras'], ['agendas', 'Agendas e rotas'], ['painel', 'Painel'], ['menu', 'Menu'], ['integracoes', 'Integrações'], ['compat', 'Compatibilidade'], ['ajuda', 'Ajuda']];
+    let tab = 'servidor';
+    try { tab = (location.hash || '').slice(1) || sessionStorage.getItem('cd:cfgtab') || tab; } catch (e) { /* sem armazenamento */ }
+    if (!TABS.some(t => t[0] === tab)) tab = 'servidor';
+    root.innerHTML = '<section class="pg cfg-root" data-show="' + tab + '"><nav class="cams-bar cfg-tabs">' + TABS.map(t =>
+      '<button type="button" class="vbtn' + (t[0] === tab ? ' on' : '') + '" data-tab-go="' + t[0] + '">' + t[1] + '</button>').join('') + '</nav><div class="cfg-helplink" id="helplink"></div>' +
+      '<div class="cfg" id="cfg"></div><div id="cfgpanel" class="cfg-stack"></div><div id="cfgedit" class="cfg-stack"></div><div id="cfghelp" class="cfg-stack"></div></section>';
+    const helpEl = root.querySelector('#cfghelp'), helpLink = root.querySelector('#helplink');
+    // “Ajuda desta aba”: leva à seção da ajuda sobre o que está na tela
+    const showHelpLink = () => { helpLink.innerHTML = tab === 'ajuda' ? '' : '<a href="#ajuda" data-help-go="' + tab + '">❓ Ajuda desta aba</a>'; };
+    function goTab(t) {
+      tab = t;
+      root.firstChild.setAttribute('data-show', tab);
+      root.querySelectorAll('[data-tab-go]').forEach(x => x.classList.toggle('on', x.getAttribute('data-tab-go') === t));
+      try { sessionStorage.setItem('cd:cfgtab', tab); } catch (x) { /* ok */ }
+      showHelpLink();
+    }
+    showHelpLink();
+    helpLink.addEventListener('click', e => {
+      const a = e.target.closest && e.target.closest('[data-help-go]');
+      if (!a) return;
+      e.preventDefault();
+      goTab('ajuda');
+      if (helpEl.go) helpEl.go(a.getAttribute('data-help-go'));
+    });
+    root.querySelector('.cfg-tabs').addEventListener('click', e => {
+      const b = e.target.closest && e.target.closest('[data-tab-go]');
+      if (!b) return;
+      goTab(b.getAttribute('data-tab-go'));
+    });
     const box = root.querySelector('#cfg');
+    if (CD.configEdit) CD.configEdit.mount(root.querySelector('#cfgedit'));   // câmeras, agendas, rotas, menu e modo compatibilidade (configEdit.js)
+    if (CD.configHelp) CD.configHelp.mount(helpEl);                             // manual de cada configuração (configHelp.js)
+    if (CD.configPanel) CD.configPanel.mount(root.querySelector('#cfgpanel')); // painel, estoque, feriados e opções do hub (configPanel.js)
     let sys = null, rec = null, drv = null, msg = '', recMsg = '', armed = '', armTimer = 0;
 
     function draw() {
-      if (!CD.state.hub) { box.innerHTML = '<div class="empty">Sem o hub: abra o painel pelo endereço do servidor da casa.</div>'; return; }
-      if (!sys) { box.innerHTML = '<div class="empty">Carregando…</div>'; return; }
+      if (!CD.state.hub) { box.innerHTML = '<div class="empty" data-tab="servidor">Sem o hub: abra o painel pelo endereço do servidor da casa.</div>'; return; }
+      if (!sys) { box.innerHTML = '<div class="empty" data-tab="servidor">Carregando…</div>'; return; }
       const can = sys.control;
       box.innerHTML = recCard() + driveCard() +
-        '<div class="cfg-card"><h2>Servidor</h2><div class="cfg-ms">' +
+        '<div class="cfg-card" data-tab="servidor"><h2>Servidor</h2><div class="cfg-ms">' +
         meter('Hub · CPU', sys.appCpuPercent, 'da CPU total (' + sys.cores + ' núcleos)') +
         meter('Hub · memória', sys.appMemPercent, bytes(sys.appMem) + ' da RAM') +
         meter('Máquina · CPU', sys.cpuPercent, sys.cores + ' núcleos') +
         meter('Máquina · memória', sys.memPercent, bytes(sys.memUsed) + ' de ' + bytes(sys.memTotal)) +
         '</div></div>' +
-        '<div class="cfg-card"><h2>Liberar memória</h2>' +
+        '<div class="cfg-card" data-tab="servidor"><h2>Liberar memória</h2>' +
         action('desktop', 'Desligar o desktop', 'Para o ambiente gráfico do servidor (tela, navegador, áudio do desktop). Volta sozinho no próximo reinício da máquina.',
           can && sys.desktop, !can ? 'Só no servidor Linux.' : !sys.desktop ? 'O desktop já está desligado.' : '') +
         action('hub', 'Desativar a central', 'Para o hub: o painel, as câmeras e a agenda saem do ar até alguém ligar de novo no servidor com “sudo systemctl start centraldiogo-hub”.',
@@ -71,7 +104,7 @@
     }
     function driveCard() {
       if (!drv) return '';
-      if (!drv.enabled) return '<div class="cfg-card"><h2>Google Drive</h2><div class="cfg-msg">A cópia para o Drive está desligada (driveSync no hub.config.json do servidor).</div></div>';
+      if (!drv.enabled) return '<div class="cfg-card" data-tab="cameras"><h2>Google Drive</h2><div class="cfg-msg">A cópia para o Drive está desligada. Ligue em “Gravações: pasta e Google Drive”, mais abaixo.</div></div>';
       const lines = [];
       if (drv.running) lines.push('Enviando' + (drv.scope ? ' (' + drv.scope + ')' : '') + (drv.progress ? ': ' + drv.progress : '…'));
       else if (drv.lastMsg) lines.push((drv.lastOK ? '' : 'Erro: ') + drv.lastMsg);
@@ -79,7 +112,7 @@
         lines.push('Tentativa ' + drv.attempts + ' de ' + drv.maxAttempts + (drv.nextRetry ? '; a próxima é às ' + when(drv.nextRetry) + '.' : '; sem tempo para outra até 1:00.'));
       const text = 'Pasta ' + drv.remote.replace(/^.*:/, '') + ' no Drive, uma subpasta por dia e por câmera. Envio automático todo dia às ' + String(drv.hour).padStart(2, '0') +
         ':00 (próximo: ' + when(drv.nextRun) + '). ' + drv.uploaded + ' arquivo(s) enviado(s)' + (drv.skipped ? ', ' + drv.skipped + ' pulado(s)' : '') + '.';
-      return '<div class="cfg-card"><h2>Google Drive</h2>' + row('Sincronizar todas as câmeras', text, driveBtn('', 'Sincronizar tudo')) +
+      return '<div class="cfg-card" data-tab="cameras"><h2>Google Drive</h2>' + row('Sincronizar todas as câmeras', text, driveBtn('', 'Sincronizar tudo')) +
         (lines.length ? '<div class="cfg-msg">' + lines.map(esc).join('<br>') + '</div>' : '') + '</div>';
     }
 
@@ -100,8 +133,8 @@
     }
 
     function recCard() {
-      if (!rec) return '<div class="cfg-card"><h2>Gravação das câmeras</h2><div class="cfg-msg">' + esc(recMsg || 'Carregando…') + '</div></div>';
-      return '<div class="cfg-card"><h2>Gravação das câmeras</h2>' +
+      if (!rec) return '<div class="cfg-card" data-tab="cameras"><h2>Gravação das câmeras</h2><div class="cfg-msg">' + esc(recMsg || 'Carregando…') + '</div></div>';
+      return '<div class="cfg-card" data-tab="cameras"><h2>Gravação das câmeras</h2>' +
         row('Gravar as câmeras', (rec.enabled ? 'Ligada. ' : 'Desligada. ') + 'Arquivos NOME_AAAAMMDDHH.mp4 em ' + rec.dir + '. Total: ' + rec.files + ' arquivo(s), ' + bytes(rec.usedBytes) +
           '. Veja em Câmeras → Gravações.', sw('master', rec.enabled, 'Gravar as câmeras')) +
         (rec.cameras || []).map(camBlock).join('') +
@@ -168,7 +201,7 @@
       try {
         await CD.hubApi.power(id === 'hub' ? 'hub-off' : 'desktop-off');
         msg = id === 'hub' ? 'Central desativada. Para ligar de novo: sudo systemctl start centraldiogo-hub' : 'Desktop desligando… a memória livre aparece aqui em instantes.';
-        if (id === 'hub') { clearInterval(tick); sys = null; box.innerHTML = '<div class="cfg-card"><h2>Central desativada</h2><div class="cfg-msg">' + esc(msg) + '</div></div>'; return; }
+        if (id === 'hub') { clearInterval(tick); sys = null; box.innerHTML = '<div class="cfg-card" data-tab="servidor"><h2>Central desativada</h2><div class="cfg-msg">' + esc(msg) + '</div></div>'; return; }
         setTimeout(load, 4000);
       } catch (err) { msg = err.message; }
       draw();

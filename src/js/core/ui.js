@@ -1,7 +1,7 @@
 (function (CD) {
   const I = CD.icons, esc = CD.util.esc;
 
-  // Janela de formulário dentro da aba. Sem <dialog>/confirm() nativos: nem toda WebView de TV/APK os suporta.
+  // Janela de formulário dentro da aba. Sem <dialog>/confirm() nativos: nem todo navegador de TV os suporta.
   //   opt.title, opt.body (HTML dos campos), opt.submit (texto do botão),
   //   opt.read(form) -> dados (ou lança Error com a mensagem de validação), opt.save(dados) -> Promise (erro aparece no formulário)
   function modal(host, opt) {

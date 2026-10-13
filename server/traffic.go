@@ -25,6 +25,8 @@ type Leg struct {
 }
 
 type Person struct {
+	ID        string           `json:"id,omitempty"`    // identificador (diogo, cassia...); usado na API
+	Label     string           `json:"label,omitempty"` // nome exibido no painel
 	ArriveBy  string           `json:"arriveBy"`
 	OnDemand  bool             `json:"onDemand"`  // só consulta quando o painel pede (clique em "Ver trânsito")
 	Window    []string         `json:"window"`    // ["06:00","08:00"]: única faixa em que consulta a API
@@ -40,6 +42,7 @@ type route struct {
 	Points   [][2]float64 `json:"points"`
 	ArriveBy string       `json:"arriveBy"`
 	Name     string       `json:"name"`
+	OnDemand bool         `json:"onDemand,omitempty"` // o painel só mostra depois de "Ver trânsito"
 }
 
 type cached struct {
@@ -55,6 +58,7 @@ type traffic struct {
 }
 
 func newTraffic(cfg Config) *traffic {
+	cfg.Traffic.normalize()
 	tr := &http.Transport{}
 	if cfg.ForceIPv4 { // chaves com restrição de IP costumam liberar só o IPv4 público
 		d := &net.Dialer{Timeout: 10 * time.Second}
@@ -233,22 +237,66 @@ func (t *traffic) forPerson(p Person, now time.Time, asked bool, stale *bool) in
 		return off("Sem dados")
 	}
 	out := *c.r
-	out.ArriveBy, out.Name = p.ArriveBy, leg.Name
+	out.ArriveBy, out.Name, out.OnDemand = p.ArriveBy, leg.Name, p.OnDemand
 	return &out
 }
 
-func (t *traffic) get(askDiogo bool) map[string]interface{} {
-	tc := t.cfg.Traffic
+// normalize leva o formato antigo (campos diogo e cassia) para a lista People e dá id/nome a quem não tiver.
+func (tc *TrafficConfig) normalize() {
+	if len(tc.People) == 0 {
+		if len(tc.Diogo.Days) > 0 {
+			d := tc.Diogo
+			d.ID, d.Label = "diogo", "Diogo"
+			tc.People = append(tc.People, d)
+		}
+		if len(tc.Cassia.Days) > 0 {
+			c := tc.Cassia
+			c.ID, c.Label = "cassia", "Cássia"
+			tc.People = append(tc.People, c)
+		}
+	}
+	tc.Diogo, tc.Cassia = Person{}, Person{}
+	for i := range tc.People {
+		if tc.People[i].ID == "" {
+			tc.People[i].ID = slug(tc.People[i].Label)
+		}
+		if tc.People[i].Label == "" {
+			tc.People[i].Label = tc.People[i].ID
+		}
+	}
+}
+
+// ask: ids das pessoas "só quando eu pedir" que o painel quer consultar agora.
+func (t *traffic) get(ask map[string]bool) map[string]interface{} {
+	tc := t.config()
 	if tc.Key == "" || tc.Home == "" {
 		return map[string]interface{}{"configured": false}
 	}
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	now, stale := time.Now(), false
-	return map[string]interface{}{
-		"configured": true,
-		"diogo":      t.forPerson(tc.Diogo, now, askDiogo, &stale),
-		"cassia":     t.forPerson(tc.Cassia, now, false, &stale),
-		"stale":      stale,
+	people := make([]map[string]interface{}, 0, len(tc.People))
+	out := map[string]interface{}{"configured": true}
+	for _, p := range tc.People {
+		r := t.forPerson(p, now, ask[p.ID], &stale)
+		people = append(people, map[string]interface{}{"id": p.ID, "label": p.Label, "onDemand": p.OnDemand, "result": r})
+		out[p.ID] = r // formato antigo (diogo, cassia): painéis ainda não atualizados continuam funcionando
 	}
+	out["people"], out["stale"] = people, stale
+	return out
+}
+
+// setConfig troca as rotas e a chave em uso (página Config) e descarta o cache de rotas já consultadas.
+func (t *traffic) setConfig(tc TrafficConfig) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	tc.normalize()
+	t.cfg.Traffic = tc
+	t.cache = map[string]*cached{}
+}
+
+func (t *traffic) config() TrafficConfig {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return t.cfg.Traffic
 }

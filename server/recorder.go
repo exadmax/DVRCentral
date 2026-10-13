@@ -122,16 +122,18 @@ func newRecMgr(cfg RecordingsConfig, statePath string, cs *cameras) *recMgr {
 		}
 	}
 	m.set = m.clean(m.set)
-	for _, c := range cs.list {
-		c.rec = &recorder{c: c, m: m, waitKey: true}
+	attach := func(c *camera) { c.rec = &recorder{c: c, m: m, waitKey: true} }
+	for _, c := range cs.all() {
+		attach(c)
 	}
+	cs.onAdd = attach
 	return m
 }
 
 // clean deixa uma configuração completa e válida para todas as câmeras do hub (câmeras que sumiram do hub.config.json saem).
 func (m *recMgr) clean(s recSettings) recSettings {
 	cams := map[string]recCamSet{}
-	for _, c := range m.cams.list {
+	for _, c := range m.cams.all() {
 		cs, ok := s.Cameras[c.cfg.ID]
 		if !ok {
 			cs = defaultCamSet()
@@ -164,7 +166,7 @@ func (m *recMgr) want(id string) (recCamSet, bool) {
 
 // apply liga ou desliga a gravação de cada câmera conforme as configurações atuais.
 func (m *recMgr) apply() {
-	for _, c := range m.cams.list {
+	for _, c := range m.cams.all() {
 		_, on := m.want(c.cfg.ID)
 		c.setRecording(on)
 	}
@@ -206,7 +208,7 @@ type recFile struct {
 // camByPrefix liga o prefixo do nome do arquivo à câmera (id); arquivos de câmeras que saíram do hub não têm dono.
 func (m *recMgr) camByPrefix() map[string]string {
 	out := map[string]string{}
-	for _, c := range m.cams.list {
+	for _, c := range m.cams.all() {
 		out[recName(c.cfg.Name, c.cfg.ID)] = c.cfg.ID
 	}
 	return out
@@ -214,7 +216,7 @@ func (m *recMgr) camByPrefix() map[string]string {
 
 func (m *recMgr) writingNames() map[string]bool {
 	out := map[string]bool{}
-	for _, c := range m.cams.list {
+	for _, c := range m.cams.all() {
 		if n := c.rec.writing(m.now()); n != "" {
 			out[n] = true
 		}
@@ -265,7 +267,7 @@ func (m *recMgr) sweep() int {
 	}
 	byPrefix := m.camByPrefix()
 	open := map[string]bool{}
-	for _, c := range m.cams.list {
+	for _, c := range m.cams.all() {
 		if n := c.rec.current(); n != "" {
 			open[n] = true
 		}
@@ -355,8 +357,8 @@ func (m *recMgr) status() map[string]interface{} {
 		total += f.Size
 	}
 	now := m.now()
-	cams := make([]recCamStatus, 0, len(m.cams.list))
-	for _, c := range m.cams.list {
+	cams := make([]recCamStatus, 0, 4)
+	for _, c := range m.cams.all() {
 		id := c.cfg.ID
 		cams = append(cams, recCamStatus{ID: id, Name: c.cfg.Name, recCamSet: m.camSet(id), Recording: c.rec.writing(now) != "",
 			Motion: c.rec.motionActive(now), UsedBytes: used[id], Files: count[id], Error: c.rec.err()})

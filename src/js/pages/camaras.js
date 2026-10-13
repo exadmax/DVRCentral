@@ -33,8 +33,8 @@
     root.innerHTML = '<section class="pg"><div class="cams-bar"><button type="button" class="vbtn on" data-v="live">Ao vivo</button>' +
       '<button type="button" class="vbtn" data-v="recs">Gravações</button></div>' +
       '<div class="cams" id="cams"></div><div class="recs" id="recs" hidden></div></section>';
-    const box = root.querySelector('#cams'), recsBox = root.querySelector('#recs'), players = [];
-    let view = 'live', recCam = '', selMode = false, picked = {};
+    const box = root.querySelector('#cams'), recsBox = root.querySelector('#recs'), cards = [];
+    let view = 'live', recCam = '', selMode = false, picked = {}, sel = 0;
 
     function note(msg) { box.innerHTML = '<div class="empty">' + esc(msg) + '</div>'; }
 
@@ -55,14 +55,39 @@
         const f = el.requestFullscreen || el.webkitRequestFullscreen;
         if (f) f.call(el);
       });
-      players.push(p);
+      cards.push({ el: el, p: p, on: false });
       return el;
     }
 
+    // Modo compatibilidade (TV): uma câmera por vez, porque o navegador não decodifica vários vídeos ao mesmo tempo.
+    const compat = () => !!(CD.compat && CD.compat.active()) && cards.length > 1;
+
+    // Liga só o que deve estar no ar: tudo no modo normal, ou apenas a câmera escolhida no modo compatibilidade (as outras fecham antes).
+    function sync() {
+      const visible = !document.hidden && view === 'live', one = compat();
+      const want = cards.map((k, i) => visible && (!one || i === sel));
+      cards.forEach((k, i) => { k.el.hidden = one && i !== sel; if (!want[i] && k.on) { k.p.stop(); k.on = false; } });
+      cards.forEach((k, i) => { if (want[i] && !k.on) { k.p.start(); k.on = true; } });
+    }
+
+    function picker(list) {
+      const bar = document.createElement('div');
+      bar.className = 'recs-f cams-pick';
+      bar.innerHTML = list.map((c, i) => '<button type="button" class="vbtn' + (i === sel ? ' on' : '') + '" data-pick="' + i + '">' + esc(c.name) + '</button>').join('') +
+        '<span class="cfg-md">Modo compatibilidade: uma câmera por vez.</span>';
+      bar.addEventListener('click', e => {
+        const b = e.target.closest && e.target.closest('[data-pick]');
+        if (!b) return;
+        sel = +b.getAttribute('data-pick');
+        bar.querySelectorAll('[data-pick]').forEach(x => x.classList.toggle('on', x === b));
+        sync();
+      });
+      return bar;
+    }
+
     function watch() {
-      const visible = () => !document.hidden && view === 'live';
-      document.addEventListener('visibilitychange', () => players.forEach(p => visible() ? p.start() : p.stop()));
-      window.addEventListener('pagehide', () => players.forEach(p => p.stop()));
+      document.addEventListener('visibilitychange', sync);
+      window.addEventListener('pagehide', () => cards.forEach(k => { k.p.stop(); k.on = false; }));
     }
 
     // ---- gravações ----
@@ -147,7 +172,8 @@
       view = v;
       root.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.getAttribute('data-v') === v));
       box.hidden = v !== 'live'; recsBox.hidden = v !== 'recs';
-      players.forEach(p => v === 'live' ? p.start() : p.stop());
+      const pk = root.querySelector('.cams-pick'); if (pk) pk.hidden = v !== 'live';
+      sync();
       if (v === 'recs') loadRecs();
     }
     root.querySelector('.cams-bar').addEventListener('click', e => {
@@ -159,10 +185,11 @@
       if (!CD.state.hub) { note('Sem o hub: abra o painel pelo endereço do servidor da casa para ver as câmeras.'); return; }
       let list;
       try { list = await CD.hubApi.cameras.list(); } catch (e) { note(e.message); return; }
-      if (!list || !list.length) { note('Nenhuma câmera configurada no hub (campo "cameras" do hub.config.json).'); return; }
+      if (!list || !list.length) { note('Nenhuma câmera cadastrada. Adicione em Config → Câmeras.'); return; }
       box.innerHTML = '';
       list.forEach(c => box.appendChild(card(c)));
-      if (view === 'live') players.forEach(p => p.start());
+      if (compat()) box.parentNode.insertBefore(picker(list), box);
+      sync();
       watch();
     }
     load();

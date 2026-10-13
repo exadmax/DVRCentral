@@ -13,9 +13,10 @@
       '<img class="pg-logo" src="assets/img/logo-128.png" alt=""><div class="pg-title"><h1>' + U.esc(page.label) + '</h1>' +
       '<div class="pg-sub">Omega Diogo · ' + U.esc(page.sub) + '</div></div></header><main id="page"></main>';
 
-    // O hub é o servidor que entregou a página (ou o endereço configurado para TV/APK)
-    const base = ((cfg.hub && cfg.hub.url) || (/^https?:/.test(location.protocol) ? location.origin : '')).replace(/\/$/, '');
+    // O hub é o servidor que entregou a página 
+    const base = /^https?:/.test(location.protocol) ? location.origin : '';
     if (base) { try { await U.getJson(base + '/api/health', 3000); CD.state.hub = base; } catch (e) { CD.state.hub = ''; } }
+    if (CD.state.hub) { try { await CD.hubApi.settings.loadPanel(cfg); } catch (e) { /* hub antigo: vale o padrão */ } }
     page.mount(document.getElementById('page'));
 
     document.addEventListener('keydown', e => {

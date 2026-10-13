@@ -2,7 +2,7 @@
 
 Duas páginas do painel, cada uma com a sua jornada, abertas pelos itens **Geladeira** e **Serviços** do menu de atalhos
 no rodapé do Início (junto de Jogos, Música e Vídeos). Têm cadastro completo (criar, ver, editar, excluir)
-guardado em um banco **SQLite** no hub. Funcionam na TV, no celular/APK e no navegador: todos falam com o mesmo hub,
+guardado em um banco **SQLite** no hub. Funcionam no navegador da TV, do celular e do computador: todos falam com o mesmo hub,
 então o que se cadastra em um aparelho aparece nos outros.
 
 - `estoque.html`: Geladeira e Dispensa

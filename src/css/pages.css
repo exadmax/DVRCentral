@@ -228,3 +228,57 @@ a { color: inherit; }
 .cams[hidden], .recs[hidden] { display: none; }
 .cfg-cam { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
 .cfg-opts { display: flex; flex-direction: column; gap: 12px; padding-left: 14px; border-left: 2px solid var(--line); }
+
+/* modo compatibilidade: seletor de câmera (uma por vez) */
+.cam[hidden], .cams-pick[hidden] { display: none; }
+.cams-pick { align-items: center; margin-bottom: 14px; }
+
+/* config: editores de câmeras, agendas, rotas e menu */
+.cfg-item { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; background: rgba(242, 245, 250, .05); }
+.cfg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.cfg-grid .wide { grid-column: 1 / -1; }
+.cfg-ia { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cfg-ia .grow { flex: 1; }
+.cfg-bar2 { display: flex; gap: 10px; flex-wrap: wrap; }
+.cfg-days { display: flex; gap: 6px; flex-wrap: wrap; }
+.cfg-days label, .cfg-chk { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(242, 245, 250, .18); font-size: 14px; cursor: pointer; }
+.cfg-days input, .cfg-chk input { accent-color: var(--blue); width: 16px; height: 16px; margin: 0; }
+.cfg-item input[type=color] { width: 56px; height: 40px; padding: 2px; }
+.fld select { min-height: 42px; padding: 0 12px; border: 1px solid rgba(242, 245, 250, .18); border-radius: 10px; background: var(--bg); color: var(--text); font: 400 16px 'Inter', system-ui, sans-serif; }
+.cfg-hint { font-size: 13px; color: var(--dim); }
+.cfg-err { color: #FFB3B3; }
+
+/* config: subseções (abas) */
+.cfg-tabs { max-width: 900px; }
+.cfg-stack { max-width: 900px; margin-top: 16px; display: flex; flex-direction: column; gap: 16px; }
+.cfg-stack:empty { display: none; }
+.cfg-root[data-show="servidor"] [data-tab]:not([data-tab="servidor"]),
+.cfg-root[data-show="cameras"] [data-tab]:not([data-tab="cameras"]),
+.cfg-root[data-show="agendas"] [data-tab]:not([data-tab="agendas"]),
+.cfg-root[data-show="painel"] [data-tab]:not([data-tab="painel"]),
+.cfg-root[data-show="menu"] [data-tab]:not([data-tab="menu"]),
+.cfg-root[data-show="integracoes"] [data-tab]:not([data-tab="integracoes"]),
+.cfg-root[data-show="compat"] [data-tab]:not([data-tab="compat"]),
+.cfg-root[data-show="ajuda"] [data-tab]:not([data-tab="ajuda"]) { display: none; }
+.cfg-banner { padding: 12px 14px; border-radius: 12px; background: rgba(255, 176, 32, .14); border: 1px solid rgba(255, 176, 32, .5); display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; font-size: 14px; }
+
+/* config → ajuda */
+.cfg-helplink { max-width: 900px; margin: -6px 0 14px; font-size: 14px; }
+.cfg-helplink a { color: var(--blue); text-decoration: none; }
+.help-top { display: flex; flex-direction: column; gap: 12px; }
+.help-top input { width: 100%; padding: 12px 14px; border-radius: 12px; background: var(--bg); color: var(--text); border: 1px solid rgba(242, 245, 250, .18); font: 400 16px 'Inter', system-ui, sans-serif; }
+.help-top input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77, 163, 255, .3); }
+.help-toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.help-toc [hidden], .help[hidden] { display: none; }
+.help-body { display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.55; overflow-wrap: anywhere; }
+.help-body p, .help-body ul, .help-body ol { margin: 0; }
+.help-body ul, .help-body ol { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+.help-body h3 { margin: 10px 0 0; font: 700 16px/1.2 'Poppins', 'Inter', sans-serif; color: var(--blue); }
+.help-body code { padding: 1px 6px; border-radius: 6px; background: rgba(242, 245, 250, .1); font: 13px/1.4 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.help-t { width: 100%; border-collapse: collapse; font-size: 14px; }
+.help-t th, .help-t td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.help-t th { color: var(--dim); font-size: 12px; letter-spacing: .5px; text-transform: uppercase; }
+.help-tip, .help-warn { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+.help-tip { background: rgba(77, 163, 255, .12); }
+.help-warn { background: rgba(255, 176, 32, .14); border: 1px solid rgba(255, 176, 32, .45); }
+@media (max-width: 640px) { .help-t { display: block; overflow-x: auto; } }
