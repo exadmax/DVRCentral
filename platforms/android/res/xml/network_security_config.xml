@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- HTTP em texto puro liberado somente para a máquina de casa (o build.sh preenche o host) -->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="false" />
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="false">__HUB_HOST__</domain>
-    </domain-config>
-</network-security-config>

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Endereço do painel (o build.sh troca pelo argumento recebido) -->
-    <string name="hub_url">__HUB_URL__</string>
-</resources>

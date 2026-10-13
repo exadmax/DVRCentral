@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- App só de intranet: o hub responde em HTTP puro, então o texto claro fica liberado -->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
-</network-security-config>
