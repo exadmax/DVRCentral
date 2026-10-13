@@ -21,7 +21,7 @@
       '<span class="ev-title">' + U.esc(e.title) + '</span></div>';
   }
 
-  // Um bloco por agenda (Casal, Diogo, Cássia...), na ordem configurada; agendas sem eventos ficam de fora
+  // Um bloco por agenda (Casal, Pessoa 1, Pessoa 2...), na ordem configurada; agendas sem eventos ficam de fora
   function groups(s, events, now) {
     return CD.calendar.calendars(s.cal).map(c => {
       const list = events.filter(e => e.cal.id === c.id);

@@ -68,9 +68,9 @@
         '<div class="cfg-days">' + days + '</div>' +
         '<div class="cfg-ia">' + btn('del:route:' + pi + ':' + ri, 'Remover rota', 'ghost') + '</div></div>';
     }
-    // Regras de consulta da API de rotas (as mesmas que diferenciam o Diogo e a Cássia):
-    //  • ondemand — só consulta quando alguém toca em “Ver trânsito” (vale por 10 min); não gasta cota sozinho. (Diogo)
-    //  • window   — consulta sozinho só entre dois horários; antes mostra “Disponível às…”, depois mostra o último resultado e some no horário de esconder. (Cássia)
+    // Regras de consulta da API de rotas (exemplos de uso comuns):
+    //  • ondemand — só consulta quando alguém toca em “Ver trânsito” (vale por 10 min); não gasta cota sozinho.
+    //  • window   — consulta sozinho só entre dois horários; antes mostra “Disponível às…”, depois mostra o último resultado e some no horário de esconder.
     //  • always   — consulta sempre que o painel atualiza (respeitando o intervalo de cache do hub).
     const MODES = [['ondemand', 'Só quando eu pedir (botão “Ver trânsito”)'], ['window', 'Automático numa janela de horário'], ['always', 'Sempre (a cada atualização)']];
     const MODE_HELP = {
