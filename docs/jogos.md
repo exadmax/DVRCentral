@@ -10,8 +10,8 @@ Dashboard (removido) com jogos, conquistas e troféus de:
 | Plataforma | Conta | Como o hub consulta |
 |---|---|---|
 | PlayStation | `seu-usuario` | mesmo fluxo da [psnawp](https://pypi.org/project/psnawp/): cookie **npsso** → token OAuth → APIs de troféus e tempo de jogo |
-| Xbox | `Omega Diogo` | login Microsoft (cliente do app do Xbox, sem Azure) → token Xbox Live/XSTS → titlehub, achievements e profile |
-| Steam | `seu-usuario` (76561198000000000) | [Steam Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API) com chave |
+| Xbox | `SeuGamertag` | login Microsoft (cliente do app do Xbox, sem Azure) → token Xbox Live/XSTS → titlehub, achievements e profile |
+| Steam | `seu-usuario` (SteamID64) | [Steam Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API) com chave |
 | RetroAchievements | `seu-usuario` | [Web API](https://api-docs.retroachievements.org) com chave |
 
 Tudo passa pelo hub (`server/games*.go`): as chaves ficam em `hub.config.json` (bloco `games`) e os tokens
@@ -59,7 +59,7 @@ do Xbox Live com login da sua conta Microsoft. Por padrão o login usa o cliente
 (não precisa registrar nada no Azure; `xbox.clientId` fica vazio).
 
 1. Abra o dashboard **pelo hub** (`http://192.168.0.10/jogos.html`). O cartão do Xbox mostra **Conectar**.
-2. Clique em **Entrar na Microsoft** e entre com a conta do Xbox (`Omega Diogo`).
+2. Clique em **Entrar na Microsoft** e entre com a conta do Xbox (`SeuGamertag`).
 3. No fim abre uma página **em branco** (`login.live.com/oauth20_desktop.srf?code=...`). Copie o endereço inteiro
    da barra, cole no campo do cartão e clique **Conectar** (o código vale poucos minutos).
 

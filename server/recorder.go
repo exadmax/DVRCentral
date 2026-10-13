@@ -1,5 +1,5 @@
 // Gravação das câmeras: o hub grava o mesmo vídeo H.264 que já repassa ao navegador (sem recodificar, sem ffmpeg) em arquivos
-// MP4 de 1 hora, um por câmera: <NOME_DA_CAMERA>_AAAAMMDDHH.mp4, na pasta recordings.dir (padrão /home/usuario/securityCam).
+// MP4 de 1 hora, um por câmera: <NOME_DA_CAMERA>_AAAAMMDDHH.mp4, na pasta recordings.dir (padrão ~/securityCam).
 // Cada câmera tem a sua configuração (página Config, guardada em recordings.state.json ao lado do hub.config.json):
 // liga/desliga, modo (contínuo ou só com movimento, ver motion.go), dias de retenção e limite de espaço em GB.
 package main
@@ -25,7 +25,7 @@ import (
 )
 
 type RecordingsConfig struct {
-	Dir string `json:"dir"` // pasta das gravações no servidor (padrão /home/usuario/securityCam)
+	Dir string `json:"dir"` // pasta das gravações no servidor (padrão ~/securityCam)
 }
 
 const (
@@ -113,7 +113,7 @@ type recMgr struct {
 
 func newRecMgr(cfg RecordingsConfig, statePath string, cs *cameras) *recMgr {
 	if cfg.Dir == "" {
-		cfg.Dir = "/home/usuario/securityCam"
+		cfg.Dir = filepath.Join(homeDir(), "securityCam")
 	}
 	m := &recMgr{dir: cfg.Dir, statePath: statePath, cams: cs, now: time.Now, set: recSettings{Cameras: map[string]recCamSet{}}}
 	if b, err := os.ReadFile(statePath); err == nil {

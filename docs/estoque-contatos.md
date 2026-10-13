@@ -102,7 +102,7 @@ scripts (sem `Origin`) passam. Para liberar outra origem, por exemplo o painel e
 com o hub na 8080, use `"allowedOrigins": ["http://localhost:5173"]` no `hub.config.json`.
 
 ## Vídeos (`videos.html`)
-Lista a pasta de vídeos do servidor (`/home/usuario/Videos`, a mesma que o nginx serve em `:8080/videos/`) com os botões **Tocar aqui** (player embutido, só aparece para formatos que o navegador toca: mp4/webm/mov/mkv), **Abrir no VLC**,
+Lista a pasta de vídeos do servidor (`~/Videos`, a mesma que o nginx serve em `:8080/videos/`) com os botões **Tocar aqui** (player embutido, só aparece para formatos que o navegador toca: mp4/webm/mov/mkv), **Abrir no VLC**,
 **Copiar link** e **Link direto**. O hub só lista os nomes (`GET /api/videos`, `server/videos.go`; pasta em `videos.dir` do `hub.config.json`);
 o arquivo vem do nginx, sem copiar nada. Legenda com o mesmo nome (`.srt`/`.vtt`/`.ass`) é carregada junto.
 - Android: abre o VLC direto (intent). iPhone/iPad: `vlc-x-callback`. PC: baixa um `.m3u` que o VLC abre.

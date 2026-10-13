@@ -53,11 +53,24 @@ type SheetConfig struct {
 	Minutes int    `json:"minutes"` // intervalo entre sincronizações (padrão 5)
 }
 
+// homeDir é a pasta pessoal de quem roda o hub (base dos padrões de gravações e vídeos).
+func homeDir() string {
+	if h, err := os.UserHomeDir(); err == nil && h != "" {
+		return h
+	}
+	return "."
+}
+
 func loadConfig(path string) Config {
-	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db", Videos: VideosConfig{Dir: "/home/usuario/Videos"}}
+	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db", Videos: VideosConfig{Dir: filepath.Join(homeDir(), "Videos")}}
 	b, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		// Primeira execução: sobe com os padrões e tudo (câmeras, agendas, trânsito...) se configura pela página Config.
+		log.Printf("%s não existe: usando os padrões. Abra http://<este-servidor>%s/config.html para configurar (ou copie hub.config.example.json).", path, c.Listen)
+		return c
+	}
 	if err != nil {
-		log.Fatalf("não foi possível ler %s: %v (copie hub.config.example.json para hub.config.json)", path, err)
+		log.Fatalf("não foi possível ler %s: %v", path, err)
 	}
 	if err := json.Unmarshal(b, &c); err != nil {
 		log.Fatalf("hub.config.json inválido: %v", err)

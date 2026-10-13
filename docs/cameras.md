@@ -39,7 +39,7 @@ A ordem da lista é a ordem na página. Caracteres especiais da senha vão codif
 ## Gravações (1 arquivo por hora)
 O hub grava o mesmo vídeo H.264 que já repassa ao navegador (sem recodificar, sem ffmpeg) em `server/recorder.go`:
 - Arquivos `NOME_DA_CAMERA_AAAAMMDDHH.mp4` (ex.: `Sala_de_Estar_2026100114.mp4`), 1 por câmera por hora, na pasta
-  **`/home/usuario/securityCam`** (campo `"recordings": {"dir": "..."}` do `hub.config.json`; o hub cria a pasta). O arquivo novo começa
+  **`~/securityCam`** (pasta pessoal de quem roda o hub) (campo `"recordings": {"dir": "..."}` do `hub.config.json`; o hub cria a pasta). O arquivo novo começa
   no primeiro quadro-chave depois da virada da hora. Se o hub reiniciar na mesma hora, o arquivo seguinte leva `_2`, `_3`...
 - **Tudo se configura na página Config**, por câmera (grava em `recordings.state.json`, ao lado do `hub.config.json`). A chave geral
   **Gravar as câmeras** vem **desligada**. Para cada câmera:
@@ -84,7 +84,7 @@ ssh -i ~/.ssh/centraldiogo_deploy -L 53682:127.0.0.1:53682 usuario@192.168.0.10 
 ```
 Abra no navegador do PC o link `http://127.0.0.1:53682/auth?state=...` que o comando imprime, entre com a conta Google e clique em Permitir.
 Conferir: `ssh usuario@192.168.0.10 'rclone lsd GDrive:'`. Opcional: criar um *client ID* próprio no Google Cloud (`rclone config`) para não
-dividir a cota da chave pública do rclone. O serviço do hub roda como `diogo`, então usa `~/.config/rclone/rclone.conf` desse usuário.
+dividir a cota da chave pública do rclone. O serviço do hub roda como o usuário definido no `install.sh`, então usa `~/.config/rclone/rclone.conf` desse usuário.
 
 ## Limites
 - Só H.264 (H.265 mostra o erro "não entrega H.264 neste endereço").

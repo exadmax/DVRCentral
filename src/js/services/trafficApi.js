@@ -18,8 +18,8 @@
   function demo() {
     const mk = (min, normal, level, d) => ({ min: min, normal: normal, delay: min - normal, level: level, demo: true, mock: d });
     return {
-      diogo: mk(42, 32, 'moderado', 'M24,60 C90,60 90,22 170,22 S260,50 380,40'),
-      cassia: mk(28, 25, 'livre', 'M24,30 C100,30 110,58 190,58 S280,26 380,34')
+      p1: mk(42, 32, 'moderado', 'M24,60 C90,60 90,22 170,22 S260,50 380,40'),
+      p2: mk(28, 25, 'livre', 'M24,30 C100,30 110,58 190,58 S280,26 380,34')
     };
   }
 

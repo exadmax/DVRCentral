@@ -145,11 +145,11 @@
 
   // ---------- categorias (uma por agenda) ----------
   const GRAD = 'linear-gradient(135deg,#4DA3FF 50%,#33E19A 50%)';
-  const COLORS = { diogo: '#4DA3FF', cassia: '#33E19A', casal: GRAD, ambos: GRAD };
+  const COLORS = { casal: GRAD, ambos: GRAD };
   const cap = w => (w || '').charAt(0).toUpperCase() + (w || '').slice(1);
   const meta = src => ({ id: src.who, label: src.label || cap(src.who), color: src.color || COLORS[src.who] || '#B48CFF' });
 
-  const DEMO = [meta({ who: 'casal' }), meta({ who: 'diogo' }), meta({ who: 'cassia' })];
+  const DEMO = [meta({ who: 'casal' }), meta({ who: 'pessoa1', label: 'Pessoa 1', color: '#4DA3FF' }), meta({ who: 'pessoa2', label: 'Pessoa 2', color: '#33E19A' })];
   const calendars = model => model.demo ? DEMO : model.sources.map(meta);
 
   // Eventos do dia; cada evento carrega a agenda de origem (cal) para o painel agrupar por categoria

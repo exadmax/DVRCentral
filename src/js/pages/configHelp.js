@@ -81,7 +81,7 @@
         <tr><td>Limite de espaço</td><td>Passou desse total em GB, o hub apaga as mais antigas <b>daquela câmera</b>. “Sem limite” não apaga por tamanho.</td></tr></table>
       <p>Debaixo do nome de cada câmera aparece o estado: <i>gravando agora</i>, <i>aguardando movimento</i>, <i>iniciando…</i> ou a mensagem de erro, mais a quantidade de arquivos e o espaço usado.</p>
       <h3>Pasta das gravações</h3>
-      <p>No cartão <b>Gravações: pasta e Google Drive</b>. O padrão é <code>/home/usuario/securityCam</code>. O hub cria a pasta se não existir. <b>Vale depois de reiniciar o hub.</b> Trocar a pasta não move os arquivos antigos.</p>
+      <p>No cartão <b>Gravações: pasta e Google Drive</b>. O padrão é <code>~/securityCam (pasta pessoal de quem roda o hub)</code>. O hub cria a pasta se não existir. <b>Vale depois de reiniciar o hub.</b> Trocar a pasta não move os arquivos antigos.</p>
       ${tip('a limpeza (retenção e limite de GB) roda a cada 10 minutos e só mexe em arquivos com o nome desse sistema, nunca em outros arquivos da pasta.')}` },
 
     { id: 'drive', title: 'Câmeras: envio ao Google Drive', html: `
@@ -111,7 +111,7 @@
       ${warn('esse endereço dá acesso de leitura à agenda inteira. Não compartilhe. Se vazar, gere outro em “Redefinir” no mesmo lugar.')}
       <h3>Adicionar</h3>
       <ol><li><b>+ Adicionar agenda</b>.</li>
-        <li><b>Nome</b>: aparece nos eventos (ex.: Casal, Diogo, Plantões).</li>
+        <li><b>Nome</b>: aparece nos eventos (ex.: Casal, Fulano, Plantões).</li>
         <li><b>Cor</b>: a bolinha dos eventos dessa agenda. Agendas antigas com degradê só trocam de cor se você escolher outra.</li>
         <li><b>Endereço iCal</b>: cole o endereço secreto.</li>
         <li><b>Salvar agendas</b>. O hub <b>abre o endereço antes de guardar</b>: se não for um iCal válido, mostra o erro e não salva.</li></ol>
@@ -134,8 +134,8 @@
       <h3>Quando consultar a API de rotas</h3>
       <p>É a regra que mais gasta ou poupa cota. Escolha por pessoa:</p>
       <table class="help-t"><tr><th>Opção</th><th>Como funciona</th><th>Use quando</th></tr>
-        <tr><td><b>Só quando eu pedir</b></td><td>O cartão mostra o botão <b>Ver trânsito</b>. Ao tocar, o hub consulta a API e o resultado fica na tela por 10 minutos. Toques repetidos em até 5 minutos reaproveitam a consulta.</td><td>Horário variável; quer poupar cota (como o Diogo).</td></tr>
-        <tr><td><b>Automático numa janela de horário</b></td><td>O hub só consulta dentro da janela (ex.: 06:00 às 08:00). Antes dela o cartão diz “Disponível às 06:00”. Depois da janela mostra o último resultado, sem nova consulta. Passando de <b>“Esconder o cartão depois das”</b> (ex.: 09:00) o cartão mostra “Só pela manhã”.</td><td>Rotina fixa de manhã (como a Cássia).</td></tr>
+        <tr><td><b>Só quando eu pedir</b></td><td>O cartão mostra o botão <b>Ver trânsito</b>. Ao tocar, o hub consulta a API e o resultado fica na tela por 10 minutos. Toques repetidos em até 5 minutos reaproveitam a consulta.</td><td>Horário variável; quer poupar cota .</td></tr>
+        <tr><td><b>Automático numa janela de horário</b></td><td>O hub só consulta dentro da janela (ex.: 06:00 às 08:00). Antes dela o cartão diz “Disponível às 06:00”. Depois da janela mostra o último resultado, sem nova consulta. Passando de <b>“Esconder o cartão depois das”</b> (ex.: 09:00) o cartão mostra “Só pela manhã”.</td><td>Rotina fixa de manhã .</td></tr>
         <tr><td><b>Sempre</b></td><td>Consulta a cada atualização do painel, respeitando o intervalo em Integrações (“Trânsito: consultar no máximo a cada”, padrão 10 min).</td><td>Poucas pessoas e cota sobrando.</td></tr></table>
       <h3>Passo 3: rotas da pessoa</h3>
       <p>Uma rota é um trecho que vale em certos dias da semana. <b>+ Adicionar rota</b>:</p>
@@ -213,7 +213,7 @@
         <tr><td>RetroAchievements</td><td><b>Usuário</b> e <b>Chave da API</b> (em <code>retroachievements.org/settings</code>, “Web API Key”).</td></tr></table>
       <p>Os campos de chave ficam em branco depois de salvos e mostram “configurada”. Marque “apagar a configurada” para remover uma chave.</p>
       <h3>Vídeos, cache e rede</h3>
-      <ul><li><b>Pasta dos vídeos no servidor</b>: a pasta que a página Vídeos lista (padrão <code>/home/usuario/Videos</code>). Em branco desliga a lista. O endereço de reprodução fica em Painel.</li>
+      <ul><li><b>Pasta dos vídeos no servidor</b>: a pasta que a página Vídeos lista (padrão <code>~/Videos</code>). Em branco desliga a lista. O endereço de reprodução fica em Painel.</li>
         <li><b>Agendas: guardar por</b>: minutos que o hub reaproveita a agenda antes de ler o Google de novo (padrão 5).</li>
         <li><b>Trânsito: consultar no máximo a cada</b>: intervalo mínimo entre consultas à API (padrão 10). Aumente para gastar menos cota.</li>
         <li><b>Usar só IPv4</b>: necessário se a chave do Google tem restrição de IP.</li></ul>` },

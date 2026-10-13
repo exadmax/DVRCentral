@@ -24,7 +24,7 @@ Não é interativo no dia a dia: fica ligado como painel passivo. Controle remot
 - Direita: clima atual (ícone + temperatura) e cidade.
 
 **Coluna esquerda (5/12) — Agenda de hoje**
-- Lista cronológica de eventos: horário, título, quem (Diogo / Pessoa 2 / ambos, com bolinha de cor por pessoa).
+- Lista cronológica de eventos: horário, título, quem (pessoa 1 / pessoa 2 / ambos, com bolinha de cor por pessoa).
 - Próximo evento destacado (cartão maior, contagem regressiva "em 1h20").
 - Estado vazio: "Nada agendado hoje".
 - Máx. 6 itens visíveis; rolagem automática lenta se houver mais.
@@ -36,7 +36,7 @@ Não é interativo no dia a dia: fica ligado como painel passivo. Controle remot
 - Nascer/pôr do sol e umidade em linha secundária.
 
 **Coluna direita (3/12) — Deslocamento**
-- Dois cartões: "Diogo → trabalho" e "Pessoa 2 → trabalho".
+- Dois cartões: "Pessoa 1 → trabalho" e "Pessoa 2 → trabalho".
 - Cada cartão: tempo estimado com trânsito (grande), tempo normal, diferença colorida (verde/âmbar/vermelho), hora de saída sugerida.
 - Mini-mapa da rota com camada de trânsito (verde/amarelo/vermelho).
 

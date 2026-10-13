@@ -2,7 +2,10 @@
 
 Painel de informações da casa: agenda, clima, trânsito, feriados, câmeras ao vivo, estoque da cozinha e lista de profissionais.
 Roda em qualquer navegador (TV, celular, tablet ou computador), tudo a partir de um único código web em `src/`,
-servido por um **hub** em Go que fica no servidor Linux da casa ("servidor").
+servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um mini-PC ou um PC antigo, com 2 GB de RAM).
+
+> ⚠️ **Uso doméstico, sem login.** O hub foi pensado para a rede da sua casa e **não tem autenticação**: quem alcança a porta vê as câmeras
+> e a Config. **Não exponha à internet.** Para acesso de fora, use uma VPN (Tailscale, WireGuard). Veja [SECURITY.md](SECURITY.md).
 
 ## Sumário
 - [Funcionalidades](#funcionalidades)
@@ -14,6 +17,7 @@ servido por um **hub** em Go que fica no servidor Linux da casa ("servidor").
 - [Versão instalada](#versão-instalada)
 - [Testes](#testes)
 - [Documentação](#documentação)
+- [Licença](#licença)
 
 ## Funcionalidades
 
@@ -21,7 +25,7 @@ servido por um **hub** em Go que fica no servidor Linux da casa ("servidor").
 |---|---|---|
 | **Agenda** | Eventos do dia do casal (Google Calendar via iCal), próximo evento com contagem regressiva | Início |
 | **Clima** | Temperatura, previsão e aviso de guarda-chuva (Open-Meteo, sem chave) | Início |
-| **Trânsito** | Tempo até o trabalho do Diogo e da Pessoa 2, horário de saída e mini-mapa | Início |
+| **Trânsito** | Tempo de deslocamento de cada pessoa cadastrada, horário de saída e mini-mapa | Início |
 | **Feriados** | Selo nacional / estadual / municipal, ou "Fim de semana" / "Dia útil" | Início |
 | **Câmeras** | Imagem ao vivo (RTSP H.264, sem ffmpeg); no Início alternam com o Clima a cada 1 min | `camaras.html` |
 | **Gravações** | 1 arquivo MP4 por hora e por câmera, contínuo ou só com movimento, com retenção por dias e GB | Câmeras → Gravações |
@@ -60,7 +64,6 @@ TV / celular / PC ─►  navegador  ─►  http://192.168.0.10/  ─►  Hub G
 | `server/` | Hub em Go, testes, `hub.config.example.json`, scripts de build/instalação e unidade systemd |
 | `docs/` | Documentação por área e design de referência (`docs/design/`) |
 | `scripts/` | Índice de build e empacotamento ([`scripts/README.md`](scripts/README.md)) |
-| `.claude/` | Agente e skill do Claude Code para operar o servidor Debian |
 
 ## Começando
 
@@ -75,10 +78,12 @@ Esse modo não tem hub, então só vale para ver o layout.
 Requer **Go 1.26+**.
 ```bash
 cd server
-cp hub.config.example.json hub.config.json   # edite com suas URLs, chaves e câmeras
-go run . -config hub.config.json
+go run .
 ```
-Abra http://localhost:8080 (`staticDir` padrão é `../src`). O banco `centraldiogo.db` é criado ao lado do `hub.config.json`.
+Abra http://localhost:8080 e vá em **Config**: câmeras, agendas, trânsito, menu, cidade e integrações se configuram pela própria tela
+(há uma aba **Ajuda** com o passo a passo). Sem `hub.config.json` o hub sobe com os padrões; se preferir configurar por arquivo,
+copie `hub.config.example.json` para `hub.config.json` e rode `go run . -config hub.config.json`.
+O painel fica em `../src` (rode a partir da pasta `server/`). O banco `centraldiogo.db` e o `hub.settings.json` (o que você edita na Config) são criados ao lado do `hub.config.json`.
 
 Para o painel em outra porta falar com o hub (ex.: `python -m http.server 5173`), acrescente
 `"allowedOrigins": ["http://localhost:5173"]` ao `hub.config.json`, senão as gravações são recusadas.
@@ -94,8 +99,8 @@ Referência completa em `server/hub.config.example.json`.
 | `calendars[]` | URLs iCal secretas do Google Calendar (`who`, `label`, `color`, `url`) |
 | `traffic` | Chave do Google Routes, endereço de casa e trajetos de cada pessoa por dia da semana |
 | `cameras[]` | `id`, `name` e URL RTSP (com senha; **use `subtype=1`**, H.264) |
-| `recordings.dir` | Pasta das gravações (padrão `/home/usuario/securityCam`) |
-| `videos.dir` | Pasta de vídeos (padrão `/home/usuario/Videos`) |
+| `recordings.dir` | Pasta das gravações (padrão `~/securityCam`) |
+| `videos.dir` | Pasta de vídeos (padrão `~/Videos`) |
 | `profissionaisSheet` | CSV do Google Planilhas e intervalo de sincronização (vazio desliga) |
 | `games` | Chaves de Steam, PSN, Xbox e RetroAchievements (subsistema sem tela) |
 | `dbPath`, `allowedOrigins`, `forceIPv4` | Banco SQLite, origens extras para gravar, uso de IPv4 nas consultas externas |
@@ -161,3 +166,17 @@ vídeos e legendas, trânsito, versão e métricas do sistema. O painel não tem
 | [docs/spec-design.md](docs/spec-design.md) | Especificação visual (TV 1920×1080) |
 | [docs/decisoes.md](docs/decisoes.md) | Decisões em aberto |
 | `docs/design/` | Mockups HTML e guia de estilo |
+
+## Licença
+Distribuído sob a **GNU GPL v3** (veja [LICENSE](LICENSE)). Você pode usar, estudar, modificar e redistribuir; versões modificadas
+distribuídas devem continuar sob a mesma licença e com o código aberto.
+
+## Contribuindo
+Issues e pull requests são bem-vindos. Rode `cd server && go vet ./... && go test ./...` antes de enviar. O painel usa JS e CSS clássicos
+(sem módulos ES e sem recursos novos de CSS) para funcionar em navegadores de TV; mantenha esse cuidado. Nunca inclua endereços reais,
+chaves, senhas ou dados da sua casa em exemplos, testes ou capturas de tela.
+
+## Aviso sobre integrações
+Steam, PlayStation, Xbox, RetroAchievements, Google (Agenda, Routes, Planilhas, Drive) e BrasilAPI são serviços de terceiros, com termos
+próprios. As integrações de PlayStation (cookie `npsso`) e Xbox (cliente público do app do Xbox) usam acesso **não oficial** e podem
+parar de funcionar ou violar os termos do serviço: use por sua conta e risco. Este projeto não é afiliado a nenhuma dessas empresas.

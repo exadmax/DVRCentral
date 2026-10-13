@@ -57,8 +57,6 @@ body.night #stage { background: #05070C; }
 /* pessoas */
 .wdot { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
 .wdot.big { width: 12px; height: 12px; }
-.diogo { background: var(--blue); }
-.cassia { background: var(--green); }
 .ambos { background: linear-gradient(135deg, var(--blue) 50%, var(--green) 50%); }
 
 /* ---- agenda ---- */

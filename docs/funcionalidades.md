@@ -183,8 +183,6 @@ Erros viram `Error` com a mensagem do servidor; há timeout de 12 s.
 
 | Item | Função |
 |---|---|
-| `.claude/agents/operador-infra-servidor.md` | Agente do Claude Code para operar o servidor via SSH |
-| `.claude/skills/debian/` | Skill de administração Debian |
 
 ## 6. Configuração
 

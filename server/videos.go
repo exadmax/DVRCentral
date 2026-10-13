@@ -14,7 +14,7 @@ import (
 )
 
 type VideosConfig struct {
-	Dir string `json:"dir"` // pasta dos vídeos no servidor (padrão /home/usuario/Videos); vazio desliga a lista
+	Dir string `json:"dir"` // pasta dos vídeos no servidor (padrão ~/Videos); vazio desliga a lista
 }
 
 type videoItem struct {

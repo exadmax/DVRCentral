@@ -1,7 +1,7 @@
 {
   "listen": ":8080",
   "staticDir": "../src",
-  "profissionaisSheet": {"url": "https://docs.google.com/spreadsheets/d/ID_DA_PLANILHA/gviz/tq?tqx=out:csv&sheet=profissionais", "minutes": 5},
+  "profissionaisSheet": {"url": "", "minutes": 5},
   "calendarCacheMinutes": 5,
   "trafficCacheMinutes": 10,
   "calendars": [
@@ -12,129 +12,55 @@
       "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
     },
     {
-      "who": "diogo",
-      "label": "Diogo",
+      "who": "pessoa1",
+      "label": "Pessoa 1",
       "color": "#4DA3FF",
-      "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
-    },
-    {
-      "who": "pessoa2",
-      "label": "Pessoa 2",
-      "color": "#33E19A",
-      "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
-    },
-    {
-      "who": "plantoes",
-      "label": "Plantões Prevent",
-      "color": "#B48CFF",
       "url": "https://calendar.google.com/calendar/ical/.../basic.ics"
     }
   ],
   "traffic": {
     "key": "",
     "home": "Rua Exemplo, 100, São Paulo, SP",
-    "diogo": {
-      "arriveBy": "09:00",
-      "days": {
-        "1": [
-          {
-            "name": "Escritório",
-            "to": "Av. Exemplo, 200, São Paulo, SP"
-          }
-        ],
-        "2": [
-          {
-            "name": "Escritório",
-            "to": "Av. Exemplo, 200, São Paulo, SP"
-          }
-        ],
-        "3": [
-          {
-            "name": "Escritório",
-            "to": "Av. Exemplo, 200, São Paulo, SP"
-          }
-        ],
-        "4": [
-          {
-            "name": "Escritório",
-            "to": "Av. Exemplo, 200, São Paulo, SP"
-          }
-        ],
-        "5": [
-          {
-            "name": "Escritório",
-            "to": "Av. Exemplo, 200, São Paulo, SP"
-          }
-        ]
+    "people": [
+      {
+        "id": "pessoa1",
+        "label": "Pessoa 1",
+        "arriveBy": "09:00",
+        "onDemand": true,
+        "days": {
+          "1": [{"name": "Escritório", "to": "Av. Exemplo, 200, São Paulo, SP"}],
+          "2": [{"name": "Escritório", "to": "Av. Exemplo, 200, São Paulo, SP"}],
+          "3": [{"name": "Escritório", "to": "Av. Exemplo, 200, São Paulo, SP"}],
+          "4": [{"name": "Escritório", "to": "Av. Exemplo, 200, São Paulo, SP"}],
+          "5": [{"name": "Escritório", "to": "Av. Exemplo, 200, São Paulo, SP"}]
+        }
       },
-      "onDemand": true
-    },
-    "pessoa2": {
-      "arriveBy": "07:00",
-      "days": {
-        "1": [
-          {
-            "name": "Trabalho A",
-            "to": "Av. Exemplo, 300, São Paulo, SP"
-          }
-        ],
-        "2": [
-          {
-            "name": "Trabalho B",
-            "to": "Rua Exemplo, 400, São Paulo, SP"
-          }
-        ],
-        "3": [
-          {
-            "home": true
-          }
-        ],
-        "4": [
-          {
-            "name": "Trabalho A",
-            "to": "Av. Exemplo, 300, São Paulo, SP"
-          }
-        ],
-        "5": [
-          {
-            "name": "Trabalho B",
-            "to": "Rua Exemplo, 400, São Paulo, SP"
-          }
-        ]
-      },
-      "window": [
-        "06:00",
-        "08:00"
-      ],
-      "showUntil": "09:00"
-    }
+      {
+        "id": "pessoa2",
+        "label": "Pessoa 2",
+        "arriveBy": "07:00",
+        "window": ["06:00", "08:00"],
+        "showUntil": "09:00",
+        "days": {
+          "1": [{"name": "Trabalho A", "to": "Av. Exemplo, 300, São Paulo, SP"}],
+          "3": [{"home": true}],
+          "5": [{"name": "Trabalho B", "to": "Rua Exemplo, 400, São Paulo, SP"}]
+        }
+      }
+    ]
   },
   "forceIPv4": true,
   "games": {
     "cacheMinutes": 360,
     "stateFile": "games.state.json",
-    "steam": {
-      "key": "",
-      "user": "seu-usuario"
-    },
-    "psn": {
-      "npsso": "",
-      "user": "seu-usuario"
-    },
-    "xbox": {
-      "clientId": "",
-      "clientSecret": "",
-      "gamertag": "SeuGamertag"
-    },
-    "retro": {
-      "key": "",
-      "user": "seu-usuario"
-    }
+    "steam": {"key": "", "user": ""},
+    "psn": {"npsso": "", "user": ""},
+    "xbox": {"clientId": "", "clientSecret": "", "gamertag": ""},
+    "retro": {"key": "", "user": ""}
   },
   "cameras": [
     {"id": "garagem", "name": "Garagem", "url": "rtsp://admin:SENHA@192.168.0.21:554/cam/realmonitor?channel=1&subtype=1"},
-    {"id": "quintal", "name": "Quintal", "url": "rtsp://admin:SENHA@192.168.0.22:554/cam/realmonitor?channel=1&subtype=1"},
-    {"id": "sala-de-estar", "name": "Sala de Estar", "url": "rtsp://192.168.0.23:554/live/mpeg4"}
+    {"id": "sala", "name": "Sala", "url": "rtsp://192.168.0.23:554/live/mpeg4"}
   ],
   "recordings": {"dir": "/home/usuario/securityCam"},
   "driveSync": {"enabled": false, "remote": "GDrive:CameraSeguranca", "hour": 3, "maxFileMB": 1024},

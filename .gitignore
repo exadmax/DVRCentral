@@ -12,3 +12,8 @@ server/games.state.json
 *.db-wal
 *.db-shm
 key/
+
+# ferramentas locais do Claude Code (operam o servidor pessoal)
+.claude/agents/
+.claude/skills/
+.claude/settings.local.json

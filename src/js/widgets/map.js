@@ -29,11 +29,11 @@
       '<circle cx="' + b[0] + '" cy="' + b[1] + '" r="6" fill="' + last + '"/></svg></div>';
   }
 
-  const PALETTE = ['#B48CFF', '#FFB020', '#FF6B6B', '#7EE7F2', '#C89BFF'];     // diogo e cassia têm cor própria no CSS
-  function dotStyle(who, i) { return who === 'diogo' || who === 'cassia' ? '' : ' style="background:' + PALETTE[i % PALETTE.length] + '"'; }
+  const PALETTE = ['#4DA3FF', '#33E19A', '#B48CFF', '#FFB020', '#FF6B6B', '#7EE7F2', '#C89BFF'];     // uma cor por pessoa, na ordem da lista
+  function dotStyle(who, i) { return ' style="background:' + PALETTE[i % PALETTE.length] + '"'; }
 
   function title(who, label, r, i) {
-    return '<div class="t-title"><span class="wdot ' + who + '"' + dotStyle(who, i || 0) + '></span><span>' + label + (r && r.name ? ' → ' + CD.util.esc(r.name) : '') + '</span></div>';
+    return '<div class="t-title"><span class="wdot"' + dotStyle(who, i || 0) + '></span><span>' + label + (r && r.name ? ' → ' + CD.util.esc(r.name) : '') + '</span></div>';
   }
 
   function card(s, who, label, r, i) {
