@@ -1,5 +1,5 @@
 (function (CD) {
-  const U = CD.util;
+  const U = CD.util, tt = CD.i18n.t;
   const COLOR = { livre: '#33E19A', moderado: '#FFB020', congestionado: '#FF6B6B' };
   const STOPS = {
     livre: ['#33E19A', '#33E19A'],
@@ -39,24 +39,24 @@
   function card(s, who, label, r, i) {
     // Pessoa "só quando eu pedir": desligada até clicar em "Ver trânsito"; volta a desligar depois de alguns minutos
     if (r && r.onDemand && !r.off && !r.manual && Date.now() > ((s.asked || {})[who] || 0)) r = { manual: true, name: r.name };
-    if (!r) return '<div class="tcard">' + title(who, label, null, i) + '<div class="sub">Sem dados de trânsito</div></div>';
-    if (r.off) return '<div class="tcard">' + title(who, label, null, i) + '<div class="t-off">' + CD.util.esc(r.reason) + '</div></div>';
+    if (!r) return '<div class="tcard">' + title(who, label, null, i) + '<div class="sub">' + tt('tr.nodata') + '</div></div>';
+    if (r.off) return '<div class="tcard">' + title(who, label, null, i) + '<div class="t-off">' + CD.util.esc(CD.i18n.srv(r.reason)) + '</div></div>';
     if (r.manual) {
       return '<div class="tcard">' + title(who, label, r, i) + '<button class="tbtn" data-traffic="' + CD.util.esc(who) + '">' +
-        (s.trafficBusy ? 'Consultando…' : 'Ver trânsito') + '</button></div>';
+        (s.trafficBusy ? tt('tr.querying') : tt('tr.view')) + '</button></div>';
     }
     const leave = leaveAt(s.now, r.arriveBy, r.min);
-    const badge = r.delay <= 0 ? 'Livre' : '+' + r.delay + ' min';
+    const badge = r.delay <= 0 ? tt('tr.free') : tt('tr.delay', { n: r.delay });
     return '<div class="tcard">' + title(who, label, r, i) +
-      '<div class="t-main"><span class="num t-min">' + r.min + ' min</span><span class="lvl ' + r.level + '">' + badge + '</span></div>' +
-      '<div class="sub sm">Normal: ' + r.normal + ' min' + (leave ? ' · Saia às ' + leave : '') + '</div>' + mini(who, r) + '</div>';
+      '<div class="t-main"><span class="num t-min">' + tt('tr.min', { n: r.min }) + '</span><span class="lvl ' + r.level + '">' + badge + '</span></div>' +
+      '<div class="sub sm">' + tt('tr.normal', { n: r.normal }) + (leave ? tt('tr.leave', { t: leave }) : '') + '</div>' + mini(who, r) + '</div>';
   }
 
   function render(s) {
     const t = s.traffic;
-    if (!t) return '<section class="col"><div class="h2">Deslocamento</div><div class="skel" style="height:240px"></div><div class="skel" style="height:240px"></div></section>';
-    const tag = t.demo ? ' <span class="tag">exemplo</span>' : (t.stale ? ' <span class="tag warn">cache</span>' : '');
-    return '<section class="col"><div class="h2">Deslocamento' + tag + '</div>' +
+    if (!t) return '<section class="col"><div class="h2">' + tt('tr.title') + '</div><div class="skel" style="height:240px"></div><div class="skel" style="height:240px"></div></section>';
+    const tag = t.demo ? ' <span class="tag">' + tt('tag.demo') + '</span>' : (t.stale ? ' <span class="tag warn">' + tt('tag.cache') + '</span>' : '');
+    return '<section class="col"><div class="h2">' + tt('tr.title') + tag + '</div>' +
       (t.people || []).map((p, i) => card(s, p.id, CD.util.esc(p.label), p.result, i)).join('') + '</section>';
   }
 

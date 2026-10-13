@@ -2,9 +2,9 @@
   // Página "Config" (config.html): uso de CPU/memória do servidor e dois botões para aliviá-lo — desligar o desktop da
   // máquina e desativar a própria central (hub). Nada disso é permanente: o desktop volta no próximo reinício.
   // Também configura a gravação das câmeras, por câmera: liga/desliga, modo (contínuo ou só com movimento), sensibilidade, dias de retenção e limite de GB.
-  const U = CD.util, esc = U.esc;
+  const U = CD.util, esc = U.esc, t = CD.i18n.t;
 
-  const nf = (n, d) => n.toFixed(d).replace('.', ',');
+  const nf = CD.i18n.num;
   const bytes = b => b >= 1073741824 ? nf(b / 1073741824, 1) + ' GB' : Math.max(1, Math.round(b / 1048576)) + ' MB';
 
   function meter(label, pct, detail) {
@@ -14,7 +14,7 @@
 
   function mount(root) {
     // Subseções: cada cartão tem data-tab e só os da aba escolhida aparecem (o CSS esconde os outros; nada é redesenhado ao trocar de aba)
-    const TABS = [['servidor', 'Servidor'], ['cameras', 'Câmeras'], ['agendas', 'Agendas e rotas'], ['painel', 'Painel'], ['menu', 'Menu'], ['integracoes', 'Integrações'], ['compat', 'Compatibilidade'], ['ajuda', 'Ajuda']];
+    const TABS = ['servidor', 'cameras', 'agendas', 'painel', 'menu', 'integracoes', 'idioma', 'compat', 'ajuda'].map(id => [id, t('cfg.tab.' + id)]);
     let tab = 'servidor';
     try { tab = (location.hash || '').slice(1) || sessionStorage.getItem('cd:cfgtab') || tab; } catch (e) { /* sem armazenamento */ }
     if (!TABS.some(t => t[0] === tab)) tab = 'servidor';
@@ -23,7 +23,7 @@
       '<div class="cfg" id="cfg"></div><div id="cfgpanel" class="cfg-stack"></div><div id="cfgedit" class="cfg-stack"></div><div id="cfghelp" class="cfg-stack"></div></section>';
     const helpEl = root.querySelector('#cfghelp'), helpLink = root.querySelector('#helplink');
     // “Ajuda desta aba”: leva à seção da ajuda sobre o que está na tela
-    const showHelpLink = () => { helpLink.innerHTML = tab === 'ajuda' ? '' : '<a href="#ajuda" data-help-go="' + tab + '">❓ Ajuda desta aba</a>'; };
+    const showHelpLink = () => { helpLink.innerHTML = tab === 'ajuda' ? '' : '<a href="#ajuda" data-help-go="' + tab + '">❓ ' + t('cfg.helpTab') + '</a>'; };
     function goTab(t) {
       tab = t;
       root.firstChild.setAttribute('data-show', tab);
@@ -51,21 +51,21 @@
     let sys = null, rec = null, drv = null, msg = '', recMsg = '', armed = '', armTimer = 0;
 
     function draw() {
-      if (!CD.state.hub) { box.innerHTML = '<div class="empty" data-tab="servidor">Sem o hub: abra o painel pelo endereço do servidor da casa.</div>'; return; }
-      if (!sys) { box.innerHTML = '<div class="empty" data-tab="servidor">Carregando…</div>'; return; }
-      const can = sys.control;
+      if (!CD.state.hub) { box.innerHTML = '<div class="empty" data-tab="servidor">' + t('c.nohub') + '</div>'; return; }
+      if (!sys) { box.innerHTML = '<div class="empty" data-tab="servidor">' + t('c.loading') + '</div>'; return; }
+      const can = sys.control, linuxOnly = t('cfg.linuxOnly');
       box.innerHTML = recCard() + driveCard() +
-        '<div class="cfg-card" data-tab="servidor"><h2>Servidor</h2><div class="cfg-ms">' +
-        meter('Hub · CPU', sys.appCpuPercent, 'da CPU total (' + sys.cores + ' núcleos)') +
-        meter('Hub · memória', sys.appMemPercent, bytes(sys.appMem) + ' da RAM') +
-        meter('Máquina · CPU', sys.cpuPercent, sys.cores + ' núcleos') +
-        meter('Máquina · memória', sys.memPercent, bytes(sys.memUsed) + ' de ' + bytes(sys.memTotal)) +
+        '<div class="cfg-card" data-tab="servidor"><h2>' + t('cfg.tab.servidor') + '</h2><div class="cfg-ms">' +
+        meter(t('cfg.m.hubCpu'), sys.appCpuPercent, t('cfg.m.hubCpuD', { n: sys.cores })) +
+        meter(t('cfg.m.hubMem'), sys.appMemPercent, t('cfg.m.hubMemD', { size: bytes(sys.appMem) })) +
+        meter(t('cfg.m.pcCpu'), sys.cpuPercent, t('cfg.m.pcCpuD', { n: sys.cores })) +
+        meter(t('cfg.m.pcMem'), sys.memPercent, t('cfg.m.pcMemD', { used: bytes(sys.memUsed), total: bytes(sys.memTotal) })) +
         '</div></div>' +
-        '<div class="cfg-card" data-tab="servidor"><h2>Liberar memória</h2>' +
-        action('desktop', 'Desligar o desktop', 'Para o ambiente gráfico do servidor (tela, navegador, áudio do desktop). Volta sozinho no próximo reinício da máquina.',
-          can && sys.desktop, !can ? 'Só no servidor Linux.' : !sys.desktop ? 'O desktop já está desligado.' : '') +
-        action('hub', 'Desativar a central', 'Para o hub: o painel, as câmeras e a agenda saem do ar até alguém ligar de novo no servidor com “sudo systemctl start centraldiogo-hub”.',
-          can, !can ? 'Só no servidor Linux.' : '', true) +
+        '<div class="cfg-card" data-tab="servidor"><h2>' + t('cfg.free') + '</h2>' +
+        action('desktop', t('cfg.desktop.title'), t('cfg.desktop.text'),
+          can && sys.desktop, !can ? linuxOnly : !sys.desktop ? t('cfg.desktop.off') : '') +
+        action('hub', t('cfg.hub.title'), t('cfg.hub.text'),
+          can, !can ? linuxOnly : '', true) +
         (msg ? '<div class="cfg-msg">' + esc(msg) + '</div>' : '') + '</div>';
     }
 
@@ -83,11 +83,11 @@
       return '<div class="cfg-a"><div class="cfg-at"><b>' + esc(title) + '</b><span>' + esc(text) + '</span></div>' + control + '</div>';
     }
 
-    const DAYS = [1, 2, 3, 5, 7, 10, 14, 30, 60].map(d => [d, d + (d === 1 ? ' dia' : ' dias')]);
-    const GBS = [[0, 'Sem limite']].concat([5, 10, 20, 50, 100, 200, 500].map(g => [g, g + ' GB']));
-    const SENS = [[1, '1 · baixa'], [2, '2'], [3, '3 · média'], [4, '4'], [5, '5 · alta']];
+    const DAYS = [1, 2, 3, 5, 7, 10, 14, 30, 60].map(d => [d, CD.i18n.n('cfg.days', d)]);
+    const GBS = [[0, t('cfg.noLimit')]].concat([5, 10, 20, 50, 100, 200, 500].map(g => [g, g + ' GB']));
+    const SENS = [[1, t('cfg.sens.1')], [2, '2'], [3, t('cfg.sens.3')], [4, '4'], [5, t('cfg.sens.5')]];
 
-    const when = iso => new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const when = iso => CD.i18n.dateTime(new Date(iso));
     const driveBusy = () => !!(drv && drv.running);
     function driveBtn(id, label) {
       return '<button type="button" class="btn ghost" data-drv="' + esc(id) + '"' + (driveBusy() ? ' disabled' : '') + '>' + esc(label) + '</button>';
@@ -97,46 +97,46 @@
       if (!drv || !drv.enabled) return '';
       const p = (drv.pending || {})[c.id] || { files: 0, bytes: 0 };
       const sending = driveBusy() && (!drv.scope || drv.scope.split(', ').indexOf(c.name) >= 0);
-      const todo = p.files ? p.files + ' gravação(ões) para enviar (' + bytes(p.bytes) + ').' : 'Nada novo para enviar.';
-      const text = sending ? 'Enviando agora…' : c.driveOff ?
-        'Desligado: não vai ao Drive nas rodadas automáticas nem em “Sincronizar tudo”. ' + todo.replace('para enviar', 'se você clicar em Sincronizar') : todo;
-      return row('Enviar ao Google Drive', text, '<span class="cfg-ctl">' + driveBtn(c.id, 'Sincronizar') + sw('drv:' + c.id, !c.driveOff, 'Enviar ' + c.name + ' ao Google Drive') + '</span>');
+      const todo = p.files ? t('cfg.drv.todo', { n: p.files, size: bytes(p.bytes) }) : t('cfg.drv.nothing');
+      const text = sending ? t('cfg.drv.sending') : c.driveOff ?
+        t('cfg.drv.off', { todo: p.files ? t('cfg.drv.todoIfClick', { n: p.files, size: bytes(p.bytes) }) : todo }) : todo;
+      return row(t('cfg.drv.row'), text, '<span class="cfg-ctl">' + driveBtn(c.id, t('cfg.drv.sync')) + sw('drv:' + c.id, !c.driveOff, t('cfg.drv.sendAria', { name: c.name })) + '</span>');
     }
     function driveCard() {
       if (!drv) return '';
-      if (!drv.enabled) return '<div class="cfg-card" data-tab="cameras"><h2>Google Drive</h2><div class="cfg-msg">A cópia para o Drive está desligada. Ligue em “Gravações: pasta e Google Drive”, mais abaixo.</div></div>';
+      if (!drv.enabled) return '<div class="cfg-card" data-tab="cameras"><h2>Google Drive</h2><div class="cfg-msg">' + t('cfg.drv.disabled') + '</div></div>';
       const lines = [];
-      if (drv.running) lines.push('Enviando' + (drv.scope ? ' (' + drv.scope + ')' : '') + (drv.progress ? ': ' + drv.progress : '…'));
-      else if (drv.lastMsg) lines.push((drv.lastOK ? '' : 'Erro: ') + drv.lastMsg);
+      if (drv.running) lines.push(t('cfg.drv.running') + (drv.scope ? ' (' + drv.scope + ')' : '') + (drv.progress ? ': ' + drv.progress : '…'));
+      else if (drv.lastMsg) lines.push((drv.lastOK ? '' : t('cfg.drv.errPrefix')) + CD.i18n.srv(drv.lastMsg));
       if (!drv.running && drv.attempts && !drv.lastOK && drv.attempts < drv.maxAttempts)
-        lines.push('Tentativa ' + drv.attempts + ' de ' + drv.maxAttempts + (drv.nextRetry ? '; a próxima é às ' + when(drv.nextRetry) + '.' : '; sem tempo para outra até 1:00.'));
-      const text = 'Pasta ' + drv.remote.replace(/^.*:/, '') + ' no Drive, uma subpasta por dia e por câmera. Envio automático todo dia às ' + String(drv.hour).padStart(2, '0') +
-        ':00 (próximo: ' + when(drv.nextRun) + '). ' + drv.uploaded + ' arquivo(s) enviado(s)' + (drv.skipped ? ', ' + drv.skipped + ' pulado(s)' : '') + '.';
-      return '<div class="cfg-card" data-tab="cameras"><h2>Google Drive</h2>' + row('Sincronizar todas as câmeras', text, driveBtn('', 'Sincronizar tudo')) +
+        lines.push(t('cfg.drv.attempt', { n: drv.attempts, max: drv.maxAttempts }) + (drv.nextRetry ? t('cfg.drv.nextAt', { t: when(drv.nextRetry) }) : t('cfg.drv.noTime')));
+      const text = t('cfg.drv.info', { folder: drv.remote.replace(/^.*:/, ''), hour: String(drv.hour).padStart(2, '0'), next: when(drv.nextRun), up: drv.uploaded }) +
+        (drv.skipped ? t('cfg.drv.skipped', { n: drv.skipped }) : '') + '.';
+      return '<div class="cfg-card" data-tab="cameras"><h2>Google Drive</h2>' + row(t('cfg.drv.all'), text, driveBtn('', t('cfg.drv.syncAll'))) +
         (lines.length ? '<div class="cfg-msg">' + lines.map(esc).join('<br>') + '</div>' : '') + '</div>';
     }
 
     function camBlock(c) {
       const motion = c.mode === 'motion';
-      const state = !rec.enabled ? 'gravação geral desligada' : !c.enabled ? 'desligada para esta câmera' : c.error ? c.error :
-        motion ? (c.motion ? 'gravando: movimento detectado' : c.recording ? 'gravando (fim do movimento)' : 'aguardando movimento') :
-        c.recording ? 'gravando agora' : 'iniciando…';
+      const state = !rec.enabled ? t('cfg.rec.stOff') : !c.enabled ? t('cfg.rec.stCamOff') : c.error ? CD.i18n.srv(c.error) :
+        motion ? (c.motion ? t('cfg.rec.stMotion') : c.recording ? t('cfg.rec.stTail') : t('cfg.rec.stWait')) :
+        c.recording ? t('cfg.rec.stNow') : t('cfg.rec.stStart');
       const cls = rec.enabled && c.enabled ? (c.error ? 'cfg-bad' : c.recording ? 'cfg-ok' : '') : '';
       return '<div class="cfg-cam"><div class="cfg-a"><div class="cfg-at"><b>' + esc(c.name) + '</b><span class="' + cls + '">' + esc(state) + ' · ' +
-        c.files + ' arquivo(s), ' + bytes(c.usedBytes) + '</span></div>' + sw('cam:' + c.id, c.enabled, 'Gravar ' + c.name) + '</div>' + driveRow(c) +
+        t('cfg.rec.files', { n: c.files, size: bytes(c.usedBytes) }) + '</span></div>' + sw('cam:' + c.id, c.enabled, t('cfg.rec.recAria', { name: c.name })) + '</div>' + driveRow(c) +
         (c.enabled ? '<div class="cfg-opts">' +
-          row('Modo', motion ? 'Só grava quando detecta movimento (com alguns segundos antes e depois).' : 'Grava o tempo todo, 1 arquivo por hora.',
-            sel(c.id, 'mode', c.mode, [['continuous', 'Contínuo'], ['motion', 'Só com movimento']])) +
-          (motion ? row('Sensibilidade', 'Mais alta pega movimentos pequenos, mas dispara mais com sombra e mudança de luz.', sel(c.id, 'sensitivity', c.sensitivity, SENS)) : '') +
-          row('Guardar por', 'Gravações mais antigas são apagadas sozinhas.', sel(c.id, 'retentionDays', c.retentionDays, DAYS)) +
-          row('Limite de espaço', 'Passou disso, apaga as mais antigas desta câmera.', sel(c.id, 'maxGB', c.maxGB, GBS)) + '</div>' : '') + '</div>';
+          row(t('cfg.rec.mode'), motion ? t('cfg.rec.modeMotionD') : t('cfg.rec.modeContD'),
+            sel(c.id, 'mode', c.mode, [['continuous', t('cfg.rec.cont')], ['motion', t('cfg.rec.motion')]])) +
+          (motion ? row(t('cfg.rec.sens'), t('cfg.rec.sensD'), sel(c.id, 'sensitivity', c.sensitivity, SENS)) : '') +
+          row(t('cfg.rec.keep'), t('cfg.rec.keepD'), sel(c.id, 'retentionDays', c.retentionDays, DAYS)) +
+          row(t('cfg.rec.limit'), t('cfg.rec.limitD'), sel(c.id, 'maxGB', c.maxGB, GBS)) + '</div>' : '') + '</div>';
     }
 
     function recCard() {
-      if (!rec) return '<div class="cfg-card" data-tab="cameras"><h2>Gravação das câmeras</h2><div class="cfg-msg">' + esc(recMsg || 'Carregando…') + '</div></div>';
-      return '<div class="cfg-card" data-tab="cameras"><h2>Gravação das câmeras</h2>' +
-        row('Gravar as câmeras', (rec.enabled ? 'Ligada. ' : 'Desligada. ') + 'Arquivos NOME_AAAAMMDDHH.mp4 em ' + rec.dir + '. Total: ' + rec.files + ' arquivo(s), ' + bytes(rec.usedBytes) +
-          '. Veja em Câmeras → Gravações.', sw('master', rec.enabled, 'Gravar as câmeras')) +
+      if (!rec) return '<div class="cfg-card" data-tab="cameras"><h2>' + t('cfg.rec.title') + '</h2><div class="cfg-msg">' + esc(recMsg || t('c.loading')) + '</div></div>';
+      return '<div class="cfg-card" data-tab="cameras"><h2>' + t('cfg.rec.title') + '</h2>' +
+        row(t('cfg.rec.master'), t(rec.enabled ? 'cfg.rec.on' : 'cfg.rec.offS') + t('cfg.rec.masterD', { dir: rec.dir, n: rec.files, size: bytes(rec.usedBytes) }),
+          sw('master', rec.enabled, t('cfg.rec.master'))) +
         (rec.cameras || []).map(camBlock).join('') +
         (recMsg ? '<div class="cfg-msg">' + esc(recMsg) + '</div>' : '') + '</div>';
     }
@@ -151,7 +151,7 @@
       const on = armed === id;
       return '<div class="cfg-a"><div class="cfg-at"><b>' + esc(title) + '</b><span>' + esc(why || text) + '</span></div>' +
         '<button type="button" class="btn' + (danger ? ' danger' : '') + (on ? '' : ' ghost') + '" data-act="' + id + '"' + (enabled ? '' : ' disabled') + '>' +
-        (on ? 'Confirmar?' : esc(title)) + '</button></div>';
+        (on ? t('cfg.confirm') : esc(title)) + '</button></div>';
     }
 
     async function load() {
@@ -164,17 +164,17 @@
 
     // Primeiro toque arma o botão (5 s); o segundo executa.
     box.addEventListener('change', e => {
-      const t = e.target;
-      if (!t.hasAttribute || !t.hasAttribute('data-f')) return;
-      const o = {}, f = t.getAttribute('data-f');
-      o[f] = f === 'mode' ? t.value : +t.value;
-      const cams = {}; cams[t.getAttribute('data-cam')] = o;
+      const el = e.target;
+      if (!el.hasAttribute || !el.hasAttribute('data-f')) return;
+      const o = {}, f = el.getAttribute('data-f');
+      o[f] = f === 'mode' ? el.value : +el.value;
+      const cams = {}; cams[el.getAttribute('data-cam')] = o;
       saveRec({ cameras: cams });
     });
     box.addEventListener('click', async e => {
-      const t = e.target.closest && e.target.closest('[data-sw]');
-      if (t && rec) {
-        const id = t.getAttribute('data-sw');
+      const swEl = e.target.closest && e.target.closest('[data-sw]');
+      if (swEl && rec) {
+        const id = swEl.getAttribute('data-sw');
         if (id === 'master') saveRec({ enabled: !rec.enabled });
         else if (id.indexOf('drv:') === 0) { const c = (rec.cameras || []).filter(x => 'drv:' + x.id === id)[0]; if (c) { const o = {}; o[c.id] = { driveOff: !c.driveOff }; saveRec({ cameras: o }); } }
         else { const c = (rec.cameras || []).filter(x => 'cam:' + x.id === id)[0]; if (c) { const o = {}; o[c.id] = { enabled: !c.enabled }; saveRec({ cameras: o }); } }
@@ -200,8 +200,8 @@
       clearTimeout(armTimer); armed = ''; b.disabled = true;
       try {
         await CD.hubApi.power(id === 'hub' ? 'hub-off' : 'desktop-off');
-        msg = id === 'hub' ? 'Central desativada. Para ligar de novo: sudo systemctl start centraldiogo-hub' : 'Desktop desligando… a memória livre aparece aqui em instantes.';
-        if (id === 'hub') { clearInterval(tick); sys = null; box.innerHTML = '<div class="cfg-card" data-tab="servidor"><h2>Central desativada</h2><div class="cfg-msg">' + esc(msg) + '</div></div>'; return; }
+        msg = id === 'hub' ? t('cfg.hub.done') : t('cfg.desktop.done');
+        if (id === 'hub') { clearInterval(tick); sys = null; box.innerHTML = '<div class="cfg-card" data-tab="servidor"><h2>' + t('cfg.hub.doneTitle') + '</h2><div class="cfg-msg">' + esc(msg) + '</div></div>'; return; }
         setTimeout(load, 4000);
       } catch (err) { msg = err.message; }
       draw();
@@ -212,5 +212,5 @@
   }
 
   CD.pages = CD.pages || {};
-  CD.pages.config = { label: 'Config', sub: 'servidor', icon: 'gear', mount: mount };
+  CD.pages.config = { labelKey: 'def.config', subKey: 'page.config.sub', icon: 'gear', mount: mount };
 })(window.CD = window.CD || {});

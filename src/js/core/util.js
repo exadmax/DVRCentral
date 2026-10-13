@@ -1,7 +1,5 @@
 (function (CD) {
   const pad = n => String(n).padStart(2, '0');
-  const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
   CD.util = {
     pad,
@@ -9,9 +7,9 @@
     dayKey: d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()),
     startOfDay: d => new Date(d.getFullYear(), d.getMonth(), d.getDate()),
     addDays: (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n),
-    diaSemana: d => DIAS[d.getDay()],
-    dataExtenso: d => DIAS[d.getDay()] + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()],
-    dataCurta: d => d.getDate() + ' de ' + MESES[d.getMonth()].slice(0, 3),
+    diaSemana: d => CD.i18n.dayName(d),
+    dataExtenso: d => CD.i18n.longDate(d),
+    dataCurta: d => CD.i18n.shortDate(d),
     esc: s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),
     dot: (cal, big) => '<span class="wdot' + (big ? ' big' : '') + '" style="background:' + cal.color + '"></span>',
     deepMerge: function merge(a, b) {

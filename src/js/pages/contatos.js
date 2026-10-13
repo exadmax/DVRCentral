@@ -1,14 +1,13 @@
 (function (CD) {
   // Página "Serviços" (contatos.html): profissionais e prestadores de serviço da casa (eletricista, encanador...), guardados no hub.
-  const U = CD.util, I = CD.icons, esc = U.esc;
+  const U = CD.util, I = CD.icons, esc = U.esc, t = CD.i18n.t;
 
-  // Sugestões para o campo "tipo de serviço" (somadas aos tipos já cadastrados)
-  const TIPOS = ['Eletricista', 'Encanador', 'Pedreiro', 'Pintor', 'Chaveiro', 'Diarista', 'Marceneiro', 'Mecânico', 'Ar-condicionado',
-    'Dedetizador', 'Vidraceiro', 'Jardineiro', 'Técnico de informática', 'Médico', 'Dentista', 'Veterinário'];
+  // Sugestões para o campo "tipo de serviço" (somadas aos tipos já cadastrados); a lista vem do idioma em uso
+  const tipos0 = () => t('con.types');
 
   const tipoKey = t => t.trim().toLowerCase();
   const cap = t => t.trim().charAt(0).toUpperCase() + t.trim().slice(1);        // só a exibição: "chaveiro" -> "Chaveiro"
-  const byName = (a, b) => a.tipoServico.localeCompare(b.tipoServico, 'pt-BR') || a.nome.localeCompare(b.nome, 'pt-BR');
+  const byName = (a, b) => a.tipoServico.localeCompare(b.tipoServico, CD.i18n.locale()) || a.nome.localeCompare(b.nome, CD.i18n.locale());
   // O campo "contato" aceita telefone, e-mail ou site; vira link conforme o que for (vários números juntos ficam só como texto)
   function contatoLink(c) {
     const t = c.trim();
@@ -26,8 +25,8 @@
     root.innerHTML = '<section class="pg">' +
       '<div class="pg-sum" id="sum"></div>' +
       '<div class="pg-tools"><nav class="chips" id="chips"></nav>' +
-      '<label class="search">' + I.svg('search', 'currentColor', 26, 2) + '<input type="search" id="q" placeholder="Buscar profissional" autocomplete="off"></label>' +
-      '<button type="button" class="btn" data-act="new">' + I.svg('plus', 'currentColor', 26, 2.2) + '<span>Novo profissional</span></button></div>' +
+      '<label class="search">' + I.svg('search', 'currentColor', 26, 2) + '<input type="search" id="q" placeholder="' + esc(t('con.search')) + '" autocomplete="off"></label>' +
+      '<button type="button" class="btn" data-act="new">' + I.svg('plus', 'currentColor', 26, 2.2) + '<span>' + t('con.new') + '</span></button></div>' +
       '<div class="pg-list cards" id="list"></div><div id="modal"></div></section>';
 
     function all() { return st.items || []; }
@@ -36,16 +35,16 @@
     function tipos() {
       const seen = {}, out = [];
       all().forEach(c => { const k = tipoKey(c.tipoServico); if (!seen[k]) { seen[k] = 1; out.push({ key: k, label: cap(c.tipoServico) }); } });
-      return out.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+      return out.sort((a, b) => a.label.localeCompare(b.label, CD.i18n.locale()));
     }
 
     function renderChips() {
       const count = k => all().filter(c => !k || tipoKey(c.tipoServico) === k).length;
-      const chips = [{ key: '', label: 'Todos' }].concat(tipos());
+      const chips = [{ key: '', label: t('c.all') }].concat(tipos());
       if (st.filter && !chips.some(c => c.key === st.filter)) st.filter = '';        // o último do tipo foi excluído
       $('#chips').innerHTML = chips.map(c => '<button type="button" class="chip' + (st.filter === c.key ? ' on' : '') + '" data-filter="' + esc(c.key) + '">' +
         esc(c.label) + '<b>' + count(c.key) + '</b></button>').join('');
-      $('#sum').innerHTML = all().length ? '<span class="spill ok">' + all().length + (all().length === 1 ? ' profissional' : ' profissionais') + '</span>' : '';
+      $('#sum').innerHTML = all().length ? '<span class="spill ok">' + CD.i18n.n('con.count', all().length) + '</span>' : '';
     }
 
     function contatoHtml(c) {
@@ -56,27 +55,27 @@
 
     function card(c) {
       if (st.confirmId === c.id) {
-        return '<article class="cc confirm"><div class="cc-name">Excluir “' + esc(c.nome) + '”?</div><div class="rw-meta">Essa ação não pode ser desfeita.</div>' +
-          '<div class="cc-act"><button type="button" class="btn danger" data-act="del" data-id="' + c.id + '">Excluir</button>' +
-          '<button type="button" class="btn ghost" data-act="cancel">Cancelar</button></div></article>';
+        return '<article class="cc confirm"><div class="cc-name">' + t('c.confirmDelete', { name: esc(c.nome) }) + '</div><div class="rw-meta">' + t('c.irreversible') + '</div>' +
+          '<div class="cc-act"><button type="button" class="btn danger" data-act="del" data-id="' + c.id + '">' + t('c.delete') + '</button>' +
+          '<button type="button" class="btn ghost" data-act="cancel">' + t('c.cancel') + '</button></div></article>';
       }
       return '<article class="cc"><div class="cc-top"><div class="cc-name">' + esc(c.nome) + '</div><span class="ctag">' + esc(cap(c.tipoServico)) + '</span></div>' +
         (c.contato ? contatoHtml(c.contato) : '') +
         (c.servico ? '<div class="cc-note">' + esc(c.servico) + '</div>' : '') +
         (c.indicacao ? '<div class="cc-line">' + I.svg('user', 'currentColor', 22, 2) + '<span>' + esc(c.indicacao) + '</span></div>' : '') +
         (c.obs ? '<div class="cc-line">' + I.svg('alert', 'currentColor', 22, 2) + '<span>' + esc(c.obs) + '</span></div>' : '') +
-        '<div class="cc-act"><button type="button" class="ib" data-act="edit" data-id="' + c.id + '" title="Editar" aria-label="Editar ' + esc(c.nome) + '">' + I.svg('edit', 'currentColor', 28, 2) + '</button>' +
-        '<button type="button" class="ib danger" data-act="ask" data-id="' + c.id + '" title="Excluir" aria-label="Excluir ' + esc(c.nome) + '">' + I.svg('trash', 'currentColor', 28, 2) + '</button></div></article>';
+        '<div class="cc-act"><button type="button" class="ib" data-act="edit" data-id="' + c.id + '" title="' + esc(t('c.edit')) + '" aria-label="' + esc(t('c.edit') + ' ' + c.nome) + '">' + I.svg('edit', 'currentColor', 28, 2) + '</button>' +
+        '<button type="button" class="ib danger" data-act="ask" data-id="' + c.id + '" title="' + esc(t('c.delete')) + '" aria-label="' + esc(t('c.delete') + ' ' + c.nome) + '">' + I.svg('trash', 'currentColor', 28, 2) + '</button></div></article>';
     }
 
     function renderList() {
       const el = $('#list');
-      let h = st.error ? '<div class="banner err"><span>' + esc(st.error) + '</span><button type="button" class="btn ghost" data-act="retry">Tentar de novo</button></div>' : '';
+      let h = st.error ? '<div class="banner err"><span>' + esc(st.error) + '</span><button type="button" class="btn ghost" data-act="retry">' + t('c.retry') + '</button></div>' : '';
       if (!st.items) { el.innerHTML = h || '<div class="skel" style="height:190px"></div><div class="skel" style="height:190px"></div>'; return; }
       const q = st.q.trim().toLowerCase();
       const list = st.items.filter(c => (!st.filter || tipoKey(c.tipoServico) === st.filter) &&
         (!q || [c.nome, c.tipoServico, c.contato, c.indicacao, c.servico, c.obs].join(' ').toLowerCase().indexOf(q) >= 0));
-      if (!list.length) h += '<div class="empty">' + (st.items.length ? 'Nenhum profissional encontrado' : 'Nenhum profissional cadastrado. Toque em “Novo profissional” para começar.') + '</div>';
+      if (!list.length) h += '<div class="empty">' + (st.items.length ? t('con.notfound') : t('con.empty')) + '</div>';
       else h += list.map(card).join('');
       el.innerHTML = h;
     }
@@ -92,26 +91,26 @@
     }
 
     function form(c) {
-      const cur = c || { nome: '', tipoServico: st.filter ? (tipos().filter(t => t.key === st.filter)[0] || {}).label || '' : '', contato: '', indicacao: '', servico: '', obs: '' };
+      const cur = c || { nome: '', tipoServico: st.filter ? (tipos().filter(x => x.key === st.filter)[0] || {}).label || '' : '', contato: '', indicacao: '', servico: '', obs: '' };
       const sugestoes = [], seen = {};
-      tipos().map(t => t.label).concat(TIPOS).forEach(t => { if (!seen[tipoKey(t)]) { seen[tipoKey(t)] = 1; sugestoes.push(t); } });
-      const body = CD.ui.field('Nome', '<input name="nome" type="text" maxlength="120" autocomplete="off" value="' + esc(cur.nome) + '">') +
-        CD.ui.field('Tipo de serviço', '<input name="tipoServico" type="text" maxlength="60" list="tipos-dl" autocomplete="off" placeholder="Ex.: Eletricista" value="' + esc(cur.tipoServico) + '">') +
-        '<datalist id="tipos-dl">' + sugestoes.map(t => '<option value="' + esc(t) + '"></option>').join('') + '</datalist>' +
-        CD.ui.field('Contato', '<input name="contato" type="text" maxlength="250" autocomplete="off" placeholder="Telefone, e-mail ou site" value="' + esc(cur.contato) + '">', '(opcional)') +
-        CD.ui.field('Indicação', '<input name="indicacao" type="text" maxlength="500" autocomplete="off" placeholder="Quem indicou, se recomenda..." value="' + esc(cur.indicacao) + '">', '(opcional)') +
-        CD.ui.field('Serviço', '<textarea name="servico" rows="3" maxlength="2000" placeholder="O que ele vai fazer / fez">' + esc(cur.servico) + '</textarea>', '(opcional)') +
-        CD.ui.field('Obs', '<textarea name="obs" rows="2" maxlength="2000">' + esc(cur.obs) + '</textarea>', '(opcional)');
+      tipos().map(x => x.label).concat(tipos0()).forEach(x => { if (!seen[tipoKey(x)]) { seen[tipoKey(x)] = 1; sugestoes.push(x); } });
+      const body = CD.ui.field(t('con.f.name'), '<input name="nome" type="text" maxlength="120" autocomplete="off" value="' + esc(cur.nome) + '">') +
+        CD.ui.field(t('con.f.type'), '<input name="tipoServico" type="text" maxlength="60" list="tipos-dl" autocomplete="off" placeholder="' + esc(t('con.f.typePh')) + '" value="' + esc(cur.tipoServico) + '">') +
+        '<datalist id="tipos-dl">' + sugestoes.map(x => '<option value="' + esc(x) + '"></option>').join('') + '</datalist>' +
+        CD.ui.field(t('con.f.contact'), '<input name="contato" type="text" maxlength="250" autocomplete="off" placeholder="' + esc(t('con.f.contactPh')) + '" value="' + esc(cur.contato) + '">', t('c.optional')) +
+        CD.ui.field(t('con.f.ref'), '<input name="indicacao" type="text" maxlength="500" autocomplete="off" placeholder="' + esc(t('con.f.refPh')) + '" value="' + esc(cur.indicacao) + '">', t('c.optional')) +
+        CD.ui.field(t('con.f.service'), '<textarea name="servico" rows="3" maxlength="2000" placeholder="' + esc(t('con.f.servicePh')) + '">' + esc(cur.servico) + '</textarea>', t('c.optional')) +
+        CD.ui.field(t('con.f.notes'), '<textarea name="obs" rows="2" maxlength="2000">' + esc(cur.obs) + '</textarea>', t('c.optional'));
 
       CD.ui.modal($('#modal'), {
-        title: c ? 'Editar profissional' : 'Novo profissional', body: body,
+        title: c ? t('con.edit') : t('con.new'), body: body,
         read(f) {
           const el = f.elements, d = {
             nome: el.nome.value.trim(), tipoServico: el.tipoServico.value.trim(), contato: el.contato.value.trim(),
             indicacao: el.indicacao.value.trim(), servico: el.servico.value.trim(), obs: el.obs.value.trim()
           };
-          if (!d.nome) throw new Error('Informe o nome.');
-          if (!d.tipoServico) throw new Error('Informe o tipo de serviço.');
+          if (!d.nome) throw new Error(t('con.e.name'));
+          if (!d.tipoServico) throw new Error(t('con.e.type'));
           return d;
         },
         async save(data) {
@@ -147,5 +146,5 @@
   }
 
   CD.pages = CD.pages || {};
-  CD.pages.contatos = { label: 'Serviços', sub: 'profissionais e prestadores', icon: 'phone', mount: mount };
+  CD.pages.contatos = { labelKey: 'page.contatos.label', subKey: 'page.contatos.sub', icon: 'phone', mount: mount };
 })(window.CD = window.CD || {});

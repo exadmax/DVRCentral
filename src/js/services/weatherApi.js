@@ -1,9 +1,9 @@
 (function (CD) {
   // Open-Meteo: gratuito, sem chave.
   const PERIODS = [
-    { label: 'Manhã', from: 6, to: 11, at: 9 },
-    { label: 'Tarde', from: 12, to: 17, at: 15 },
-    { label: 'Noite', from: 18, to: 23, at: 21 }
+    { id: 'morning', from: 6, to: 11, at: 9 },
+    { id: 'afternoon', from: 12, to: 17, at: 15 },
+    { id: 'night', from: 18, to: 23, at: 21 }
   ];
   const r = n => Math.round(n);
 
@@ -23,7 +23,7 @@
     const periods = PERIODS.map(p => {
       let pop = 0;
       for (let i = p.from; i <= p.to; i++) pop = Math.max(pop, h.precipitation_probability[i] || 0);
-      return { label: p.label, temp: r(h.temperature_2m[p.at]), pop: pop, code: h.weather_code[p.at] };
+      return { id: p.id, temp: r(h.temperature_2m[p.at]), pop: pop, code: h.weather_code[p.at] };
     });
     // Primeira hora (de agora até 22h) com chance de chuva >= 60%
     let rain = null;

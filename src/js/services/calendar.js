@@ -149,7 +149,8 @@
   const cap = w => (w || '').charAt(0).toUpperCase() + (w || '').slice(1);
   const meta = src => ({ id: src.who, label: src.label || cap(src.who), color: src.color || COLORS[src.who] || '#B48CFF' });
 
-  const DEMO = [meta({ who: 'casal' }), meta({ who: 'pessoa1', label: 'Pessoa 1', color: '#4DA3FF' }), meta({ who: 'pessoa2', label: 'Pessoa 2', color: '#33E19A' })];
+  const t = CD.i18n.t;
+  const DEMO = [meta({ who: 'casal' }), meta({ who: 'pessoa1', label: t('demo.person', { n: 1 }), color: '#4DA3FF' }), meta({ who: 'pessoa2', label: t('demo.person', { n: 2 }), color: '#33E19A' })];
   const calendars = model => model.demo ? DEMO : model.sources.map(meta);
 
   // Eventos do dia; cada evento carrega a agenda de origem (cal) para o painel agrupar por categoria
@@ -165,7 +166,7 @@
           const k = (e.title || '') + '|' + o.start.getTime();
           if (seen[k]) return;
           seen[k] = 1;
-          out.push({ title: e.title || '(sem título)', start: o.start, end: o.end, allDay: !!e.allDay, cal: cal });
+          out.push({ title: e.title || t('ev.untitled'), start: o.start, end: o.end, allDay: !!e.allDay, cal: cal });
         });
       });
     });
@@ -173,10 +174,10 @@
   }
 
   function demoEvents(day) {
-    const t = (h, m) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
-    const e = (h, m, title, cal) => ({ title: title, start: t(h, m), end: t(h + 1, m), allDay: false, cal: DEMO[cal] });
-    return [e(9, 30, 'Daily Meu VW', 1), e(11, 0, 'Reunião de squad', 1), e(14, 0, 'Consulta odontológica', 2),
-      e(16, 0, 'Chamada com fornecedor', 1), e(19, 0, 'Academia', 1), e(20, 30, 'Jantar', 0)];
+    const at = (h, m) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
+    const e = (h, m, title, cal) => ({ title: title, start: at(h, m), end: at(h + 1, m), allDay: false, cal: DEMO[cal] });
+    return [e(9, 30, t('demo.ev1'), 1), e(11, 0, t('demo.ev2'), 1), e(14, 0, t('demo.ev3'), 2),
+      e(16, 0, t('demo.ev4'), 1), e(19, 0, t('demo.ev5'), 1), e(20, 30, t('demo.ev6'), 0)];
   }
 
   CD.calendar = { load: load, eventsOn: eventsOn, calendars: calendars, parseIcs: parseIcs };

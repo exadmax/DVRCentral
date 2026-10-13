@@ -5,11 +5,11 @@
   //  • Hub (vale depois de reiniciar o hub): pastas, cópia para o Drive, planilha de profissionais, jogos, tempos de cache e rede
   //    (/api/settings/hub). Segredos nunca voltam do hub: o campo fica em branco e “configurada” aparece ao lado.
   // Cada cartão é redesenhado sozinho (não o conjunto), para não perder o que está sendo digitado nos outros.
-  const U = CD.util, esc = U.esc, ui = CD.cfgUi;
+  const U = CD.util, esc = U.esc, ui = CD.cfgUi, t = CD.i18n.t;
   const fld = ui.fld, btn = ui.btn;
 
   const HOURS = Array.from({ length: 24 }, (_, h) => [h, String(h).padStart(2, '0') + ':00']);
-  const HTYPES = [['municipal', 'Municipal'], ['estadual', 'Estadual'], ['nacional', 'Nacional']];
+  const HTYPES = ['municipal', 'estadual', 'nacional'].map(id => [id, t('hol.type.' + id)]);
 
   const input = (f, v, o) => {
     o = o || {};
@@ -39,101 +39,101 @@
       const m = msgs[id];
       return '<div class="cfg-card" data-tab="' + tab + '" data-card="' + id + '"><h2>' + esc(title) + '</h2>' + (hint ? '<div class="cfg-hint">' + hint + '</div>' : '') + body +
         (m ? '<div class="cfg-msg' + (m.bad ? ' cfg-err' : '') + '">' + esc(m.text) + '</div>' : '') +
-        (save === false ? '' : '<div class="cfg-bar2">' + (save || '') + btn('save:' + id, 'Salvar', '', busy[id]) + '</div>') + '</div>';
+        (save === false ? '' : '<div class="cfg-bar2">' + (save || '') + btn('save:' + id, t('c.save'), '', busy[id]) + '</div>') + '</div>';
     }
     const grid = html => '<div class="cfg-grid">' + html + '</div>';
 
     // ---------- Painel ----------
     function cLoc() {
       const l = cfg.location || {};
-      return card('loc', 'painel', 'Localização e clima', 'Usada no clima (Open-Meteo) e no cabeçalho da tela inicial.',
-        grid(fld('Cidade', input('city', l.city)) + fld('Estado', input('state', l.state)) +
-          fld('Latitude', num('lat', l.lat, -90, 90, 'any')) + fld('Longitude', num('lon', l.lon, -180, 180, 'any')) +
-          fld('Fuso horário', input('timezone', l.timezone, { ph: 'America/Sao_Paulo' })) +
-          fld('Atualizar o clima a cada (minutos)', num('refreshMinutes', cfg.refreshMinutes || 15, 5, 240))));
+      return card('loc', 'painel', t('cp.loc.title'), t('cp.loc.hint'),
+        grid(fld(t('cp.loc.city'), input('city', l.city)) + fld(t('cp.loc.state'), input('state', l.state)) +
+          fld(t('cp.loc.lat'), num('lat', l.lat, -90, 90, 'any')) + fld(t('cp.loc.lon'), num('lon', l.lon, -180, 180, 'any')) +
+          fld(t('cp.loc.tz'), input('timezone', l.timezone, { ph: 'America/Sao_Paulo' })) +
+          fld(t('cp.loc.refresh'), num('refreshMinutes', cfg.refreshMinutes || 15, 5, 240))));
     }
     function cNight() {
       const n = cfg.night || { from: 23, until: 5 };
-      return card('night', 'painel', 'Modo noturno', 'Nesse período a tela inicial fica escura, só com o clima e os eventos de amanhã.',
-        grid(fld('Começa às', select('from', n.from, HOURS)) + fld('Termina às', select('until', n.until, HOURS))));
+      return card('night', 'painel', t('cp.night.title'), t('cp.night.hint'),
+        grid(fld(t('cp.night.from'), select('from', n.from, HOURS)) + fld(t('cp.night.until'), select('until', n.until, HOURS))));
     }
     function cRot() {
-      return card('rot', 'painel', 'Câmeras na tela inicial', 'Cada câmera aparece no lugar do Clima por este tempo e depois o Clima volta (rodízio).',
-        grid(fld('Segundos por câmera', num('rotateSeconds', (cfg.cameras || {}).rotateSeconds || 60, 5, 3600))));
+      return card('rot', 'painel', t('cp.rot.title'), t('cp.rot.hint'),
+        grid(fld(t('cp.rot.secs'), num('rotateSeconds', (cfg.cameras || {}).rotateSeconds || 60, 5, 3600))));
     }
     function cSoon() {
-      return card('soon', 'painel', 'Aviso de validade', 'Itens da geladeira e da dispensa que vencem em até N dias ficam em destaque âmbar (vencidos, em vermelho).',
-        grid(fld('Avisar com quantos dias de antecedência', num('soonDays', (cfg.estoque || {}).soonDays == null ? 3 : cfg.estoque.soonDays, 0, 365))));
+      return card('soon', 'painel', t('cp.soon.title'), t('cp.soon.hint'),
+        grid(fld(t('cp.soon.days'), num('soonDays', (cfg.estoque || {}).soonDays == null ? 3 : cfg.estoque.soonDays, 0, 365))));
     }
     function cVid() {
       const v = cfg.videos || {};
-      return card('vid', 'painel', 'Página Vídeos (endereço de reprodução)', 'Os arquivos são entregues por um servidor web da máquina (nginx). A pasta que o hub lista fica em Integrações.',
-        grid(fld('Porta', num('port', v.port || 8080, 1, 65535)) + fld('Caminho', input('path', v.path || '/videos/', { ph: '/videos/' }))));
+      return card('vid', 'painel', t('cp.vid.title'), t('cp.vid.hint'),
+        grid(fld(t('cp.vid.port'), num('port', v.port || 8080, 1, 65535)) + fld(t('ce.menu.path'), input('path', v.path || '/videos/', { ph: '/videos/' }))));
     }
 
     function localRow(l, i) {
-      return '<div class="cfg-item" data-r="' + i + '"><div class="cfg-grid">' + fld('Nome', input('label', l.label, { ph: 'Ex.: Garagem' })) +
-        fld('Cor', '<input type="color" data-f="color" value="' + esc(l.color || '#4DA3FF') + '">') +
-        fld('Ícone', select('icon', l.icon || 'box', ui.ICONS)) + '</div><div class="cfg-ia">' + btn('del:locais:' + i, 'Remover', 'ghost') + '</div></div>';
+      return '<div class="cfg-item" data-r="' + i + '"><div class="cfg-grid">' + fld(t('ce.name'), input('label', l.label, { ph: t('cp.locais.namePh') })) +
+        fld(t('ce.color'), '<input type="color" data-f="color" value="' + esc(l.color || '#4DA3FF') + '">') +
+        fld(t('ce.menu.icon'), select('icon', l.icon || 'box', ui.ICONS)) + '</div><div class="cfg-ia">' + btn('del:locais:' + i, t('c.remove'), 'ghost') + '</div></div>';
     }
     function cLocais() {
-      return card('locais', 'painel', 'Locais do estoque', 'Onde os itens são guardados (aparecem como abas em Geladeira e Dispensa). Um local só pode ser removido quando estiver vazio.',
-        st.locais.map(localRow).join(''), btn('add:locais', '+ Adicionar local'));
+      return card('locais', 'painel', t('cp.locais.title'), t('cp.locais.hint'),
+        st.locais.map(localRow).join(''), btn('add:locais', t('cp.locais.add')));
     }
 
     function holRow(h, i) {
-      return '<div class="cfg-item" data-r="' + i + '"><div class="cfg-grid">' + fld('Dia e mês', input('date', h.date ? '2000-' + h.date : '', { type: 'date' })) +
-        fld('Nome', input('name', h.name, { ph: 'Ex.: Aniversário da cidade' })) + fld('Tipo', select('type', h.type || 'municipal', HTYPES)) +
-        '</div><div class="cfg-ia">' + btn('del:hol:' + i, 'Remover', 'ghost') + '</div></div>';
+      return '<div class="cfg-item" data-r="' + i + '"><div class="cfg-grid">' + fld(t('cp.hol.date'), input('date', h.date ? '2000-' + h.date : '', { type: 'date' })) +
+        fld(t('ce.name'), input('name', h.name, { ph: t('cp.hol.namePh') })) + fld(t('cp.hol.type'), select('type', h.type || 'municipal', HTYPES)) +
+        '</div><div class="cfg-ia">' + btn('del:hol:' + i, t('c.remove'), 'ghost') + '</div></div>';
     }
     function cHol() {
-      return card('hol', 'painel', 'Feriados locais', 'Feriados estaduais e municipais que a BrasilAPI não traz. Repetem todo ano (só importam o dia e o mês).',
-        st.hol.map(holRow).join(''), btn('add:hol', '+ Adicionar feriado'));
+      return card('hol', 'painel', t('cp.hol.title'), t('cp.hol.hint'),
+        st.hol.map(holRow).join(''), btn('add:hol', t('cp.hol.add')));
     }
 
     // ---------- Hub ----------
     function pendingBanner() {
       const h = st.hub;
       if (!h || !h.pending) return '';
-      return '<div class="cfg-banner"><span>Há mudanças salvas que só valem depois de reiniciar o hub.' + (h.canRestart ? '' : ' (Reinicie à mão: sudo systemctl restart centraldiogo-hub)') + '</span>' +
-        (h.canRestart ? btn('restart', busy.restart ? 'Reiniciando…' : 'Reiniciar o hub agora', '', busy.restart) : '') + '</div>';
+      return '<div class="cfg-banner"><span>' + t('cp.pending') + (h.canRestart ? '' : ' ' + t('cp.pendingManual')) + '</span>' +
+        (h.canRestart ? btn('restart', busy.restart ? t('cp.restarting') : t('cp.restartNow'), '', busy.restart) : '') + '</div>';
     }
     const secret = (f, label, set, ph) => '<div class="fld wide"><span>' + esc(label) + '</span>' +
-      input(f, '', { type: 'password', ph: set ? 'configurada (em branco = manter)' : ph || 'cole aqui' }) +
-      (set ? '<label class="cfg-chk"><input type="checkbox" data-clear="' + f + '">apagar a configurada</label>' : '') + '</div>';
+      input(f, '', { type: 'password', ph: set ? t('cp.secretSet') : ph || t('cp.secretPaste') }) +
+      (set ? '<label class="cfg-chk"><input type="checkbox" data-clear="' + f + '">' + esc(t('cp.secretClear')) + '</label>' : '') + '</div>';
 
     function cDrive() {
       const h = st.hub;
-      return card('hubdrive', 'cameras', 'Gravações: pasta e Google Drive', 'Vale depois de reiniciar o hub. O envio usa o rclone já configurado no servidor.',
-        grid(fld('Pasta das gravações no servidor', input('recordingsDir', h.recordingsDir, { ph: '/home/usuario/securityCam' }), 'wide') +
-          '<div class="wide">' + check('driveEnabled', h.driveEnabled, 'Copiar as gravações para o Google Drive todo dia') + '</div>' +
-          fld('Destino no rclone (REMOTE:Pasta)', input('driveRemote', h.driveRemote, { ph: 'GDrive:CameraSeguranca' }), 'wide') +
-          fld('Hora do envio automático', select('driveHour', h.driveHour, HOURS)) +
-          fld('Maior arquivo enviado inteiro (MB; acima disso é dividido; 0 = 1024)', num('driveMaxFileMB', h.driveMaxFileMB, 0, 1048576))));
+      return card('hubdrive', 'cameras', t('cp.drive.title'), t('cp.drive.hint'),
+        grid(fld(t('cp.drive.dir'), input('recordingsDir', h.recordingsDir, { ph: '/home/usuario/securityCam' }), 'wide') +
+          '<div class="wide">' + check('driveEnabled', h.driveEnabled, t('cp.drive.enable')) + '</div>' +
+          fld(t('cp.drive.remote'), input('driveRemote', h.driveRemote, { ph: 'GDrive:CameraSeguranca' }), 'wide') +
+          fld(t('cp.drive.hour'), select('driveHour', h.driveHour, HOURS)) +
+          fld(t('cp.drive.maxMB'), num('driveMaxFileMB', h.driveMaxFileMB, 0, 1048576))));
     }
     function cSheet() {
       const h = st.hub;
-      return card('hubsheet', 'integracoes', 'Planilha de profissionais', 'CSV da aba de profissionais no Google Planilhas. Deixe o endereço em branco para desligar a sincronização.',
-        grid(fld('Endereço do CSV', input('sheetUrl', h.sheetUrl, { ph: 'https://docs.google.com/spreadsheets/d/ID/gviz/tq?tqx=out:csv&sheet=profissionais' }), 'wide') +
-          fld('Sincronizar a cada (minutos)', num('sheetMinutes', h.sheetMinutes || 5, 1, 1440))));
+      return card('hubsheet', 'integracoes', t('cp.sheet.title'), t('cp.sheet.hint'),
+        grid(fld(t('cp.sheet.url'), input('sheetUrl', h.sheetUrl, { ph: 'https://docs.google.com/spreadsheets/d/ID/gviz/tq?tqx=out:csv&sheet=profissionais' }), 'wide') +
+          fld(t('cp.sheet.min'), num('sheetMinutes', h.sheetMinutes || 5, 1, 1440))));
     }
     function cGames() {
       const h = st.hub;
-      return card('hubgames', 'integracoes', 'Jogos e conquistas', 'Contas usadas para listar jogos e troféus. As chaves ficam só no servidor.',
-        grid(fld('Atualizar a cada (minutos)', num('gamesCacheMinutes', h.gamesCacheMinutes || 360, 1, 10080), 'wide') +
-          '<div class="cfg-sub wide">Steam</div>' + fld('Usuário (URL personalizada ou SteamID64)', input('steamUser', h.steamUser)) + secret('steamKey', 'Chave da API', h.steamKeySet) +
-          '<div class="cfg-sub wide">PlayStation</div>' + fld('Usuário (só para exibição)', input('psnUser', h.psnUser)) + secret('psnNpsso', 'Cookie npsso', h.psnNpssoSet) +
-          '<div class="cfg-sub wide">Xbox</div>' + fld('Gamertag', input('xboxGamertag', h.xboxGamertag)) + fld('Client ID (opcional)', input('xboxClientId', h.xboxClientId)) +
-          secret('xboxClientSecret', 'Client secret (opcional)', h.xboxClientSecretSet) +
-          '<div class="cfg-sub wide">RetroAchievements</div>' + fld('Usuário', input('retroUser', h.retroUser)) + secret('retroKey', 'Chave da API', h.retroKeySet)));
+      return card('hubgames', 'integracoes', t('cp.games.title'), t('cp.games.hint'),
+        grid(fld(t('cp.games.min'), num('gamesCacheMinutes', h.gamesCacheMinutes || 360, 1, 10080), 'wide') +
+          '<div class="cfg-sub wide">Steam</div>' + fld(t('cp.games.steamUser'), input('steamUser', h.steamUser)) + secret('steamKey', t('cp.games.apiKey'), h.steamKeySet) +
+          '<div class="cfg-sub wide">PlayStation</div>' + fld(t('cp.games.psnUser'), input('psnUser', h.psnUser)) + secret('psnNpsso', t('cp.games.npsso'), h.psnNpssoSet) +
+          '<div class="cfg-sub wide">Xbox</div>' + fld('Gamertag', input('xboxGamertag', h.xboxGamertag)) + fld(t('cp.games.clientId'), input('xboxClientId', h.xboxClientId)) +
+          secret('xboxClientSecret', t('cp.games.clientSecret'), h.xboxClientSecretSet) +
+          '<div class="cfg-sub wide">RetroAchievements</div>' + fld(t('cp.games.retroUser'), input('retroUser', h.retroUser)) + secret('retroKey', t('cp.games.apiKey'), h.retroKeySet)));
     }
     function cMisc() {
       const h = st.hub;
-      return card('hubmisc', 'integracoes', 'Vídeos, cache e rede', 'Vale depois de reiniciar o hub.',
-        grid(fld('Pasta dos vídeos no servidor (vazio = desliga a página Vídeos)', input('videosDir', h.videosDir, { ph: '/home/usuario/Videos' }), 'wide') +
-          fld('Agendas: guardar por (minutos)', num('calendarCacheMinutes', h.calendarCacheMinutes, 1, 1440)) +
-          fld('Trânsito: consultar no máximo a cada (minutos)', num('trafficCacheMinutes', h.trafficCacheMinutes, 1, 1440)) +
-          '<div class="wide">' + check('forceIPv4', h.forceIPv4, 'Usar só IPv4 nas consultas externas (chaves do Google com restrição de IP)') + '</div>'));
+      return card('hubmisc', 'integracoes', t('cp.misc.title'), t('cp.restartNote'),
+        grid(fld(t('cp.misc.videosDir'), input('videosDir', h.videosDir, { ph: '/home/usuario/Videos' }), 'wide') +
+          fld(t('cp.misc.calCache'), num('calendarCacheMinutes', h.calendarCacheMinutes, 1, 1440)) +
+          fld(t('cp.misc.trafficCache'), num('trafficCacheMinutes', h.trafficCacheMinutes, 1, 1440)) +
+          '<div class="wide">' + check('forceIPv4', h.forceIPv4, t('cp.misc.ipv4')) + '</div>'));
     }
 
     // ---------- desenho ----------
@@ -191,12 +191,12 @@
     }
 
     async function savePanel(id, payload, resync) {
-      setBusy(id, true); say(id, 'Salvando…'); showMsg(id);
+      setBusy(id, true); say(id, t('c.saving')); showMsg(id);
       let ok = false;
       try {
         await CD.hubApi.settings.save('panel', payload);
         await CD.hubApi.settings.loadPanel(cfg);
-        say(id, 'Salvo. As telas abertas atualizam em até 5 minutos.'); ok = true;
+        say(id, t('cp.saved')); ok = true;
       } catch (e) { say(id, e.message, true); }
       setBusy(id, false);
       if (ok || resync) { resyncLists(); redraw(id); } else showMsg(id);
@@ -225,17 +225,17 @@
         el.querySelectorAll('[data-clear]:checked').forEach(c => clear.push(c.getAttribute('data-clear')));
       });
       body.clearSecrets = clear;
-      setBusy(from, true); say(from, 'Salvando…'); showMsg(from);
+      setBusy(from, true); say(from, t('c.saving')); showMsg(from);
       try {
         st.hub = await CD.hubApi.settings.save('hub', body);
-        say(from, st.hub.pending ? 'Salvo. Falta reiniciar o hub para valer.' : 'Salvo.');
+        say(from, st.hub.pending ? t('cp.savedPending') : t('cp.savedOk'));
       } catch (e) { say(from, e.message, true); setBusy(from, false); showMsg(from); return; }
       setBusy(from, false);
       HUBCARDS.forEach(redraw); drawBanner();
     }
 
     async function restart() {
-      if (!confirm('Reiniciar o hub agora? As câmeras, a agenda e o painel ficam fora do ar por alguns segundos.')) return;
+      if (!confirm(t('cp.restartAsk'))) return;
       busy.restart = true; drawBanner();
       try { await CD.hubApi.settings.restartHub(); } catch (e) { busy.restart = false; say('hubmisc', e.message, true); redraw('hubmisc'); drawBanner(); return; }
       const t0 = Date.now();
@@ -264,7 +264,7 @@
       if (op === 'del') {
         const i = +p[2], r = rows[i], fresh = what === 'locais' ? !r.id : false;
         const blank = !(r.label || r.name || r.date || '').trim();
-        if (!blank && !confirm('Remover "' + (r.label || r.name || 'este item') + '"?')) return;
+        if (!blank && !confirm(t('ce.removeAsk', { name: r.label || r.name || t('ce.thisItem') }))) return;
         rows.splice(i, 1);
         say(what, ''); redraw(what);
         if (fresh || (what === 'hol' && blank)) return;
@@ -278,7 +278,7 @@
       resyncLists();
       try { st.hub = await CD.hubApi.settings.get('hub'); } catch (e) { st.hub = null; }
       drawAll();
-      if (!st.hub) root.insertAdjacentHTML('beforeend', '<div class="cfg-card" data-tab="integracoes"><h2>Opções do hub</h2><div class="cfg-msg">Este hub é antigo e não tem estas opções: atualize o hub no servidor.</div></div>');
+      if (!st.hub) root.insertAdjacentHTML('beforeend', '<div class="cfg-card" data-tab="integracoes"><h2>' + t('cp.old.title') + '</h2><div class="cfg-msg">' + t('cp.old.text') + '</div></div>');
     }
     load();
   }

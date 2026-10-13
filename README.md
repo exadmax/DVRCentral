@@ -13,6 +13,7 @@ servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um 
 - [Estrutura do repositório](#estrutura-do-repositório)
 - [Começando](#começando)
 - [Configuração](#configuração)
+- [Idiomas](#idiomas)
 - [Implantação no servidor](#implantação-no-servidor)
 - [Versão instalada](#versão-instalada)
 - [Testes](#testes)
@@ -34,6 +35,7 @@ servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um 
 | **Vídeos** | Lista a pasta de vídeos do servidor; toca no navegador ou abre no VLC | `videos.html` |
 | **Config** | CPU/memória do servidor, configuração das gravações, desligar desktop/hub | `config.html` |
 | **Modo noturno** | Das 23h às 5h: tela escura com clima e eventos de amanhã | Início |
+| **Idiomas** | Português, English, Español e 中文, escolhido por aparelho (ou automático, pelo navegador) | Config → Idioma |
 
 O inventário completo, com fontes de dados, endpoints e arquivos de código, está em **[docs/funcionalidades.md](docs/funcionalidades.md)**.
 
@@ -60,10 +62,10 @@ TV / celular / PC ─►  navegador  ─►  http://192.168.0.10/  ─►  Hub G
 
 | Pasta | Conteúdo |
 |---|---|
-| `src/` | Painel web: `*.html`, `css/`, `js/{core,services,widgets,pages}`, `config/`, `assets/` |
+| `src/` | Painel web: `*.html`, `css/`, `js/{core,services,widgets,pages,i18n}`, `config/`, `assets/` |
 | `server/` | Hub em Go, testes, `hub.config.example.json`, scripts de build/instalação e unidade systemd |
 | `docs/` | Documentação por área e design de referência (`docs/design/`) |
-| `scripts/` | Índice de build e empacotamento ([`scripts/README.md`](scripts/README.md)) |
+| `scripts/` | Índice de build e empacotamento ([`scripts/README.md`](scripts/README.md)) e o verificador de traduções (`check-i18n.js`) |
 
 ## Começando
 
@@ -118,6 +120,22 @@ window.CD_SETTINGS_LOCAL = {
 ```
 Também define a cidade, os atalhos do rodapé (`links`) e a porta/pasta dos vídeos (`videos`).
 
+## Idiomas
+
+O painel e as páginas (inclusive a Config e o manual da aba Ajuda) existem em **Português (pt)**, **English (en)**, **Español (es)** e **中文 (zh, chinês simplificado)**.
+
+- **Como escolher**: em **Config → Idioma**. Vale **só para aquele aparelho** (fica guardado no navegador dele): a TV pode ficar em português e o celular em inglês.
+  A opção *Automático* (padrão) segue o idioma do navegador e, se ele não for um dos quatro, usa português. Também dá para forçar pelo endereço:
+  `index.html?lang=en` (`pt`, `en`, `es`, `zh`); `?lang=auto` volta ao automático.
+- **O que é traduzido**: textos da interface, datas e números no formato de cada idioma, os nomes de fábrica do menu, dos locais do estoque e das agendas de exemplo,
+  os feriados nacionais e os avisos de erro do hub que são conhecidos. **O que você cadastrou** (nome de câmera, agenda, item, profissional, atalho renomeado, feriado local)
+  e os eventos do Google Agenda aparecem exatamente como foram escritos. Os avisos de erro do hub ainda não conhecidos aparecem em português.
+- **Onde fica**: `src/js/core/i18n.js` (núcleo: `CD.i18n.t`, plurais, datas, escolha do idioma) e `src/js/i18n/` (`pt.js`, `en.js`, `es.js`, `zh.js`, o manual `help.<idioma>.js`
+  e `srv.js`, que traduz mensagens do hub reconhecendo o texto original em português).
+- **Mudou ou criou um texto?** Escreva-o primeiro em `pt.js` (é a referência e o idioma de reserva), traduza nos outros três arquivos e rode
+  `node scripts/check-i18n.js`: ele aponta chave faltando, `{parâmetro}` diferente, chave usada no código sem tradução e diferença de estrutura no manual.
+- **Outro idioma**: acrescente-o em `LANGS` (`i18n.js`), crie `src/js/i18n/<id>.js` e `help.<id>.js` com as mesmas chaves e inclua os `<script>` nas páginas `*.html`.
+
 ## Implantação no servidor
 
 No PC de desenvolvimento:
@@ -153,7 +171,10 @@ sudo systemctl start centraldiogo-hub
 cd server && go test ./...
 ```
 Cobrem CRUD e validação de estoque/serviços, proteção de origem, sincronização da planilha, câmeras e gravador (retenção, movimento),
-vídeos e legendas, trânsito, versão e métricas do sistema. O painel não tem testes automatizados.
+vídeos e legendas, trânsito, versão e métricas do sistema. O painel não tem testes automatizados; só há o verificador das traduções:
+```bash
+node scripts/check-i18n.js
+```
 
 ## Documentação
 

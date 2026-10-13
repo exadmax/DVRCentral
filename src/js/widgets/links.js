@@ -22,7 +22,7 @@
       if (!h) return '';
       const a = l.alert === 'estoque' ? CD.widgets.expiring(s) : null;     // item que avisa vencidos/perto de vencer
       return '<a class="lk' + (a ? ' ' + a.lvl : '') + '" target="_top" href="' + CD.util.esc(h) + '">' + CD.icons.svg(a ? a.icon : l.icon, a ? a.color : '#4DA3FF', 36, 1.8) +
-        '<span class="lk-t"><b>' + CD.util.esc(l.label) + '</b><span>' + CD.util.esc(a ? a.sub : l.sub || '') + '</span></span></a>';
+        '<span class="lk-t"><b>' + CD.util.esc(CD.i18n.user(l.label)) + '</b><span>' + CD.util.esc(a ? a.sub : CD.i18n.user(l.sub || '')) + '</span></span></a>';
     }).join('') + '</nav>';
   }
 

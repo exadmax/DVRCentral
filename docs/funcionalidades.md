@@ -80,13 +80,14 @@ sistema 10 s, tela 30 s.
 ### 2.6 Config
 - Medidores: CPU e memória do hub e da máquina (atualiza a cada 5 s).
 - **Gravação das câmeras**: chave geral e, por câmera: liga/desliga, modo (contínuo ou só movimento), sensibilidade 1–5, guardar por N dias, limite em GB.
-- **A Config tem subseções (abas)**: Servidor · Câmeras · Agendas e rotas · Painel · Menu · Integrações · Compatibilidade · Ajuda. Tudo que era fixo em arquivo agora se edita aqui e fica em `hub.settings.json` (ao lado do `hub.config.json`, que continua valendo para o que ainda não foi editado). Segredos (senhas, chaves, tokens) voltam mascarados; campo em branco = manter.
+- **A Config tem subseções (abas)**: Servidor · Câmeras · Agendas e rotas · Painel · Menu · Integrações · Idioma · Compatibilidade · Ajuda. Tudo que era fixo em arquivo agora se edita aqui e fica em `hub.settings.json` (ao lado do `hub.config.json`, que continua valendo para o que ainda não foi editado). Segredos (senhas, chaves, tokens) voltam mascarados; campo em branco = manter.
   - **Câmeras**: cadastro (nome + endereço RTSP), gravação por câmera, pasta das gravações e envio ao Drive (ligar, destino do rclone, hora, tamanho máximo).
   - **Agendas e rotas**: agendas iCal e **pessoas do trânsito** (adicionar/remover), cada uma com nome, horário de chegada, rotas (origem, destino, dias, "a partir de") e a **regra de consulta da API**: *só quando eu pedir* (botão "Ver trânsito", como o Diogo), *automático numa janela de horário* com "esconder depois de" (como a Pessoa 2) ou *sempre*.
   - **Painel** (vale na hora, até 5 min nas telas abertas): localização/clima e intervalo de atualização, modo noturno, tempo do rodízio das câmeras, dias do aviso de validade, **locais do estoque** (um local só sai se estiver vazio), endereço da página Vídeos e feriados locais.
   - **Menu**: atalhos do rodapé (o da Config não pode ser removido).
   - **Integrações**: planilha de profissionais, contas de jogos (Steam, PSN, Xbox, RetroAchievements), pasta de vídeos, tempos de cache e IPv4. **Essas opções do hub só valem depois de reiniciar o hub**: a tela mostra "aguardando reinício" e um botão que reinicia pelo systemd.
   - **Ajuda**: manual completo de cada configuração, com busca e índice (`js/pages/configHelp.js`); cada aba tem o link "Ajuda desta aba". Ao mudar uma opção, atualize o texto desse arquivo.
+  - **Idioma** (só no aparelho): português, inglês, espanhol ou chinês (`js/core/i18n.js`, `js/i18n/`). *Automático* segue o idioma do navegador; a escolha fica em `localStorage` (`cd:lang`) e também vale `?lang=en`. Traduz a interface, datas/números, os nomes de fábrica do menu/locais do estoque, os feriados nacionais e as mensagens conhecidas do hub; o que o usuário cadastrou fica como foi escrito.
   - **Compatibilidade** (só no aparelho): em navegador de TV (user agent: Samsung/Tizen, LG/webOS, Chromecast...) ou forçado, a página Câmeras mostra uma câmera por vez (`js/core/compat.js`).
   - Ainda fica em arquivo: `listen`/`staticDir`/`dbPath`/`allowedOrigins` e o executável do rclone.
 - **Modo compatibilidade** (último cartão, vale só para o aparelho): em navegador de TV (detectado pelo user agent: Tizen, webOS, Chromecast etc.; ou forçado), a página Câmeras mostra uma câmera por vez, com botões para trocar (`js/core/compat.js`).
@@ -169,15 +170,16 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 
 | Camada | Arquivos | Exporta |
 |---|---|---|
-| Núcleo | `core/util.js`, `core/icons.js`, `core/ui.js`, `core/stock.js`, `core/app.js` | `CD.util`, `CD.icons`, `CD.ui` (modal/campos), `CD.stock` (regras de validade), `CD.state` + laço principal |
+| Núcleo | `core/i18n.js`, `core/util.js`, `core/icons.js`, `core/ui.js`, `core/stock.js`, `core/app.js` | `CD.i18n` (`t`, `n` plural, datas, `user`, `holiday`, `srv`), `CD.util`, `CD.icons`, `CD.ui` (modal/campos), `CD.stock` (regras de validade), `CD.state` + laço principal |
+| Idiomas | `i18n/pt.js`, `en.js`, `es.js`, `zh.js`, `srv.js` (mensagens do hub), `help.pt.js`/`help.en.js`/`help.es.js`/`help.zh.js` (manual da Config) | `CD.i18n.add(id, {...})`, `CD.i18n.addHelp(id, [...])` |
 | Serviços | `services/weatherApi.js`, `holidaysApi.js`, `trafficApi.js`, `calendar.js`, `hubApi.js`, `cameraPlayer.js` | `CD.weatherApi`, `CD.holidaysApi`, `CD.trafficApi`, `CD.calendar`, `CD.hubApi`, `CD.cameraPlayer` |
 | Widgets (Início) | `widgets/agenda.js`, `weather.js`, `map.js`, `holidays.js` (selo + rodapé), `expiring.js`, `links.js`, `cameras.js`, `night.js` | `CD.widgets.*` |
-| Páginas | `pages/boot.js`, `estoque.js`, `contatos.js`, `camaras.js`, `videos.js`, `config.js` | `CD.pages.*` (cada uma com `label`, `sub`, `icon`, `mount`) |
+| Páginas | `pages/boot.js`, `estoque.js`, `contatos.js`, `camaras.js`, `videos.js`, `config.js` | `CD.pages.*` (cada uma com `labelKey`, `subKey` (chaves do dicionário), `icon`, `mount`) |
 | Configuração | `config/settings.example.js` (padrões), `config/settings.js` (local, ignorado pelo git), `config/holidays-sp.js` | `CD_SETTINGS`, `CD_SETTINGS_LOCAL`, `CD_LOCAL_HOLIDAYS` |
 | Estilo | `css/main.css`, `css/pages.css` | — |
 
 `hubApi.js` é o único ponto que fala com o hub nas páginas: `estoque`, `contatos` (CRUD), `cameras`, `recordings`, `videos`, `system`, `power`.
-Erros viram `Error` com a mensagem do servidor; há timeout de 12 s.
+Erros viram `Error` com a mensagem do servidor (traduzida por `CD.i18n.srv` quando é uma das conhecidas em `i18n/srv.js`); há timeout de 12 s.
 
 ### 5.3 Plataformas e ferramentas
 
@@ -201,4 +203,4 @@ Erros viram `Error` com a mensagem do servidor; há timeout de 12 s.
 
 34 testes em Go (`cd server && go test ./...`): estoque/contatos/CRUD e proteção de origem (`store_test.go`), planilha (`sheet_test.go`),
 câmeras (`cameras_test.go`), gravador, retenção e movimento (`recorder_test.go`), vídeos e legendas (`videos_test.go`), trânsito
-(`traffic_test.go`), versão (`version_test.go`), sistema (`sysinfo_test.go`) e jogos (`games_test.go`). O painel não tem testes automatizados.
+(`traffic_test.go`), versão (`version_test.go`), sistema (`sysinfo_test.go`) e jogos (`games_test.go`). O painel não tem testes automatizados; as traduções têm um verificador (`node scripts/check-i18n.js`: chaves iguais nos quatro idiomas, parâmetros, chaves usadas no código e estrutura do manual).

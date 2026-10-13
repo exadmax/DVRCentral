@@ -1,6 +1,7 @@
 (function (CD) {
   // Player de câmera ao vivo: toca o MP4 contínuo do hub (/api/cameras/{id}/stream) com Media Source Extensions.
   // Usado pela página Câmeras (camaras.html) e pelo card rotativo da tela inicial.
+  const t = CD.i18n.t;
   const MS = window.ManagedMediaSource || window.MediaSource;
   const LIVE_LAG = 1.2;      // se a imagem atrasar mais que isso (s), pula para o "agora"
   const KEEP_BEHIND = 6;     // segundos já vistos que ficam na memória
@@ -50,7 +51,7 @@
       catch (e) {
         if (e && e.name === 'QuotaExceededError' && video.buffered.length) {
           try { sb.remove(video.buffered.start(0), Math.max(video.buffered.start(0), video.currentTime - 1)); } catch (x) { /* segue */ }
-        } else fail(my, 'Erro ao tocar o vídeo.');
+        } else fail(my, t('cp.playErr'));
       }
     }
 
@@ -59,7 +60,7 @@
       pending = concat(pending, chunk);
       while (pending.length >= 8) {
         const size = u32(pending, 0);
-        if (size < 8 || size > (1 << 24)) throw new Error('fluxo de vídeo inválido');
+        if (size < 8 || size > (1 << 24)) throw new Error(t('cp.badStream'));
         if (pending.length < size) break;
         const type = String.fromCharCode(pending[4], pending[5], pending[6], pending[7]);
         group.push(pending.slice(0, size));
@@ -79,16 +80,16 @@
     async function start() {
       cleanup();
       const my = gen;
-      if (!MS || !window.fetch) { onState('err', 'Este navegador não toca vídeo ao vivo.'); return; }
-      onState('load', 'Conectando…');
+      if (!MS || !window.fetch) { onState('err', t('cp.noLive')); return; }
+      onState('load', t('cam.connecting'));
       try {
         ctl = window.AbortController ? new AbortController() : null;
         const r = await fetch(url, ctl ? { signal: ctl.signal, cache: 'no-store' } : { cache: 'no-store' });
         if (my !== gen) return;
-        if (!r.ok) throw new Error(((await r.text()) || '').trim() || 'Erro ' + r.status);
-        if (!r.body || !r.body.getReader) throw new Error('Este navegador não suporta vídeo contínuo.');
+        if (!r.ok) throw new Error(CD.i18n.srv(((await r.text()) || '').trim()) || t('cp.httpErr', { n: r.status }));
+        if (!r.body || !r.body.getReader) throw new Error(t('cp.noStream'));
         const type = 'video/mp4; codecs="' + r.headers.get('X-Codec') + '"';
-        if (!MS.isTypeSupported(type)) throw new Error('Este navegador não abre o vídeo da câmera (' + type + ').');
+        if (!MS.isTypeSupported(type)) throw new Error(t('cp.noCodec', { type: type }));
 
         ms = new MS();
         objUrl = URL.createObjectURL(ms);
@@ -99,22 +100,22 @@
         sb = ms.addSourceBuffer(type);
         try { sb.mode = 'sequence'; } catch (e) { /* o padrão serve */ }
         sb.addEventListener('updateend', () => { tidy(); pump(my); });
-        sb.addEventListener('error', () => fail(my, 'Erro ao tocar o vídeo.'));
+        sb.addEventListener('error', () => fail(my, t('cp.playErr')));
 
         lastData = Date.now();
-        watchdog = setInterval(() => { if (Date.now() - lastData > 15000) fail(my, 'A câmera parou de enviar imagem.'); }, 5000);
+        watchdog = setInterval(() => { if (Date.now() - lastData > 15000) fail(my, t('cp.stalled')); }, 5000);
         const reader = r.body.getReader();
         for (;;) {
           const { done, value } = await reader.read();
           if (my !== gen) return;
-          if (done) throw new Error('A conexão com a câmera foi encerrada.');
+          if (done) throw new Error(t('cp.closed'));
           lastData = Date.now();
           feed(my, value);
           if (video.paused) { const p = video.play(); if (p && p.catch) p.catch(() => { /* espera o navegador liberar */ }); }
         }
       } catch (e) {
         if (my !== gen) return;
-        fail(my, (e && e.message) || 'Sem conexão com o servidor da casa.');
+        fail(my, (e && e.message) || t('err.offline'));
       }
     }
 

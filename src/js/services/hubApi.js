@@ -1,8 +1,8 @@
 (function (CD) {
   // Cliente da API CRUD do hub (/api/estoque, /api/contatos). Erros viram Error com a mensagem do servidor.
   async function call(method, path, body, headers) {
-    const base = CD.state && CD.state.hub;
-    if (!base) throw new Error('Sem o hub: abra o painel pelo endereço do servidor da casa para usar esta página.');
+    const t = CD.i18n.t, base = CD.state && CD.state.hub;
+    if (!base) throw new Error(t('err.nohub'));
     const opt = { method: method };
     if (headers) opt.headers = headers;
     if (body !== undefined) { opt.headers = Object.assign({ 'Content-Type': 'application/json' }, headers); opt.body = JSON.stringify(body); }
@@ -14,11 +14,11 @@
       if (r.status === 204) return null;
       let j = null;
       try { j = await r.json(); } catch (e) { /* corpo vazio ou não JSON */ }
-      if (!r.ok) throw new Error((j && j.error) || 'Erro ' + r.status + ' no servidor');
+      if (!r.ok) throw new Error(CD.i18n.srv(j && j.error) || t('err.http', { n: r.status }));
       return j;
     } catch (e) {
-      if (e && e.name === 'AbortError') throw new Error('O servidor demorou demais para responder.');
-      if (e instanceof TypeError) throw new Error('Sem conexão com o servidor da casa.');
+      if (e && e.name === 'AbortError') throw new Error(t('err.timeout'));
+      if (e instanceof TypeError) throw new Error(t('err.offline'));
       throw e;
     } finally { clearTimeout(timer); }
   }

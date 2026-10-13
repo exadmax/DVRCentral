@@ -1,15 +1,15 @@
 (function (CD) {
   // Página "Vídeos" (videos.html): lista a pasta de vídeos do servidor (via hub) e abre cada arquivo no VLC, tocando direto da rede.
   // Os arquivos vêm do nginx (/videos/, com Accept-Ranges), sem copiar nada para o aparelho.
-  const U = CD.util, esc = U.esc;
+  const U = CD.util, esc = U.esc, t = CD.i18n.t;
 
   function fileUrl(name) {
     const c = CD.state.cfg.videos || {}, u = new URL(CD.state.hub);
     return u.protocol + '//' + u.hostname + ':' + (c.port || 8080) + (c.path || '/videos/') + encodeURIComponent(name);
   }
 
-  function size(n) { return n >= 1073741824 ? (n / 1073741824).toFixed(1) + ' GB' : Math.max(1, Math.round(n / 1048576)) + ' MB'; }
-  function when(t) { return new Date(t * 1000).toLocaleDateString('pt-BR'); }
+  function size(n) { return n >= 1073741824 ? CD.i18n.num(n / 1073741824, 1) + ' GB' : Math.max(1, Math.round(n / 1048576)) + ' MB'; }
+  function when(sec) { return CD.i18n.dateNum(new Date(sec * 1000)); }
 
   // Android: intent direto para o VLC (com legenda); iPhone/iPad: x-callback do VLC; demais: baixa uma lista .m3u que o VLC abre.
   function openVlc(v) {
@@ -29,13 +29,13 @@
   }
 
   function copy(text, btn) {
-    const done = () => { const t = btn.textContent; btn.textContent = 'Copiado!'; setTimeout(() => { btn.textContent = t; }, 1500); };
-    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(done, () => window.prompt('Copie o link:', text)); return; }
+    const done = () => { const old = btn.textContent; btn.textContent = t('vid.copied'); setTimeout(() => { btn.textContent = old; }, 1500); };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(done, () => window.prompt(t('vid.copyPrompt'), text)); return; }
     const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
     document.body.appendChild(ta); ta.select();
     let ok = false; try { ok = document.execCommand('copy'); } catch (e) { /* cai no prompt */ }
     ta.remove();
-    if (ok) done(); else window.prompt('Copie o link:', text);
+    if (ok) done(); else window.prompt(t('vid.copyPrompt'), text);
   }
 
   // Player embutido: só para formatos que o navegador diz tocar (mp4/webm/mov/mkv); o resto fica só com o VLC.
@@ -50,17 +50,17 @@
     ov.className = 'vp';
     const subOk = v.sub && /\.(srt|vtt)$/i.test(v.sub);
     ov.innerHTML = '<div class="vp-top"><div class="vp-name">' + esc(v.name) + '</div>' +
-      '<button type="button" class="vbtn" data-a="vlc">Abrir no VLC</button><button type="button" class="vbtn" data-a="x">Fechar</button></div>' +
-      '<video controls autoplay playsinline></video><div class="vp-msg">Sem imagem ou sem som? Este arquivo pode usar um formato que o navegador não lê: abra no VLC.</div>';
+      '<button type="button" class="vbtn" data-a="vlc">' + t('def.videos.sub') + '</button><button type="button" class="vbtn" data-a="x">' + t('c.close') + '</button></div>' +
+      '<video controls autoplay playsinline></video><div class="vp-msg">' + t('vid.hint') + '</div>';
     const video = ov.querySelector('video'), msg = ov.querySelector('.vp-msg');
     video.src = fileUrl(v.name);
     if (subOk) {
       const tr = document.createElement('track');
-      tr.kind = 'subtitles'; tr.label = 'Português'; tr.srclang = 'pt'; tr.default = true;
+      tr.kind = 'subtitles'; tr.label = t('vid.subLabel'); tr.default = true;
       tr.src = CD.state.hub + '/api/videos/sub?name=' + encodeURIComponent(v.name);
       video.appendChild(tr);
     }
-    video.addEventListener('error', () => { msg.textContent = 'O navegador não consegue tocar este vídeo (formato ou codec). Abra no VLC.'; msg.className = 'vp-msg err'; });
+    video.addEventListener('error', () => { msg.textContent = t('vid.playErr'); msg.className = 'vp-msg err'; });
     function close() {
       document.removeEventListener('keydown', onKey);
       video.pause(); video.removeAttribute('src'); video.load();   // solta a conexão com o servidor
@@ -80,20 +80,20 @@
     function note(msg) { box.innerHTML = '<div class="empty">' + esc(msg) + '</div>'; }
 
     async function load() {
-      if (!CD.state.hub) { note('Sem o hub: abra o painel pelo endereço do servidor da casa para ver os vídeos.'); return; }
+      if (!CD.state.hub) { note(t('vid.nohub')); return; }
       let list;
       try { list = await CD.hubApi.videos.list(); } catch (e) { note(e.message); return; }
-      if (!list || !list.length) { note('Nenhum vídeo na pasta do servidor.'); return; }
+      if (!list || !list.length) { note(t('vid.none')); return; }
       box.innerHTML = '';
       list.forEach(v => {
         const el = document.createElement('article');
         el.className = 'vid';
         el.innerHTML = '<div class="vid-main"><div class="vid-name">' + esc(v.name) + '</div><div class="vid-meta">' + size(v.size) + ' · ' + when(v.time) +
-          (v.sub ? ' · com legenda' : '') + '</div></div><div class="vid-act">' +
-          (canPlay(v.name) ? '<button type="button" class="vbtn main" data-a="play">Tocar aqui</button>' : '') +
-          '<button type="button" class="vbtn' + (canPlay(v.name) ? '' : ' main') + '" data-a="vlc">Abrir no VLC</button>' +
-          '<button type="button" class="vbtn" data-a="copy">Copiar link</button>' +
-          '<a class="vbtn" href="' + esc(fileUrl(v.name)) + '" target="_blank" rel="noopener">Link direto</a></div>';
+          (v.sub ? t('vid.withSub') : '') + '</div></div><div class="vid-act">' +
+          (canPlay(v.name) ? '<button type="button" class="vbtn main" data-a="play">' + t('vid.playHere') + '</button>' : '') +
+          '<button type="button" class="vbtn' + (canPlay(v.name) ? '' : ' main') + '" data-a="vlc">' + t('def.videos.sub') + '</button>' +
+          '<button type="button" class="vbtn" data-a="copy">' + t('vid.copy') + '</button>' +
+          '<a class="vbtn" href="' + esc(fileUrl(v.name)) + '" target="_blank" rel="noopener">' + t('vid.direct') + '</a></div>';
         const pl = el.querySelector('[data-a="play"]');
         if (pl) pl.addEventListener('click', () => player(v));
         el.querySelector('[data-a="vlc"]').addEventListener('click', () => openVlc(v));
@@ -105,5 +105,5 @@
   }
 
   CD.pages = CD.pages || {};
-  CD.pages.videos = { label: 'Vídeos', sub: 'abrir no VLC', icon: 'film', mount: mount };
+  CD.pages.videos = { labelKey: 'page.videos.label', subKey: 'page.videos.sub', icon: 'film', mount: mount };
 })(window.CD = window.CD || {});

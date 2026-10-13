@@ -2,7 +2,7 @@
   // Card rotativo da tela inicial: no lugar do Clima (coluna do meio) entram as câmeras, uma por vez (o app.js troca a cada minuto).
   // O painel se redesenha a cada 30 s (innerHTML); por isso o vídeo vive num elemento próprio que é recolocado no novo
   // #camslot a cada redesenho (na mesma tarefa, então o navegador não pausa o vídeo).
-  const esc = CD.util.esc;
+  const esc = CD.util.esc, t = CD.i18n.t;
   let box = null;                                           // { id, el, player }
 
   // Câmera que ocupa o lugar do clima agora (midIdx 0 = Clima), ou null
@@ -13,8 +13,8 @@
 
   function slot(s) {
     const c = cur(s);
-    const names = ['Clima'].concat(s.cams.map(x => x.name));
-    return '<section class="col camcol"><div class="h2">' + esc(c.name) + ' <span class="tag">ao vivo</span></div><div id="camslot"></div>' +
+    const names = [t('wx.short')].concat(s.cams.map(x => x.name));
+    return '<section class="col camcol"><div class="h2">' + esc(c.name) + ' <span class="tag">' + t('cam.liveTag') + '</span></div><div id="camslot"></div>' +
       '<div class="cam-dots">' + names.map((n, i) => '<span class="cam-dot' + (i === s.midIdx ? ' on' : '') + '">' + esc(n) + '</span>').join('') + '</div>' + CD.widgets.thumbs(s) + '</section>';
   }
 
@@ -28,7 +28,7 @@
   function create(c) {
     const el = document.createElement('div');
     el.className = 'camv';
-    el.innerHTML = '<video muted autoplay playsinline></video><div class="cam-st">Conectando…</div>';
+    el.innerHTML = '<video muted autoplay playsinline></video><div class="cam-st">' + t('cam.connecting') + '</div>';
     const video = el.firstChild, st = el.lastChild;
     const player = CD.cameraPlayer.create(video, CD.hubApi.cameras.streamUrl(c.id), (kind, text) => {
       st.textContent = text;

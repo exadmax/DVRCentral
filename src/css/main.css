@@ -11,9 +11,9 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); }
-body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', system-ui, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
 html.night, body.night { background: #05070C; }
-.num { font-family: 'Poppins', 'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.num { font-family: 'Poppins', 'Inter', system-ui, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; font-variant-numeric: tabular-nums; }
 
 /* ---- palco ---- */
 #app { position: fixed; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }

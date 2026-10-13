@@ -117,7 +117,7 @@
       } catch (e) { if (state.traffic && !state.traffic.demo) { state.traffic.stale = true; return render(); } }
     }
     const d = CD.trafficApi.demo();
-    state.traffic = { demo: true, people: [{ id: 'p1', label: 'Pessoa 1', result: d.p1 }, { id: 'p2', label: 'Pessoa 2', result: d.p2 }] };
+    state.traffic = { demo: true, people: [{ id: 'p1', label: CD.i18n.t('demo.person', { n: 1 }), result: d.p1 }, { id: 'p2', label: CD.i18n.t('demo.person', { n: 2 }), result: d.p2 }] };
     render();
   }
 
