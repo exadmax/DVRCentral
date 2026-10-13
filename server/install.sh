@@ -39,8 +39,14 @@ fi
 
 mkdir -p "$D/www"
 install -m 755 "hub-linux-$A" "$D/hub"
-[ -f "$D/hub.config.json" ] && cp "$D/hub.config.json" "$D/hub.config.json.bak"
-install -m 600 hub.config.json "$D/hub.config.json"
+# A configuração do servidor (hub.config.json e o hub.settings.json da página Config) é preservada: o pacote só instala a configuração
+# na primeira instalação. Para trocar algo depois, use a página Config ou edite o arquivo no servidor.
+if [ -f "$D/hub.config.json" ]; then
+  cp "$D/hub.config.json" "$D/hub.config.json.bak"
+  echo ">> hub.config.json existente mantido (cópia em hub.config.json.bak)"
+else
+  install -m 600 hub.config.json "$D/hub.config.json"
+fi
 rm -rf "$D/www" && mkdir "$D/www" && tar -xzf www.tgz -C "$D/www"
 chown -R "$USER_RUN" "$D"
 sed "s/__USER__/$USER_RUN/" centraldiogo-hub.service > /etc/systemd/system/centraldiogo-hub.service
