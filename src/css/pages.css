@@ -249,9 +249,11 @@ a { color: inherit; }
 .cfg-err { color: #FFB3B3; }
 
 /* config: subseções (abas) */
-.cfg-tabs { max-width: 900px; }
-.cfg-stack { max-width: 900px; margin-top: 16px; display: flex; flex-direction: column; gap: 16px; }
-.cfg-stack:empty { display: none; }
+/* os contêineres dos cartões somem do layout (display: contents): só os cartões da aba escolhida ocupam espaço, com um único espaçamento */
+.cfg-root { display: flex; flex-direction: column; gap: 16px; max-width: 900px; }
+.cfg-root .cfg, .cfg-root .cfg-stack { display: contents; }
+.cfg-root .cams-bar, .cfg-root .cfg-helplink { margin: 0; }
+#cp-banner:empty { display: none; }
 .cfg-root[data-show="servidor"] [data-tab]:not([data-tab="servidor"]),
 .cfg-root[data-show="cameras"] [data-tab]:not([data-tab="cameras"]),
 .cfg-root[data-show="agendas"] [data-tab]:not([data-tab="agendas"]),

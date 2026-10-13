@@ -1,7 +1,7 @@
 ﻿# Central Diogo — Especificação de design
 
 ## Contexto
-Painel de informações da casa, exibido na **TV Samsung (Tizen), 1920×1080, uso doméstico**, lido a 2–3 metros de distância ("10-foot UI"). Versões secundárias: APK Android (celular/tablet) e web, responsivas a partir do mesmo layout.
+Painel de informações da casa, exibido no navegador da **TV (1920×1080), uso doméstico**, lido a 2–3 metros de distância ("10-foot UI"). Celular e tablet usam o mesmo painel web, responsivo a partir do mesmo layout.
 Não é interativo no dia a dia: fica ligado como painel passivo. Controle remoto só para trocar de tela/atualizar.
 
 ## Princípios
