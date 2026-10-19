@@ -1,6 +1,6 @@
 # Central Diogo (Omega Diogo)
 
-Painel de informações da casa: agenda, clima, trânsito, feriados, câmeras ao vivo, estoque da cozinha e lista de profissionais.
+Painel de informações da casa: agenda, clima, trânsito, feriados, câmeras ao vivo, estoque da cozinha, lista de profissionais, vídeos e biblioteca de livros (PDF e EPUB).
 Roda em qualquer navegador (TV, celular, tablet ou computador), tudo a partir de um único código web em `src/`,
 servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um mini-PC ou um PC antigo, com 2 GB de RAM).
 
@@ -34,7 +34,7 @@ servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um 
 | **Serviços** | Profissionais (eletricista, encanador...), com sincronização opcional com Google Planilhas | `contatos.html` |
 | **Vídeos** | Lista a pasta de vídeos do servidor; toca no navegador ou abre no VLC | `videos.html` |
 | **Livros** | PDFs e EPUBs no servidor, com envio pelo painel, categoria, dono e leitor de EPUB (desligável na Config) | `livros.html` |
-| **Config** | CPU/memória do servidor, configuração das gravações, desligar desktop/hub | `config.html` |
+| **Config** | CPU/memória do servidor; câmeras, agendas, trânsito, menu, painel, livros e integrações em abas, com ajuda embutida; desligar desktop/hub | `config.html` |
 | **Modo noturno** | Das 23h às 5h: tela escura com clima e eventos de amanhã | Início |
 | **Idiomas** | Português, English, Español e 中文, escolhido por aparelho (ou automático, pelo navegador) | Config → Idioma |
 
@@ -45,18 +45,18 @@ O inventário completo, com fontes de dados, endpoints e arquivos de código, es
 ```
 TV / celular / PC ─►  navegador  ─►  http://192.168.0.10/  ─►  Hub Go (server/)
                                                                  ├─ serve o painel (src/)
-                                                       ├─ /api/*  agenda, trânsito, estoque, serviços, câmeras, vídeos, sistema
+                                                       ├─ /api/*  agenda, trânsito, estoque, serviços, câmeras, vídeos, livros, sistema
                                                        ├─ SQLite  (centraldiogo.db)
                                                        └─ guarda as chaves e senhas (nunca vão para os aparelhos)
 ```
 
 - **Hub** (`server/`, Go 1.26, sem CGO): roda no Linux na porta 80, só com biblioteca padrão mais SQLite em Go puro e RTSP.
-  Pensado para máquinas de 2 GB (o serviço limita a 150 MB). Guarda as URLs iCal, a chave do Google Routes, as senhas das câmeras
+  Pensado para máquinas de 2 GB (o serviço limita a memória a 400 MB). Os livros enviados ficam numa pasta do servidor (`~/Livros`), fora do banco. Guarda as URLs iCal, a chave do Google Routes, as senhas das câmeras
   e resolve o CORS do Google.
 - **Painel** (`src/`): HTML e JS clássicos (sem módulos ES, para funcionar também em navegadores de TV). Aberto pelo hub em qualquer navegador.
 - Para abrir na **TV**, use o navegador dela em `http://192.168.0.10/` (e na Config ligue o *Modo compatibilidade* se as câmeras não carregarem). Para mudar o painel basta reenviar o hub.
 - **Sem hub**, o painel ainda abre e mostra clima e feriados; agenda e trânsito aparecem com dados de **exemplo** (etiqueta "exemplo")
-  e as páginas de estoque, serviços, câmeras, vídeos e config avisam que precisam do hub.
+  e as páginas de estoque, serviços, câmeras, vídeos, livros e config avisam que precisam do hub.
 - O hub é aberto à rede de casa, **sem login**. Não exponha à internet.
 
 ## Estrutura do repositório
@@ -150,7 +150,7 @@ No servidor Linux, após copiar e extrair o pacote:
 sudo bash install.sh           # instala em /opt/centraldiogo, libera a porta 80 e ativa o serviço
 bash install.sh --check        # só mostra a versão instalada e a próxima (sem sudo, sem alterar nada)
 ```
-O `install.sh` **não toca no banco**: reinstalar preserva estoque e serviços. Ele também grava a regra do polkit que permite
+O `install.sh` **não toca no banco nem na pasta de livros**: reinstalar preserva estoque, serviços e livros. Ele também grava a regra do polkit que permite
 à página Config parar o desktop e o hub. Comandos úteis: `systemctl status centraldiogo-hub`, `journalctl -u centraldiogo-hub -f`.
 
 **Backup do banco** (modo WAL: não copie só o `.db` com o hub rodando):
@@ -173,7 +173,7 @@ sudo systemctl start centraldiogo-hub
 cd server && go test ./...
 ```
 Cobrem CRUD e validação de estoque/serviços, proteção de origem, sincronização da planilha, câmeras e gravador (retenção, movimento),
-vídeos e legendas, trânsito, versão e métricas do sistema. O painel não tem testes automatizados; só há o verificador das traduções:
+vídeos e legendas, livros (envio, categoria/dono, leitor de EPUB, liga/desliga), trânsito, versão e métricas do sistema. O painel não tem testes automatizados; só há o verificador das traduções:
 ```bash
 node scripts/check-i18n.js
 ```
@@ -184,7 +184,7 @@ node scripts/check-i18n.js
 |---|---|
 | [docs/funcionalidades.md](docs/funcionalidades.md) | **Mapa de todas as funcionalidades**, API, rotinas e código |
 | [docs/cameras.md](docs/cameras.md) | Câmeras ao vivo, rodízio, gravações, modelos Intelbras |
-| [docs/estoque-contatos.md](docs/estoque-contatos.md) | Geladeira, Serviços, planilha, banco, API e segurança; página Vídeos |
+| [docs/estoque-contatos.md](docs/estoque-contatos.md) | Geladeira, Serviços, planilha, banco, API e segurança; páginas Vídeos e Livros |
 | [docs/jogos.md](docs/jogos.md) | Subsistema de conquistas (sem tela) |
 | [docs/spec-design.md](docs/spec-design.md) | Especificação visual (TV 1920×1080) |
 | [docs/decisoes.md](docs/decisoes.md) | Decisões em aberto |

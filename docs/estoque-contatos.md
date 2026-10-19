@@ -108,3 +108,12 @@ o arquivo vem do nginx, sem copiar nada. Legenda com o mesmo nome (`.srt`/`.vtt`
 - Android: abre o VLC direto (intent). iPhone/iPad: `vlc-x-callback`. PC: baixa um `.m3u` que o VLC abre.
 - Porta e caminho do nginx: `videos: { port: 8080, path: '/videos/' }` em `settings.js`.
 - O player embutido decodifica no aparelho (o servidor só entrega o arquivo). A legenda `.srt` é convertida para WebVTT pelo hub (`GET /api/videos/sub?name=`). Se o navegador não conseguir tocar (codec x265/AC3), aparece o aviso para abrir no VLC.
+
+## Livros (`livros.html`)
+Biblioteca de **PDFs e EPUBs** guardados no servidor (pasta `~/Livros`, campo `books.dir` do `hub.config.json`; `books.maxMB` limita cada envio, padrão 300 MB).
+Tudo passa pelo hub (`server/books.go`), sem nginx.
+- **Enviar livro**: um ou mais `.pdf`/`.epub`, com **categoria** e **dono** escolhidos nas listas da Config. O hub confere o conteúdo (PDF começa com `%PDF-`; EPUB é um zip com `container.xml`) e acrescenta “(2)” a nomes repetidos. O envio é o corpo cru do arquivo (`PUT /api/books/file/{nome}?category=&owner=`) e exige o cabeçalho `X-CD-Action: confirm`.
+- **Filtros e busca**: chips por categoria, seletor de dono e campo de busca. O lápis troca categoria e dono (`PATCH /api/books/file/{nome}`); a lixeira exclui o arquivo.
+- **PDF** abre numa aba do navegador. **EPUB** abre no leitor da página: o hub abre o zip (`GET /api/books/epub/{nome}/toc` devolve os capítulos, `.../x/{arquivo}` entrega cada arquivo de dentro), e a página mostra o capítulo num `<iframe sandbox="allow-same-origin">`, sem scripts: o iframe não tem `allow-scripts` e o hub manda uma política (CSP) que proíbe scripts, então nada de um EPUB de terceiros roda no painel. As setas ← → trocam de capítulo e o último lido fica no `localStorage` do aparelho.
+- **Categoria e dono** de cada livro ficam em `.livros.json` dentro da pasta dos livros. As **listas** de categorias e de donos, e o **liga/desliga**, ficam em **Config → Livros** (`panel.books`, vale na hora). Desligada, o atalho some do menu, a página avisa e a API responde 503 (lista e envio) ou 404 (arquivos); os arquivos continuam na pasta.
+- A pasta nasce no primeiro envio. Reinstalar o hub (`install.sh`) não mexe nela.
