@@ -12,6 +12,7 @@
         <tr><td>Cámaras</td><td>Alta de las cámaras, grabación, carpeta de las grabaciones y envío a Google Drive.</td></tr>
         <tr><td>Agendas y rutas</td><td>Agendas (iCal) y el tráfico de cada persona.</td></tr>
         <tr><td>Panel</td><td>Ciudad y clima, modo nocturno, rotación de las cámaras, caducidad, lugares del inventario, vídeos y festivos locales.</td></tr>
+        <tr><td>Libros</td><td>Activa o desactiva la página Libros y define las categorías y los dueños de los libros.</td></tr>
         <tr><td>Menú</td><td>Los botones de acceso directo del pie de la pantalla de inicio.</td></tr>
         <tr><td>Integraciones</td><td>Hoja de cálculo de profesionales, cuentas de juegos, carpeta de vídeos, tiempos de caché y red.</td></tr>
         <tr><td>Idioma</td><td>Idioma de la interfaz: portugués, inglés, español o chino (vale solo en el dispositivo).</td></tr>
@@ -175,6 +176,18 @@
       <h3>Festivos locales</h3>
       <p>Complementan los festivos nacionales (que vienen de BrasilAPI). Indique el <b>día y mes</b> (el año se ignora: se repite cada año), el <b>nombre</b> y el <b>tipo</b> (local, estatal, nacional), que cambia el color de la insignia en la pantalla de inicio. Si nunca los editó, valen los de São Paulo (aniversario de la ciudad y 9 de julio). La lista que guarde <b>sustituye</b> a la predeterminada.</p>` },
 
+    { id: 'livros', title: 'Libros (PDF y EPUB)', html: `
+      <p>La página <b>Libros</b> guarda PDF y EPUB en el servidor (carpeta <code>~/Livros</code>) y permite subir archivos nuevos desde el propio panel. Cada libro puede tener una <b>categoría</b> y un <b>dueño</b>.</p>
+      <table class="help-t"><tr><th>Opción</th><th>Qué hace</th></tr>
+        <tr><td>Mostrar la página Libros</td><td>Desactivada, el acceso desaparece del menú y el servidor deja de listar, entregar y recibir libros. Los archivos siguen en la carpeta; al activarla de nuevo, todo vuelve.</td></tr>
+        <tr><td>Categorías</td><td>Una por línea. Se convierten en filtros de la página y en opciones al subir o editar un libro. Quitar una categoría de la lista <b>no</b> borra el libro ni la categoría que ya tiene.</td></tr>
+        <tr><td>Dueños</td><td>Uno por línea (de quién es el libro). El filtro de dueño aparece en la página cuando algún libro tiene dueño.</td></tr></table>
+      <p>Surte efecto al instante; las pantallas abiertas lo toman en un máximo de 5 minutos.</p>
+      <h3>En la página Libros</h3>
+      <ul><li><b>Subir libro</b>: elija uno o más archivos .pdf o .epub (hasta 300 MB cada uno), la categoría y el dueño. Un nombre repetido recibe “(2)”.</li>
+        <li><b>PDF</b> se abre en una pestaña del navegador. <b>EPUB</b> se abre en el lector de la página: las flechas ← → o los botones cambian de capítulo, y el último capítulo leído queda recordado en este dispositivo.</li>
+        <li>El lápiz cambia categoría y dueño; la papelera elimina el archivo del servidor (no se puede deshacer).</li></ul>
+    ` },
     { id: 'menu', title: 'Menú de accesos directos', html: `
       <p>Son los botones del pie de la pantalla de inicio. Puede añadir, quitar, renombrar y reordenar.</p>
       <h3>Campos de cada acceso directo</h3>
@@ -185,7 +198,7 @@
         <tr><td>Puerto</td><td><b>Vacío</b>: el acceso abre una página del propio panel/hub. <b>Rellenado</b>: abre otro servicio de la misma máquina en ese puerto (p. ej.: 4533 para Navidrome).</td></tr>
         <tr><td>Ruta</td><td>Empieza por <code>/</code>. Ejemplos: <code>/estoque.html</code>, <code>/camaras.html</code>, <code>/videos.html</code>, <code>/</code>. Puede usar <code>{host}</code> para la dirección de la máquina (p. ej.: <code>/jogos/play/?feed={host}:8080/roms/feed.json</code>).</td></tr></table>
       <h3>Páginas del panel disponibles</h3>
-      <p><code>/estoque.html</code> (Nevera), <code>/contatos.html</code> (Servicios), <code>/camaras.html</code> (Cámaras), <code>/videos.html</code> (Vídeos), <code>/config.html</code> (Config).</p>
+      <p><code>/estoque.html</code> (Nevera), <code>/contatos.html</code> (Servicios), <code>/camaras.html</code> (Cámaras), <code>/videos.html</code> (Vídeos), <code>/livros.html</code> (Libros), <code>/config.html</code> (Config).</p>
       <h3>Reordenar, quitar, restaurar</h3>
       <ul><li>Use las flechas <b>↑</b> y <b>↓</b> y haga clic en <b>Guardar menú</b>.</li>
         <li><b>Quitar</b> guarda al instante.</li>

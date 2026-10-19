@@ -27,7 +27,8 @@ type Config struct {
 	DBPath               string      `json:"dbPath"` // banco SQLite (estoque e contatos); relativo à pasta do hub.config.json
 	ProfissionaisSheet   SheetConfig `json:"profissionaisSheet"`
 	Videos         VideosConfig     `json:"videos"`         // pasta dos vídeos servida pelo nginx em /videos/ (lista da página Vídeos)
-	Cameras        []CameraConfig   `json:"cameras"`        // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
+	Books          BooksConfig      `json:"books"`          // pasta dos livros PDF/EPUB (página Livros: lista, envio e leitor)
+	Cameras        []CameraConfig   `json:"cameras"`       // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
 	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
 	DriveSync      DriveSyncConfig  `json:"driveSync"`      // cópia diária das gravações para o Google Drive via rclone (drive.go)
 	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
@@ -62,7 +63,7 @@ func homeDir() string {
 }
 
 func loadConfig(path string) Config {
-	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db", Videos: VideosConfig{Dir: filepath.Join(homeDir(), "Videos")}}
+	c := Config{Listen: ":8080", StaticDir: "../src", CalendarCacheMinutes: 5, TrafficCacheMinutes: 10, ForceIPv4: true, DBPath: "centraldiogo.db", Videos: VideosConfig{Dir: filepath.Join(homeDir(), "Videos")}, Books: BooksConfig{Dir: filepath.Join(homeDir(), "Livros")}}
 	b, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
 		// Primeira execução: sobe com os padrões e tudo (câmeras, agendas, trânsito...) se configura pela página Config.
@@ -90,7 +91,7 @@ func withCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -152,6 +153,7 @@ func main() {
 	sm.register(mux)
 	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
 	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
+	newBooks(cfg.Books, cfg.AllowedOrigins, sm.booksEnabled).register(mux)
 	if db != nil && cfg.ProfissionaisSheet.URL != "" {
 		go db.sheetLoop(cfg.ProfissionaisSheet.URL, time.Duration(cfg.ProfissionaisSheet.Minutes)*time.Minute)
 	}

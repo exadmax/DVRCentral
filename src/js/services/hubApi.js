@@ -44,7 +44,7 @@
       // mescla na configuração em uso. O que não foi editado continua com o padrão do settings.js.
       async loadPanel(cfg) {
         const j = await call('GET', '/api/settings/panel');
-        ['location', 'night', 'cameras', 'estoque', 'videos'].forEach(k => { if (j[k]) cfg[k] = Object.assign(cfg[k] || {}, j[k]); });
+        ['location', 'night', 'cameras', 'estoque', 'videos', 'books'].forEach(k => { if (j[k]) cfg[k] = Object.assign(cfg[k] || {}, j[k]); });
         if (j.refreshMinutes) cfg.refreshMinutes = j.refreshMinutes;
         if (j.localHolidays) cfg.localHolidays = j.localHolidays;
         if (j.locais && CD.stock) CD.stock.setLocais(j.locais);
@@ -55,6 +55,34 @@
       save(section, obj) { return call('PUT', '/api/settings/' + section, obj, { 'X-CD-Action': 'confirm' }); }
     },
     videos: { list() { return call('GET', '/api/videos'); } },
+    // livros (PDF/EPUB): lista, envio (corpo cru do arquivo, com progresso), categoria/dono, exclusão e leitor de EPUB (capítulos servidos pelo hub)
+    books: {
+      list() { return call('GET', '/api/books'); },
+      setMeta(name, o) { return call('PATCH', '/api/books/file/' + encodeURIComponent(name), o, { 'X-CD-Action': 'confirm' }); },
+      remove(name) { return call('DELETE', '/api/books/file/' + encodeURIComponent(name), undefined, { 'X-CD-Action': 'confirm' }); },
+      fileUrl(name, download) { return CD.state.hub + '/api/books/file/' + encodeURIComponent(name) + (download ? '?download=1' : ''); },
+      toc(name) { return call('GET', '/api/books/epub/' + encodeURIComponent(name) + '/toc'); },
+      chapterUrl(name, href) { return CD.state.hub + '/api/books/epub/' + encodeURIComponent(name) + '/x/' + href.split('/').map(encodeURIComponent).join('/'); },
+      upload(file, meta, onProgress) {
+        const t = CD.i18n.t, base = CD.state && CD.state.hub;
+        return new Promise((resolve, reject) => {
+          if (!base) return reject(new Error(t('err.nohub')));
+          const x = new XMLHttpRequest();
+          x.open('PUT', base + '/api/books/file/' + encodeURIComponent(file.name) + '?category=' + encodeURIComponent(meta.category || '') + '&owner=' + encodeURIComponent(meta.owner || ''));
+          x.setRequestHeader('X-CD-Action', 'confirm');
+          x.setRequestHeader('Content-Type', 'application/octet-stream');
+          if (x.upload && onProgress) x.upload.onprogress = e => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
+          x.onerror = () => reject(new Error(t('err.offline')));
+          x.onload = () => {
+            let j = null;
+            try { j = JSON.parse(x.responseText); } catch (e) { /* corpo vazio ou não JSON */ }
+            if (x.status >= 200 && x.status < 300) resolve(j);
+            else reject(new Error(CD.i18n.srv(j && j.error) || t('err.http', { n: x.status })));
+          };
+          x.send(file);
+        });
+      }
+    },
     // gravações das câmeras: arquivos de 1 hora no servidor; as configurações (liga/desliga, câmeras, retenção) ficam na página Config
     recordings: {
       list() { return call('GET', '/api/recordings'); },

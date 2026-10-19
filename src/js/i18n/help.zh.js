@@ -12,6 +12,7 @@
         <tr><td>摄像头</td><td>摄像头登记、录像、录像文件夹以及上传到 Google Drive。</td></tr>
         <tr><td>日历与路线</td><td>日历（iCal）以及每个人的路况。</td></tr>
         <tr><td>面板</td><td>城市与天气、夜间模式、摄像头轮播、保质期、库存位置、视频和本地假日。</td></tr>
+        <tr><td>图书</td><td>开启或关闭“图书”页面，并设置图书的分类和所有者。</td></tr>
         <tr><td>菜单</td><td>主屏幕底部的快捷按钮。</td></tr>
         <tr><td>集成</td><td>服务商表格、游戏账号、视频文件夹、缓存时间和网络。</td></tr>
         <tr><td>语言</td><td>界面语言：葡萄牙语、英语、西班牙语或中文（仅对此设备有效）。</td></tr>
@@ -175,6 +176,18 @@
       <h3>本地假日</h3>
       <p>用于补充全国假日（来自 BrasilAPI）。请填写<b>月和日</b>（年份会被忽略：每年重复）、<b>名称</b>和<b>类型</b>（本地、州、全国），类型会改变主屏幕上徽标的颜色。如果您从未编辑过，则使用圣保罗的假日（市庆日和 7 月 9 日）。您保存的列表会<b>替换</b>默认列表。</p>` },
 
+    { id: 'livros', title: '图书（PDF 和 EPUB）', html: `
+      <p>“<b>图书</b>”页面把 PDF 和 EPUB 保存在服务器上（文件夹 <code>~/Livros</code>），并可直接在面板里上传新文件。每本书可以设置<b>分类</b>和<b>所有者</b>。</p>
+      <table class="help-t"><tr><th>选项</th><th>作用</th></tr>
+        <tr><td>显示“图书”页面</td><td>关闭后，菜单中的快捷方式消失，服务器也不再列出、提供或接收图书。文件仍保留在文件夹中；重新开启即可恢复。</td></tr>
+        <tr><td>分类</td><td>每行一个。会成为页面上的筛选项，以及上传或编辑图书时的选项。从列表中删除分类<b>不会</b>删除图书，也不会改变图书已有的分类。</td></tr>
+        <tr><td>所有者</td><td>每行一个（这本书是谁的）。只要有图书设置了所有者，页面上就会出现所有者筛选。</td></tr></table>
+      <p>立即生效；已打开的屏幕最多 5 分钟内更新。</p>
+      <h3>在“图书”页面</h3>
+      <ul><li><b>上传图书</b>：选择一个或多个 .pdf 或 .epub 文件（每个最大 300 MB），再选分类和所有者。重名文件会加上“(2)”。</li>
+        <li><b>PDF</b> 在浏览器新标签页中打开。<b>EPUB</b> 在页面内的阅读器中打开：用 ← → 箭头或按钮切换章节，最后阅读的章节会记在本设备上。</li>
+        <li>铅笔图标可修改分类和所有者；垃圾桶图标会从服务器删除文件（无法撤销）。</li></ul>
+    ` },
     { id: 'menu', title: '快捷菜单', html: `
       <p>这些是主屏幕底部的按钮。您可以添加、移除、重命名和调整顺序。</p>
       <h3>每个快捷方式的字段</h3>
@@ -185,7 +198,7 @@
         <tr><td>端口</td><td><b>留空</b>：快捷方式打开面板/hub 自带的页面。<b>已填写</b>：打开同一台主机上该端口的其他服务（例如 4533 对应 Navidrome）。</td></tr>
         <tr><td>路径</td><td>以 <code>/</code> 开头。示例：<code>/estoque.html</code>、<code>/camaras.html</code>、<code>/videos.html</code>、<code>/</code>。可以用 <code>{host}</code> 表示主机地址（例如 <code>/jogos/play/?feed={host}:8080/roms/feed.json</code>）。</td></tr></table>
       <h3>可用的面板页面</h3>
-      <p><code>/estoque.html</code>（冰箱）、<code>/contatos.html</code>（服务）、<code>/camaras.html</code>（摄像头）、<code>/videos.html</code>（视频）、<code>/config.html</code>（设置）。</p>
+      <p><code>/estoque.html</code>（冰箱）、<code>/contatos.html</code>（服务）、<code>/camaras.html</code>（摄像头）、<code>/videos.html</code>（视频）、<code>/livros.html</code>（图书）、<code>/config.html</code>（设置）。</p>
       <h3>调整顺序、移除、恢复</h3>
       <ul><li>使用箭头 <b>↑</b> 和 <b>↓</b>，然后点击<b>保存菜单</b>。</li>
         <li><b>移除</b>会立即保存。</li>

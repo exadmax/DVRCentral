@@ -23,13 +23,14 @@
     'page.estoque.label': 'Geladeira e Dispensa', 'page.estoque.sub': 'itens e validades',
     'page.contatos.label': 'Serviços', 'page.contatos.sub': 'profissionais e prestadores',
     'page.camaras.label': 'Câmeras', 'page.camaras.sub': 'imagem ao vivo',
+    'page.livros.label': 'Livros', 'page.livros.sub': 'PDF e EPUB',
     'page.videos.label': 'Vídeos', 'page.videos.sub': 'abrir no VLC',
     'page.config.sub': 'servidor',
 
     // ---- nomes de fábrica (menu, locais do estoque, agendas de exemplo) ----
     'def.games': 'Jogos', 'def.fridge': 'Geladeira', 'def.freezer': 'Freezer', 'def.pantry': 'Dispensa', 'def.services': 'Serviços',
-    'def.cameras': 'Câmeras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.config': 'Config', 'def.couple': 'Casal',
-    'def.fridge.sub': 'Itens e validades', 'def.services.sub': 'Profissionais', 'def.cameras.sub': 'Ao vivo', 'def.videos.sub': 'Abrir no VLC', 'def.config.sub': 'Servidor',
+    'def.cameras': 'Câmeras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Livros', 'def.config': 'Config', 'def.couple': 'Casal',
+    'def.fridge.sub': 'Itens e validades', 'def.services.sub': 'Profissionais', 'def.cameras.sub': 'Ao vivo', 'def.videos.sub': 'Abrir no VLC', 'def.books.sub': 'PDF e EPUB', 'def.config.sub': 'Servidor',
 
     // ---- tela inicial ----
     'ag.today': 'Agenda de hoje', 'ag.events.one': '{n} evento', 'ag.events.other': '{n} eventos', 'ag.none': 'Nada agendado hoje',
@@ -71,6 +72,14 @@
     'est.e.number': 'Quantidade e peso devem ser números maiores ou iguais a zero.',
 
     // ---- serviços (profissionais) ----
+    'liv.search': 'Buscar livro', 'liv.upload': 'Enviar livro', 'liv.edit': 'Editar livro', 'liv.count.one': '{n} livro', 'liv.count.other': '{n} livros',
+    'liv.notfound': 'Nenhum livro encontrado', 'liv.empty': 'Nenhum livro ainda. Toque em “Enviar livro” para adicionar PDFs e EPUBs.',
+    'liv.off': 'A página Livros está desligada. Para ligar, vá em Config > Livros.', 'liv.nohub': 'Sem o hub: abra o painel pelo endereço do servidor da casa para ver os livros.',
+    'liv.f.file': 'Arquivos PDF ou EPUB', 'liv.f.category': 'Categoria', 'liv.f.owner': 'Dono', 'liv.none': '— nenhum —', 'liv.allOwners': 'Todos os donos',
+    'liv.e.file': 'Escolha ao menos um arquivo PDF ou EPUB.', 'liv.e.type': '“{name}” não é PDF nem EPUB.', 'liv.sending': 'Enviando {i} de {n} · {p}%', 'liv.fail': '{name}: {msg}',
+    'liv.read': 'Ler', 'liv.open': 'Abrir', 'liv.download': 'Baixar', 'liv.uncat': 'Sem categoria',
+    'liv.contents': 'Sumário', 'liv.chapter': 'Capítulo {n}', 'liv.prev': 'Anterior', 'liv.next': 'Próximo', 'liv.opening': 'Abrindo o livro…', 'liv.openErr': 'Não foi possível abrir este EPUB.',
+    'liv.cats': ['Romance', 'Técnico', 'Infantil', 'Culinária', 'Religião', 'Outros'],
     'con.wa': 'Tentar WhatsApp com {name}', 'con.search': 'Buscar profissional', 'con.new': 'Novo profissional', 'con.edit': 'Editar profissional',
     'con.count.one': '{n} profissional', 'con.count.other': '{n} profissionais', 'con.notfound': 'Nenhum profissional encontrado',
     'con.empty': 'Nenhum profissional cadastrado. Toque em “Novo profissional” para começar.',
@@ -103,7 +112,7 @@
 
     // ---- Config: abas, servidor e gravação ----
     'cfg.tab.servidor': 'Servidor', 'cfg.tab.cameras': 'Câmeras', 'cfg.tab.agendas': 'Agendas e rotas', 'cfg.tab.painel': 'Painel', 'cfg.tab.menu': 'Menu',
-    'cfg.tab.integracoes': 'Integrações', 'cfg.tab.idioma': 'Idioma', 'cfg.tab.compat': 'Compatibilidade', 'cfg.tab.ajuda': 'Ajuda', 'cfg.helpTab': 'Ajuda desta aba',
+    'cfg.tab.livros': 'Livros', 'cfg.tab.integracoes': 'Integrações', 'cfg.tab.idioma': 'Idioma', 'cfg.tab.compat': 'Compatibilidade', 'cfg.tab.ajuda': 'Ajuda', 'cfg.helpTab': 'Ajuda desta aba',
     'cfg.linuxOnly': 'Só no servidor Linux.',
     'cfg.m.hubCpu': 'Hub · CPU', 'cfg.m.hubCpuD': 'da CPU total ({n} núcleos)', 'cfg.m.hubMem': 'Hub · memória', 'cfg.m.hubMemD': '{size} da RAM',
     'cfg.m.pcCpu': 'Máquina · CPU', 'cfg.m.pcCpuD': '{n} núcleos', 'cfg.m.pcMem': 'Máquina · memória', 'cfg.m.pcMemD': '{used} de {total}',
@@ -173,7 +182,7 @@
     'ce.compat.tv': 'Navegador de TV detectado: {v}.',
     'ico.gamepad': 'Jogos', 'ico.fridge': 'Geladeira', 'ico.phone': 'Telefone', 'ico.camera': 'Câmera', 'ico.music': 'Música', 'ico.film': 'Filme', 'ico.folder': 'Pasta',
     'ico.gear': 'Engrenagem', 'ico.home': 'Casa', 'ico.link': 'Link', 'ico.box': 'Caixa', 'ico.clock': 'Relógio', 'ico.mail': 'E-mail', 'ico.user': 'Pessoa',
-    'ico.pin': 'Local', 'ico.trophy': 'Troféu', 'ico.umbrella': 'Guarda-chuva', 'ico.search': 'Busca',
+    'ico.pin': 'Local', 'ico.trophy': 'Troféu', 'ico.umbrella': 'Guarda-chuva', 'ico.book': 'Livro', 'ico.search': 'Busca',
 
     // ---- Config: painel e integrações ----
     'cp.loc.title': 'Localização e clima', 'cp.loc.hint': 'Usada no clima (Open-Meteo) e no cabeçalho da tela inicial.', 'cp.loc.city': 'Cidade', 'cp.loc.state': 'Estado',
@@ -183,6 +192,9 @@
     'cp.rot.title': 'Câmeras na tela inicial', 'cp.rot.hint': 'Cada câmera aparece no lugar do Clima por este tempo e depois o Clima volta (rodízio).', 'cp.rot.secs': 'Segundos por câmera',
     'cp.soon.title': 'Aviso de validade', 'cp.soon.hint': 'Itens da geladeira e da dispensa que vencem em até N dias ficam em destaque âmbar (vencidos, em vermelho).',
     'cp.soon.days': 'Avisar com quantos dias de antecedência',
+    'cp.books.title': 'Livros (PDF e EPUB)', 'cp.books.hint': 'Os arquivos ficam na pasta “Livros” do servidor. Aqui você liga ou desliga a página e define as listas de categorias e de donos que aparecem ao enviar um livro.',
+    'cp.books.enable': 'Mostrar a página Livros (desligada, some do menu e o servidor não entrega os livros)', 'cp.books.cats': 'Categorias (uma por linha)', 'cp.books.owners': 'Donos (um por linha)',
+    'cp.books.catsPh': 'Romance\nTécnico\nInfantil', 'cp.books.ownersPh': 'Ana\nBruno',
     'cp.vid.title': 'Página Vídeos (endereço de reprodução)', 'cp.vid.hint': 'Os arquivos são entregues por um servidor web da máquina (nginx). A pasta que o hub lista fica em Integrações.',
     'cp.vid.port': 'Porta',
     'cp.locais.title': 'Locais do estoque', 'cp.locais.hint': 'Onde os itens são guardados (aparecem como abas em Geladeira e Dispensa). Um local só pode ser removido quando estiver vazio.',

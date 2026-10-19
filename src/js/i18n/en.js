@@ -22,13 +22,14 @@
     'page.estoque.label': 'Fridge & Pantry', 'page.estoque.sub': 'items and expiry dates',
     'page.contatos.label': 'Services', 'page.contatos.sub': 'professionals and contractors',
     'page.camaras.label': 'Cameras', 'page.camaras.sub': 'live view',
+    'page.livros.label': 'Books', 'page.livros.sub': 'PDF and EPUB',
     'page.videos.label': 'Videos', 'page.videos.sub': 'open in VLC',
     'page.config.sub': 'server',
 
     // ---- factory names (menu, stock places, sample calendars) ----
     'def.games': 'Games', 'def.fridge': 'Fridge', 'def.freezer': 'Freezer', 'def.pantry': 'Pantry', 'def.services': 'Services',
-    'def.cameras': 'Cameras', 'def.music': 'Music', 'def.videos': 'Videos', 'def.config': 'Config', 'def.couple': 'Couple',
-    'def.fridge.sub': 'Items & expiry', 'def.services.sub': 'Professionals', 'def.cameras.sub': 'Live', 'def.videos.sub': 'Open in VLC', 'def.config.sub': 'Server',
+    'def.cameras': 'Cameras', 'def.music': 'Music', 'def.videos': 'Videos', 'def.books': 'Books', 'def.config': 'Config', 'def.couple': 'Couple',
+    'def.fridge.sub': 'Items & expiry', 'def.services.sub': 'Professionals', 'def.cameras.sub': 'Live', 'def.videos.sub': 'Open in VLC', 'def.books.sub': 'PDF and EPUB', 'def.config.sub': 'Server',
 
     // ---- home screen ----
     'ag.today': 'Today’s agenda', 'ag.events.one': '{n} event', 'ag.events.other': '{n} events', 'ag.none': 'Nothing scheduled today',
@@ -70,6 +71,14 @@
     'est.e.number': 'Quantity and weight must be numbers greater than or equal to zero.',
 
     // ---- services (professionals) ----
+    'liv.search': 'Search books', 'liv.upload': 'Upload book', 'liv.edit': 'Edit book', 'liv.count.one': '{n} book', 'liv.count.other': '{n} books',
+    'liv.notfound': 'No books found', 'liv.empty': 'No books yet. Tap “Upload book” to add PDFs and EPUBs.',
+    'liv.off': 'The Books page is turned off. To turn it on, go to Config > Books.', 'liv.nohub': 'No hub: open the panel through the home server address to see the books.',
+    'liv.f.file': 'PDF or EPUB files', 'liv.f.category': 'Category', 'liv.f.owner': 'Owner', 'liv.none': '— none —', 'liv.allOwners': 'All owners',
+    'liv.e.file': 'Choose at least one PDF or EPUB file.', 'liv.e.type': '“{name}” is not a PDF or EPUB.', 'liv.sending': 'Uploading {i} of {n} · {p}%', 'liv.fail': '{name}: {msg}',
+    'liv.read': 'Read', 'liv.open': 'Open', 'liv.download': 'Download', 'liv.uncat': 'No category',
+    'liv.contents': 'Contents', 'liv.chapter': 'Chapter {n}', 'liv.prev': 'Previous', 'liv.next': 'Next', 'liv.opening': 'Opening the book…', 'liv.openErr': 'Could not open this EPUB.',
+    'liv.cats': ['Fiction', 'Technical', 'Children', 'Cooking', 'Religion', 'Other'],
     'con.wa': 'Try WhatsApp with {name}', 'con.search': 'Search professionals', 'con.new': 'New professional', 'con.edit': 'Edit professional',
     'con.count.one': '{n} professional', 'con.count.other': '{n} professionals', 'con.notfound': 'No professionals found',
     'con.empty': 'No professionals yet. Tap “New professional” to get started.',
@@ -102,7 +111,7 @@
 
     // ---- Config: tabs, server and recording ----
     'cfg.tab.servidor': 'Server', 'cfg.tab.cameras': 'Cameras', 'cfg.tab.agendas': 'Calendars & routes', 'cfg.tab.painel': 'Panel', 'cfg.tab.menu': 'Menu',
-    'cfg.tab.integracoes': 'Integrations', 'cfg.tab.idioma': 'Language', 'cfg.tab.compat': 'Compatibility', 'cfg.tab.ajuda': 'Help', 'cfg.helpTab': 'Help for this tab',
+    'cfg.tab.livros': 'Books', 'cfg.tab.integracoes': 'Integrations', 'cfg.tab.idioma': 'Language', 'cfg.tab.compat': 'Compatibility', 'cfg.tab.ajuda': 'Help', 'cfg.helpTab': 'Help for this tab',
     'cfg.linuxOnly': 'Only on the Linux server.',
     'cfg.m.hubCpu': 'Hub · CPU', 'cfg.m.hubCpuD': 'of total CPU ({n} cores)', 'cfg.m.hubMem': 'Hub · memory', 'cfg.m.hubMemD': '{size} of RAM',
     'cfg.m.pcCpu': 'Machine · CPU', 'cfg.m.pcCpuD': '{n} cores', 'cfg.m.pcMem': 'Machine · memory', 'cfg.m.pcMemD': '{used} of {total}',
@@ -172,7 +181,7 @@
     'ce.compat.tv': 'TV browser detected: {v}.',
     'ico.gamepad': 'Games', 'ico.fridge': 'Fridge', 'ico.phone': 'Phone', 'ico.camera': 'Camera', 'ico.music': 'Music', 'ico.film': 'Film', 'ico.folder': 'Folder',
     'ico.gear': 'Gear', 'ico.home': 'Home', 'ico.link': 'Link', 'ico.box': 'Box', 'ico.clock': 'Clock', 'ico.mail': 'E-mail', 'ico.user': 'Person',
-    'ico.pin': 'Place', 'ico.trophy': 'Trophy', 'ico.umbrella': 'Umbrella', 'ico.search': 'Search',
+    'ico.pin': 'Place', 'ico.trophy': 'Trophy', 'ico.umbrella': 'Umbrella', 'ico.book': 'Book', 'ico.search': 'Search',
 
     // ---- Config: panel and integrations ----
     'cp.loc.title': 'Location and weather', 'cp.loc.hint': 'Used for the weather (Open-Meteo) and the home screen header.', 'cp.loc.city': 'City', 'cp.loc.state': 'State',
@@ -182,6 +191,9 @@
     'cp.rot.title': 'Cameras on the home screen', 'cp.rot.hint': 'Each camera takes the place of the Weather for this long, then the Weather comes back (rotation).', 'cp.rot.secs': 'Seconds per camera',
     'cp.soon.title': 'Expiry warning', 'cp.soon.hint': 'Fridge and pantry items that expire within N days are highlighted in amber (expired ones in red).',
     'cp.soon.days': 'Warn how many days ahead',
+    'cp.books.title': 'Books (PDF and EPUB)', 'cp.books.hint': 'The files live in the server’s “Livros” folder. Here you turn the page on or off and set the category and owner lists offered when uploading a book.',
+    'cp.books.enable': 'Show the Books page (when off, it disappears from the menu and the server does not deliver the books)', 'cp.books.cats': 'Categories (one per line)', 'cp.books.owners': 'Owners (one per line)',
+    'cp.books.catsPh': 'Fiction\nTechnical\nChildren', 'cp.books.ownersPh': 'Ann\nBob',
     'cp.vid.title': 'Videos page (playback address)', 'cp.vid.hint': 'The files are served by a web server on the machine (nginx). The folder the hub lists is set in Integrations.',
     'cp.vid.port': 'Port',
     'cp.locais.title': 'Stock places', 'cp.locais.hint': 'Where items are kept (they show up as tabs in Fridge & Pantry). A place can only be removed when it is empty.',

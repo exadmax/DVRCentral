@@ -15,6 +15,7 @@ window.CD_SETTINGS = {
     { label: 'Câmeras', sub: 'Ao vivo', icon: 'camera', path: '/camaras.html' },
     { label: 'Música', sub: 'Navidrome', icon: 'music',   port: 4533, path: '/' },
     { label: 'Vídeos', sub: 'Abrir no VLC', icon: 'film', path: '/videos.html' },
+    { label: 'Livros', sub: 'PDF e EPUB', icon: 'book', path: '/livros.html' },
     { label: 'Config', sub: 'Servidor', icon: 'gear', path: '/config.html' }
   ],
 

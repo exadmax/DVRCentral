@@ -90,7 +90,8 @@
   const DEFAULTS = {
     'Jogos': 'def.games', 'Geladeira': 'def.fridge', 'Freezer': 'def.freezer', 'Dispensa': 'def.pantry', 'Serviços': 'def.services',
     'Câmeras': 'def.cameras', 'Música': 'def.music', 'Vídeos': 'def.videos', 'Config': 'def.config', 'Itens e validades': 'def.fridge.sub',
-    'Profissionais': 'def.services.sub', 'Ao vivo': 'def.cameras.sub', 'Abrir no VLC': 'def.videos.sub', 'Servidor': 'def.config.sub', 'Casal': 'def.couple'
+    'Profissionais': 'def.services.sub', 'Ao vivo': 'def.cameras.sub', 'Abrir no VLC': 'def.videos.sub', 'Servidor': 'def.config.sub', 'Casal': 'def.couple',
+    'Livros': 'def.books', 'PDF e EPUB': 'def.books.sub'
   };
   function user(text) {
     if (cur === 'pt' || !text || !DEFAULTS[text]) return text;

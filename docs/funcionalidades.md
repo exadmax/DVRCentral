@@ -26,6 +26,7 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 | **Serviços** | `contatos.html` + `js/pages/contatos.js` | Serviços | ✅ | CRUD de profissionais (eletricista, encanador...); sincroniza com Google Planilhas |
 | **Câmeras** | `camaras.html` + `js/pages/camaras.js` | Câmeras | ✅ | Imagem ao vivo de cada câmera e lista de gravações (assistir/baixar) |
 | **Vídeos** | `videos.html` + `js/pages/videos.js` | Vídeos | ✅ | Lista a pasta de vídeos; tocar no navegador, abrir no VLC, copiar link |
+| **Livros** | `livros.html` + `js/pages/livros.js` | Livros | ✅ | PDFs e EPUBs no servidor: envio pelo painel, categoria e dono, leitor de EPUB; pode ser desligada na Config |
 | **Config** | `config.html` + `js/pages/config.js` | Config | ✅ | CPU/memória do servidor, botões de energia e configuração das gravações |
 | Jogos (externo) | — | Jogos | ➖ | Abre o WebRCade (porta 8080) |
 | Música (externo) | — | Música | ➖ | Abre o Navidrome (porta 4533) |
@@ -77,6 +78,13 @@ sistema 10 s, tela 30 s.
 - **Tocar aqui** (mp4/webm/mov/mkv, legenda `.srt`/`.vtt`), **Abrir no VLC** (intent no Android, `vlc-x-callback` no iOS, `.m3u` no PC), **Copiar link**, **Link direto**.
 - Os arquivos são entregues pelo nginx em `:8080/videos/`; o hub só lista os nomes.
 
+### 2.5.1 Livros (PDF e EPUB)
+- Os arquivos ficam na pasta `~/Livros` do servidor (`books.dir`); `books.maxMB` limita o tamanho de cada envio (padrão 300 MB). Mais recentes primeiro.
+- **Enviar livro**: um ou mais `.pdf`/`.epub` de uma vez, com **categoria** e **dono** (listas da Config). O hub confere o conteúdo (PDF começa com `%PDF-`; EPUB é um zip com `container.xml`) e acrescenta “(2)” a nomes repetidos.
+- Filtros por categoria (chips), por dono e busca. O lápis troca categoria e dono; a lixeira exclui o arquivo.
+- **PDF** abre numa aba do navegador. **EPUB** abre no leitor da página: o hub abre o zip (`archive/zip`), devolve o sumário e serve cada capítulo, e a página mostra o capítulo num `<iframe sandbox="allow-same-origin">`. O hub manda uma política (CSP) que proíbe scripts do livro. O último capítulo lido fica no `localStorage` do aparelho.
+- Categoria e dono de cada livro ficam em `.livros.json` dentro da pasta; as listas de categorias e donos e o **liga/desliga** ficam na Config > Livros (`panel.books`). Desligada, o atalho some do menu e a API responde 503 (lista/envio) ou 404 (arquivos).
+
 ### 2.6 Config
 - Medidores: CPU e memória do hub e da máquina (atualiza a cada 5 s).
 - **Gravação das câmeras**: chave geral e, por câmera: liga/desliga, modo (contínuo ou só movimento), sensibilidade 1–5, guardar por N dias, limite em GB.
@@ -84,6 +92,7 @@ sistema 10 s, tela 30 s.
   - **Câmeras**: cadastro (nome + endereço RTSP), gravação por câmera, pasta das gravações e envio ao Drive (ligar, destino do rclone, hora, tamanho máximo).
   - **Agendas e rotas**: agendas iCal e **pessoas do trânsito** (adicionar/remover), cada uma com nome, horário de chegada, rotas (origem, destino, dias, "a partir de") e a **regra de consulta da API**: *só quando eu pedir* (botão "Ver trânsito", como o Diogo), *automático numa janela de horário* com "esconder depois de" (como a Pessoa 2) ou *sempre*.
   - **Painel** (vale na hora, até 5 min nas telas abertas): localização/clima e intervalo de atualização, modo noturno, tempo do rodízio das câmeras, dias do aviso de validade, **locais do estoque** (um local só sai se estiver vazio), endereço da página Vídeos e feriados locais.
+  - **Livros**: liga/desliga a página e define as listas de categorias e de donos (uma por linha; vale na hora).
   - **Menu**: atalhos do rodapé (o da Config não pode ser removido).
   - **Integrações**: planilha de profissionais, contas de jogos (Steam, PSN, Xbox, RetroAchievements), pasta de vídeos, tempos de cache e IPv4. **Essas opções do hub só valem depois de reiniciar o hub**: a tela mostra "aguardando reinício" e um botão que reinicia pelo systemd.
   - **Ajuda**: manual completo de cada configuração, com busca e índice (`js/pages/configHelp.js`); cada aba tem o link "Ajuda desta aba". Ao mudar uma opção, atualize o texto desse arquivo.
@@ -120,6 +129,13 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `POST /api/recordings/drive/skip` | Marca como já enviadas as pendentes mais velhas que N dias (exige `X-CD-Action: confirm`) | `drive.go` |
 | `GET /api/videos` | Lista da pasta de vídeos | `videos.go` |
 | `GET /api/videos/sub?name=` | Legenda do vídeo em WebVTT (converte SRT) | `videos.go` |
+| `GET /api/books` | Lista dos livros (`name`, `size`, `time`, `type`, `category`, `owner`) | `books.go` |
+| `PUT /api/books/file/{nome}?category=&owner=` | Envia um livro (corpo cru do arquivo; exige `X-CD-Action: confirm`) | `books.go` |
+| `PATCH /api/books/file/{nome}` | Troca categoria e dono, corpo `{"category","owner"}` (exige `X-CD-Action: confirm`) | `books.go` |
+| `GET /api/books/file/{nome}` | Entrega o PDF (inline) ou EPUB; `?download=1` baixa | `books.go` |
+| `DELETE /api/books/file/{nome}` | Exclui o livro (exige `X-CD-Action: confirm`) | `books.go` |
+| `GET /api/books/epub/{nome}/toc` | Título e capítulos do EPUB | `books.go` |
+| `GET /api/books/epub/{nome}/x/{arquivo}` | Arquivo de dentro do EPUB (HTML, CSS, imagens, fontes; sem scripts) | `books.go` |
 | `GET /api/system` | CPU/memória da máquina e do hub, `control`, `desktop` | `sysinfo.go` |
 | `POST /api/admin/desktop-off` | Para o display manager (exige `X-CD-Action: confirm`) | `power.go` |
 | `POST /api/admin/hub-off` | Para o serviço do hub (exige `X-CD-Action: confirm`) | `power.go` |
@@ -160,6 +176,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `drive.go` | Cópia diária das gravações para o Google Drive (rclone), divisão de MP4 grande em partes, estado em `drive.state.json` |
 | `motion.go` | Detector de movimento por tamanho de quadro |
 | `videos.go` | Listagem de vídeos e conversão SRT → VTT |
+| `books.go` | Livros PDF/EPUB: lista, envio, categoria/dono, exclusão e leitor de EPUB |
 | `sysinfo.go` + `_linux/_windows/_other.go` | Amostragem de CPU/memória por plataforma |
 | `power.go` | Parar desktop/hub via `systemctl` (polkit) |
 | `games.go`, `games_psn.go`, `games_xbox.go`, `games_steam.go`, `games_retro.go` | Agregador de conquistas e um cliente por plataforma |

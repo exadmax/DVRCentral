@@ -12,6 +12,7 @@
         <tr><td>Cameras</td><td>Camera list, recording, the recordings folder and the upload to Google Drive.</td></tr>
         <tr><td>Calendars &amp; routes</td><td>Calendars (iCal) and each person’s traffic.</td></tr>
         <tr><td>Panel</td><td>City and weather, night mode, camera rotation, expiry warning, stock places, videos and local holidays.</td></tr>
+        <tr><td>Books</td><td>Turns the Books page on or off and sets the book categories and owners.</td></tr>
         <tr><td>Menu</td><td>The shortcut buttons at the bottom of the home screen.</td></tr>
         <tr><td>Integrations</td><td>Professionals spreadsheet, game accounts, videos folder, cache times and network.</td></tr>
         <tr><td>Language</td><td>Interface language: Portuguese, English, Spanish or Chinese (applies to this device only).</td></tr>
@@ -175,6 +176,18 @@
       <h3>Local holidays</h3>
       <p>They complement the national holidays (which come from BrasilAPI). Enter the <b>day and month</b> (the year is ignored: it repeats every year), the <b>name</b> and the <b>type</b> (local, state, national), which changes the badge color on the home screen. If you have never edited them, the São Paulo ones apply (city anniversary and July 9). The list you save <b>replaces</b> the default one.</p>` },
 
+    { id: 'livros', title: 'Books (PDF and EPUB)', html: `
+      <p>The <b>Books</b> page keeps PDFs and EPUBs on the server (folder <code>~/Livros</code>) and lets you upload new files from the panel itself. Each book can have a <b>category</b> and an <b>owner</b>.</p>
+      <table class="help-t"><tr><th>Option</th><th>What it does</th></tr>
+        <tr><td>Show the Books page</td><td>When off, the shortcut disappears from the menu and the server stops listing, delivering and receiving books. The files stay in the folder; turn it on again and everything is back.</td></tr>
+        <tr><td>Categories</td><td>One per line. They become filters on the page and options when uploading or editing a book. Removing a category from the list does <b>not</b> delete the book or the category it already has.</td></tr>
+        <tr><td>Owners</td><td>One per line (whose book it is). The owner filter shows on the page once some book has an owner.</td></tr></table>
+      <p>Takes effect immediately; open screens pick it up within 5 minutes.</p>
+      <h3>On the Books page</h3>
+      <ul><li><b>Upload book</b>: choose one or more .pdf or .epub files (up to 300 MB each), the category and the owner. A repeated name gets “(2)”.</li>
+        <li><b>PDF</b> opens in a browser tab. <b>EPUB</b> opens in the page reader: the ← → arrows or the buttons change chapter, and the last chapter read is remembered on this device.</li>
+        <li>The pencil changes category and owner; the trash can deletes the file from the server (it cannot be undone).</li></ul>
+    ` },
     { id: 'menu', title: 'Shortcut menu', html: `
       <p>These are the buttons at the bottom of the home screen. You can add, remove, rename and reorder them.</p>
       <h3>Fields of each shortcut</h3>
@@ -185,7 +198,7 @@
         <tr><td>Port</td><td><b>Blank</b>: the shortcut opens a page of the panel/hub itself. <b>Filled in</b>: opens another service on the same machine on that port (e.g. 4533 for Navidrome).</td></tr>
         <tr><td>Path</td><td>Starts with <code>/</code>. Examples: <code>/estoque.html</code>, <code>/camaras.html</code>, <code>/videos.html</code>, <code>/</code>. You can use <code>{host}</code> for the machine’s address (e.g. <code>/jogos/play/?feed={host}:8080/roms/feed.json</code>).</td></tr></table>
       <h3>Available panel pages</h3>
-      <p><code>/estoque.html</code> (Fridge), <code>/contatos.html</code> (Services), <code>/camaras.html</code> (Cameras), <code>/videos.html</code> (Videos), <code>/config.html</code> (Config).</p>
+      <p><code>/estoque.html</code> (Fridge), <code>/contatos.html</code> (Services), <code>/camaras.html</code> (Cameras), <code>/videos.html</code> (Videos), <code>/livros.html</code> (Books), <code>/config.html</code> (Config).</p>
       <h3>Reorder, remove, restore</h3>
       <ul><li>Use the <b>↑</b> and <b>↓</b> arrows and click <b>Save menu</b>.</li>
         <li><b>Remove</b> saves immediately.</li>

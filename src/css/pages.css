@@ -190,6 +190,19 @@ a { color: inherit; }
 .vp-msg { font-size: 13px; color: var(--faint); text-align: center; }
 .vp-msg.err { color: #FFB3B3; font-size: 15px; }
 
+/* livros (livros.html): cartões com categoria/dono e leitor de EPUB */
+.ctag.alt { background: rgba(51, 225, 154, .16); color: var(--green); }
+.own-sel { height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--text); font: 400 14px 'Inter', system-ui, sans-serif; }
+.own-sel:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77, 163, 255, .3); }
+.bk-act { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.rd { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 50; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; background: var(--bg); }
+.rd-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rd-name { flex: 1 1 160px; min-width: 0; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rd-sel { max-width: 40vw; min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); font: 400 14px 'Inter', system-ui, sans-serif; }
+.rd-frame { flex: 1; min-height: 0; width: 100%; border: 0; border-radius: 10px; background: #fff; }
+.rd-msg { font-size: 15px; color: var(--faint); text-align: center; }
+.rd-msg.err { color: #FFB3B3; }
+
 /* config (config.html): medidores do servidor e botões de liberar memória */
 .cfg { display: flex; flex-direction: column; gap: 16px; max-width: 900px; }
 .cfg-card { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; border-radius: 14px; background: var(--card); min-width: 0; }
@@ -262,6 +275,7 @@ a { color: inherit; }
 .cfg-root[data-show="agendas"] [data-tab]:not([data-tab="agendas"]),
 .cfg-root[data-show="painel"] [data-tab]:not([data-tab="painel"]),
 .cfg-root[data-show="menu"] [data-tab]:not([data-tab="menu"]),
+.cfg-root[data-show="livros"] [data-tab]:not([data-tab="livros"]),
 .cfg-root[data-show="integracoes"] [data-tab]:not([data-tab="integracoes"]),
 .cfg-root[data-show="idioma"] [data-tab]:not([data-tab="idioma"]),
 .cfg-root[data-show="compat"] [data-tab]:not([data-tab="compat"]),

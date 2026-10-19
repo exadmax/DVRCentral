@@ -13,6 +13,7 @@
         <tr><td>Câmeras</td><td>Cadastro das câmeras, gravação, pasta das gravações e envio ao Google Drive.</td></tr>
         <tr><td>Agendas e rotas</td><td>Agendas (iCal) e o trânsito de cada pessoa.</td></tr>
         <tr><td>Painel</td><td>Cidade e clima, modo noturno, rodízio das câmeras, validade, locais do estoque, vídeos e feriados locais.</td></tr>
+        <tr><td>Livros</td><td>Liga ou desliga a página Livros e define as categorias e os donos dos livros.</td></tr>
         <tr><td>Menu</td><td>Os botões de atalho do rodapé da tela inicial.</td></tr>
         <tr><td>Integrações</td><td>Planilha de profissionais, contas de jogos, pasta de vídeos, tempos de cache e rede.</td></tr>
         <tr><td>Idioma</td><td>Idioma da interface: português, inglês, espanhol ou chinês (vale só no aparelho).</td></tr>
@@ -176,6 +177,18 @@
       <h3>Feriados locais</h3>
       <p>Complementam os feriados nacionais (que vêm da BrasilAPI). Informe <b>dia e mês</b> (o ano é ignorado: repete todo ano), o <b>nome</b> e o <b>tipo</b> (municipal, estadual, nacional), que muda a cor do selo na tela inicial. Se você nunca editou, valem os de São Paulo (aniversário da cidade e 9 de julho). A lista que você salva <b>substitui</b> a padrão.</p>` },
 
+    { id: 'livros', title: 'Livros (PDF e EPUB)', html: `
+      <p>A página <b>Livros</b> guarda PDFs e EPUBs no servidor (pasta <code>~/Livros</code>) e deixa enviar arquivos novos pelo próprio painel. Cada livro pode ter uma <b>categoria</b> e um <b>dono</b>.</p>
+      <table class="help-t"><tr><th>Opção</th><th>O que faz</th></tr>
+        <tr><td>Mostrar a página Livros</td><td>Desligada, o atalho some do menu e o servidor deixa de listar, entregar e receber livros. Os arquivos continuam na pasta; ao ligar de novo, tudo volta.</td></tr>
+        <tr><td>Categorias</td><td>Uma por linha. Viram filtros na página e opções ao enviar ou editar um livro. Tirar uma categoria da lista <b>não</b> apaga o livro nem a categoria que ele já tem.</td></tr>
+        <tr><td>Donos</td><td>Uma por linha (de quem é o livro). O filtro de dono aparece na página quando algum livro tem dono.</td></tr></table>
+      <p>Vale na hora; telas abertas pegam a mudança em até 5 minutos.</p>
+      <h3>Na página Livros</h3>
+      <ul><li><b>Enviar livro</b>: escolha um ou mais arquivos .pdf ou .epub (até 300 MB cada), a categoria e o dono. Nome repetido ganha “(2)”.</li>
+        <li><b>PDF</b> abre numa aba do navegador. <b>EPUB</b> abre no leitor da página: as setas ← → ou os botões trocam de capítulo, e o último capítulo lido fica lembrado neste aparelho.</li>
+        <li>O lápis troca categoria e dono; a lixeira exclui o arquivo do servidor (não dá para desfazer).</li></ul>
+    ` },
     { id: 'menu', title: 'Menu de atalhos', html: `
       <p>São os botões do rodapé da tela inicial. Você pode adicionar, remover, renomear e reordenar.</p>
       <h3>Campos de cada atalho</h3>
@@ -186,7 +199,7 @@
         <tr><td>Porta</td><td><b>Vazia</b>: o atalho abre uma página do próprio painel/hub. <b>Preenchida</b>: abre outro serviço da mesma máquina nessa porta (ex.: 4533 para o Navidrome).</td></tr>
         <tr><td>Caminho</td><td>Começa com <code>/</code>. Exemplos: <code>/estoque.html</code>, <code>/camaras.html</code>, <code>/videos.html</code>, <code>/</code>. Pode usar <code>{host}</code> para o endereço da máquina (ex.: <code>/jogos/play/?feed={host}:8080/roms/feed.json</code>).</td></tr></table>
       <h3>Páginas do painel disponíveis</h3>
-      <p><code>/estoque.html</code> (Geladeira), <code>/contatos.html</code> (Serviços), <code>/camaras.html</code> (Câmeras), <code>/videos.html</code> (Vídeos), <code>/config.html</code> (Config).</p>
+      <p><code>/estoque.html</code> (Geladeira), <code>/contatos.html</code> (Serviços), <code>/camaras.html</code> (Câmeras), <code>/videos.html</code> (Vídeos), <code>/livros.html</code> (Livros), <code>/config.html</code> (Config).</p>
       <h3>Reordenar, remover, restaurar</h3>
       <ul><li>Use as setas <b>↑</b> e <b>↓</b> e clique em <b>Salvar menu</b>.</li>
         <li><b>Remover</b> salva na hora.</li>

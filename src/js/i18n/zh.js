@@ -22,13 +22,14 @@
     'page.estoque.label': '冰箱与储藏室', 'page.estoque.sub': '物品与保质期',
     'page.contatos.label': '服务', 'page.contatos.sub': '师傅与服务商',
     'page.camaras.label': '摄像头', 'page.camaras.sub': '实时画面',
+    'page.livros.label': '图书', 'page.livros.sub': 'PDF 和 EPUB',
     'page.videos.label': '视频', 'page.videos.sub': '用 VLC 打开',
     'page.config.sub': '服务器',
 
     // ---- 出厂名称（菜单、库存位置、示例日历） ----
     'def.games': '游戏', 'def.fridge': '冰箱', 'def.freezer': '冷冻室', 'def.pantry': '储藏室', 'def.services': '服务',
-    'def.cameras': '摄像头', 'def.music': '音乐', 'def.videos': '视频', 'def.config': '设置', 'def.couple': '夫妻',
-    'def.fridge.sub': '物品与保质期', 'def.services.sub': '师傅', 'def.cameras.sub': '实时', 'def.videos.sub': '用 VLC 打开', 'def.config.sub': '服务器',
+    'def.cameras': '摄像头', 'def.music': '音乐', 'def.videos': '视频', 'def.books': '图书', 'def.config': '设置', 'def.couple': '夫妻',
+    'def.fridge.sub': '物品与保质期', 'def.services.sub': '师傅', 'def.cameras.sub': '实时', 'def.videos.sub': '用 VLC 打开', 'def.books.sub': 'PDF 和 EPUB', 'def.config.sub': '服务器',
 
     // ---- 主屏幕 ----
     'ag.today': '今日日程', 'ag.events.other': '{n} 个事件', 'ag.none': '今天没有安排',
@@ -70,6 +71,14 @@
     'est.e.number': '数量和重量必须是大于或等于零的数字。',
 
     // ---- 服务（师傅与服务商） ----
+    'liv.search': '搜索图书', 'liv.upload': '上传图书', 'liv.edit': '编辑图书', 'liv.count.one': '{n} 本书', 'liv.count.other': '{n} 本书',
+    'liv.notfound': '未找到图书', 'liv.empty': '还没有图书。点击“上传图书”添加 PDF 和 EPUB。',
+    'liv.off': '“图书”页面已关闭。要开启，请前往 配置 > 图书。', 'liv.nohub': '没有 hub：请通过家用服务器地址打开面板以查看图书。',
+    'liv.f.file': 'PDF 或 EPUB 文件', 'liv.f.category': '分类', 'liv.f.owner': '所有者', 'liv.none': '— 无 —', 'liv.allOwners': '所有人',
+    'liv.e.file': '请至少选择一个 PDF 或 EPUB 文件。', 'liv.e.type': '“{name}”不是 PDF 或 EPUB。', 'liv.sending': '正在上传 {i}/{n} · {p}%', 'liv.fail': '{name}：{msg}',
+    'liv.read': '阅读', 'liv.open': '打开', 'liv.download': '下载', 'liv.uncat': '未分类',
+    'liv.contents': '目录', 'liv.chapter': '第 {n} 章', 'liv.prev': '上一章', 'liv.next': '下一章', 'liv.opening': '正在打开图书…', 'liv.openErr': '无法打开此 EPUB。',
+    'liv.cats': ['小说', '技术', '儿童', '烹饪', '宗教', '其他'],
     'con.wa': '尝试通过 WhatsApp 联系 {name}', 'con.search': '搜索服务商', 'con.new': '新建服务商', 'con.edit': '编辑服务商',
     'con.count.other': '{n} 位服务商', 'con.notfound': '未找到服务商',
     'con.empty': '还没有服务商。点按“新建服务商”开始。',
@@ -102,7 +111,7 @@
 
     // ---- 设置：标签页、服务器与录像 ----
     'cfg.tab.servidor': '服务器', 'cfg.tab.cameras': '摄像头', 'cfg.tab.agendas': '日历与路线', 'cfg.tab.painel': '面板', 'cfg.tab.menu': '菜单',
-    'cfg.tab.integracoes': '集成', 'cfg.tab.idioma': '语言', 'cfg.tab.compat': '兼容性', 'cfg.tab.ajuda': '帮助', 'cfg.helpTab': '本页帮助',
+    'cfg.tab.livros': '图书', 'cfg.tab.integracoes': '集成', 'cfg.tab.idioma': '语言', 'cfg.tab.compat': '兼容性', 'cfg.tab.ajuda': '帮助', 'cfg.helpTab': '本页帮助',
     'cfg.linuxOnly': '仅限 Linux 服务器。',
     'cfg.m.hubCpu': 'Hub · CPU', 'cfg.m.hubCpuD': '占总 CPU（{n} 核）', 'cfg.m.hubMem': 'Hub · 内存', 'cfg.m.hubMemD': '占用内存 {size}',
     'cfg.m.pcCpu': '主机 · CPU', 'cfg.m.pcCpuD': '{n} 核', 'cfg.m.pcMem': '主机 · 内存', 'cfg.m.pcMemD': '{used} / {total}',
@@ -172,7 +181,7 @@
     'ce.compat.tv': '是否检测到电视浏览器：{v}。',
     'ico.gamepad': '游戏', 'ico.fridge': '冰箱', 'ico.phone': '电话', 'ico.camera': '摄像头', 'ico.music': '音乐', 'ico.film': '影片', 'ico.folder': '文件夹',
     'ico.gear': '齿轮', 'ico.home': '家', 'ico.link': '链接', 'ico.box': '箱子', 'ico.clock': '时钟', 'ico.mail': '邮件', 'ico.user': '人物',
-    'ico.pin': '地点', 'ico.trophy': '奖杯', 'ico.umbrella': '雨伞', 'ico.search': '搜索',
+    'ico.pin': '地点', 'ico.trophy': '奖杯', 'ico.umbrella': '雨伞', 'ico.book': '图书', 'ico.search': '搜索',
 
     // ---- 设置：面板与集成 ----
     'cp.loc.title': '位置与天气', 'cp.loc.hint': '用于天气（Open-Meteo）和主屏幕顶部的显示。', 'cp.loc.city': '城市', 'cp.loc.state': '州',
@@ -182,6 +191,9 @@
     'cp.rot.title': '主屏幕上的摄像头', 'cp.rot.hint': '每个摄像头会在“天气”的位置显示这么长时间，然后恢复显示天气（轮播）。', 'cp.rot.secs': '每个摄像头显示秒数',
     'cp.soon.title': '保质期提醒', 'cp.soon.hint': '冰箱和储藏室中 N 天内到期的物品会以琥珀色突出显示（已过期的为红色）。',
     'cp.soon.days': '提前几天提醒',
+    'cp.books.title': '图书（PDF 和 EPUB）', 'cp.books.hint': '文件保存在服务器的“Livros”文件夹中。在这里开启或关闭该页面，并设置上传图书时可选的分类和所有者列表。',
+    'cp.books.enable': '显示“图书”页面（关闭后菜单中不再显示，服务器也不再提供图书）', 'cp.books.cats': '分类（每行一个）', 'cp.books.owners': '所有者（每行一个）',
+    'cp.books.catsPh': '小说\n技术\n儿童', 'cp.books.ownersPh': '小明\n小红',
     'cp.vid.title': '视频页面（播放地址）', 'cp.vid.hint': '文件由主机上的网页服务器（nginx）提供。hub 列出的文件夹在“集成”中设置。',
     'cp.vid.port': '端口',
     'cp.locais.title': '库存位置', 'cp.locais.hint': '物品存放的地方（在“冰箱与储藏室”中显示为标签页）。位置为空时才能移除。',

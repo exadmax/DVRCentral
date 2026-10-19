@@ -33,6 +33,7 @@ servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um 
 | **Geladeira e Dispensa** | Itens com quantidade/peso, validade e local; avisa o que está vencendo | `estoque.html` |
 | **Serviços** | Profissionais (eletricista, encanador...), com sincronização opcional com Google Planilhas | `contatos.html` |
 | **Vídeos** | Lista a pasta de vídeos do servidor; toca no navegador ou abre no VLC | `videos.html` |
+| **Livros** | PDFs e EPUBs no servidor, com envio pelo painel, categoria, dono e leitor de EPUB (desligável na Config) | `livros.html` |
 | **Config** | CPU/memória do servidor, configuração das gravações, desligar desktop/hub | `config.html` |
 | **Modo noturno** | Das 23h às 5h: tela escura com clima e eventos de amanhã | Início |
 | **Idiomas** | Português, English, Español e 中文, escolhido por aparelho (ou automático, pelo navegador) | Config → Idioma |
@@ -103,6 +104,7 @@ Referência completa em `server/hub.config.example.json`.
 | `cameras[]` | `id`, `name` e URL RTSP (com senha; **use `subtype=1`**, H.264) |
 | `recordings.dir` | Pasta das gravações (padrão `~/securityCam`) |
 | `videos.dir` | Pasta de vídeos (padrão `~/Videos`) |
+| `books.dir`, `books.maxMB` | Pasta dos livros (padrão `~/Livros`) e tamanho máximo de cada envio (padrão 300 MB) |
 | `profissionaisSheet` | CSV do Google Planilhas e intervalo de sincronização (vazio desliga) |
 | `games` | Chaves de Steam, PSN, Xbox e RetroAchievements (subsistema sem tela) |
 | `dbPath`, `allowedOrigins`, `forceIPv4` | Banco SQLite, origens extras para gravar, uso de IPv4 nas consultas externas |

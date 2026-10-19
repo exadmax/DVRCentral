@@ -238,3 +238,25 @@ func TestMigrationKeepsItems(t *testing.T) {
 		t.Fatalf("itens=%d err=%v", n, err)
 	}
 }
+
+func TestSettingsBooks(t *testing.T) {
+	m, mux, _ := testSettings(t)
+	if !m.booksEnabled() {
+		t.Fatal("a página Livros deve vir ligada por padrão")
+	}
+	w := put(mux, "/api/settings/panel", `{"books":{"enabled":true,"categories":["  Romance ","","Técnico"],"owners":["Ana","Bia"]}}`)
+	if w.Code != 200 || !strings.Contains(w.Body.String(), `"categories":["Romance","Técnico"]`) {
+		t.Fatalf("salvar listas: %d %s", w.Code, w.Body)
+	}
+	for _, bad := range []string{
+		`{"books":{"enabled":true,"categories":["A","a"],"owners":[]}}`,                 // repetida
+		`{"books":{"enabled":true,"categories":[],"owners":["` + strings.Repeat("x", 41) + `"]}}`, // longa demais
+	} {
+		if w := put(mux, "/api/settings/panel", bad); w.Code != 400 {
+			t.Errorf("deveria recusar %s: %d", bad, w.Code)
+		}
+	}
+	if w := put(mux, "/api/settings/panel", `{"books":{"enabled":false,"categories":[],"owners":[]}}`); w.Code != 200 || m.booksEnabled() {
+		t.Fatalf("desligar: %d enabled=%v", w.Code, m.booksEnabled())
+	}
+}

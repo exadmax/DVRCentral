@@ -22,13 +22,14 @@
     'page.estoque.label': 'Nevera y Despensa', 'page.estoque.sub': 'artículos y caducidad',
     'page.contatos.label': 'Servicios', 'page.contatos.sub': 'profesionales y proveedores',
     'page.camaras.label': 'Cámaras', 'page.camaras.sub': 'imagen en vivo',
+    'page.livros.label': 'Libros', 'page.livros.sub': 'PDF y EPUB',
     'page.videos.label': 'Vídeos', 'page.videos.sub': 'abrir en VLC',
     'page.config.sub': 'servidor',
 
     // ---- nombres de fábrica (menú, lugares del inventario, agendas de ejemplo) ----
     'def.games': 'Juegos', 'def.fridge': 'Nevera', 'def.freezer': 'Congelador', 'def.pantry': 'Despensa', 'def.services': 'Servicios',
-    'def.cameras': 'Cámaras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.config': 'Config', 'def.couple': 'Pareja',
-    'def.fridge.sub': 'Caducidades', 'def.services.sub': 'Profesionales', 'def.cameras.sub': 'En vivo', 'def.videos.sub': 'Abrir en VLC', 'def.config.sub': 'Servidor',
+    'def.cameras': 'Cámaras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Libros', 'def.config': 'Config', 'def.couple': 'Pareja',
+    'def.fridge.sub': 'Caducidades', 'def.services.sub': 'Profesionales', 'def.cameras.sub': 'En vivo', 'def.videos.sub': 'Abrir en VLC', 'def.books.sub': 'PDF y EPUB', 'def.config.sub': 'Servidor',
 
     // ---- pantalla de inicio ----
     'ag.today': 'Agenda de hoy', 'ag.events.one': '{n} evento', 'ag.events.other': '{n} eventos', 'ag.none': 'Nada programado hoy',
@@ -70,6 +71,14 @@
     'est.e.number': 'La cantidad y el peso deben ser números mayores o iguales a cero.',
 
     // ---- servicios (profesionales) ----
+    'liv.search': 'Buscar libro', 'liv.upload': 'Subir libro', 'liv.edit': 'Editar libro', 'liv.count.one': '{n} libro', 'liv.count.other': '{n} libros',
+    'liv.notfound': 'No se encontraron libros', 'liv.empty': 'Aún no hay libros. Toque “Subir libro” para añadir PDF y EPUB.',
+    'liv.off': 'La página Libros está desactivada. Para activarla, vaya a Config > Libros.', 'liv.nohub': 'Sin el hub: abra el panel por la dirección del servidor de la casa para ver los libros.',
+    'liv.f.file': 'Archivos PDF o EPUB', 'liv.f.category': 'Categoría', 'liv.f.owner': 'Dueño', 'liv.none': '— ninguno —', 'liv.allOwners': 'Todos los dueños',
+    'liv.e.file': 'Elija al menos un archivo PDF o EPUB.', 'liv.e.type': '“{name}” no es PDF ni EPUB.', 'liv.sending': 'Subiendo {i} de {n} · {p}%', 'liv.fail': '{name}: {msg}',
+    'liv.read': 'Leer', 'liv.open': 'Abrir', 'liv.download': 'Descargar', 'liv.uncat': 'Sin categoría',
+    'liv.contents': 'Índice', 'liv.chapter': 'Capítulo {n}', 'liv.prev': 'Anterior', 'liv.next': 'Siguiente', 'liv.opening': 'Abriendo el libro…', 'liv.openErr': 'No se pudo abrir este EPUB.',
+    'liv.cats': ['Novela', 'Técnico', 'Infantil', 'Cocina', 'Religión', 'Otros'],
     'con.wa': 'Probar WhatsApp con {name}', 'con.search': 'Buscar profesional', 'con.new': 'Nuevo profesional', 'con.edit': 'Editar profesional',
     'con.count.one': '{n} profesional', 'con.count.other': '{n} profesionales', 'con.notfound': 'No se encontró ningún profesional',
     'con.empty': 'Aún no hay profesionales. Toque “Nuevo profesional” para empezar.',
@@ -102,7 +111,7 @@
 
     // ---- Config: pestañas, servidor y grabación ----
     'cfg.tab.servidor': 'Servidor', 'cfg.tab.cameras': 'Cámaras', 'cfg.tab.agendas': 'Agendas y rutas', 'cfg.tab.painel': 'Panel', 'cfg.tab.menu': 'Menú',
-    'cfg.tab.integracoes': 'Integraciones', 'cfg.tab.idioma': 'Idioma', 'cfg.tab.compat': 'Compatibilidad', 'cfg.tab.ajuda': 'Ayuda', 'cfg.helpTab': 'Ayuda de esta pestaña',
+    'cfg.tab.livros': 'Libros', 'cfg.tab.integracoes': 'Integraciones', 'cfg.tab.idioma': 'Idioma', 'cfg.tab.compat': 'Compatibilidad', 'cfg.tab.ajuda': 'Ayuda', 'cfg.helpTab': 'Ayuda de esta pestaña',
     'cfg.linuxOnly': 'Solo en el servidor Linux.',
     'cfg.m.hubCpu': 'Hub · CPU', 'cfg.m.hubCpuD': 'de la CPU total ({n} núcleos)', 'cfg.m.hubMem': 'Hub · memoria', 'cfg.m.hubMemD': '{size} de la RAM',
     'cfg.m.pcCpu': 'Máquina · CPU', 'cfg.m.pcCpuD': '{n} núcleos', 'cfg.m.pcMem': 'Máquina · memoria', 'cfg.m.pcMemD': '{used} de {total}',
@@ -172,7 +181,7 @@
     'ce.compat.tv': 'Navegador de TV detectado: {v}.',
     'ico.gamepad': 'Juegos', 'ico.fridge': 'Nevera', 'ico.phone': 'Teléfono', 'ico.camera': 'Cámara', 'ico.music': 'Música', 'ico.film': 'Película', 'ico.folder': 'Carpeta',
     'ico.gear': 'Engranaje', 'ico.home': 'Casa', 'ico.link': 'Enlace', 'ico.box': 'Caja', 'ico.clock': 'Reloj', 'ico.mail': 'Correo', 'ico.user': 'Persona',
-    'ico.pin': 'Lugar', 'ico.trophy': 'Trofeo', 'ico.umbrella': 'Paraguas', 'ico.search': 'Búsqueda',
+    'ico.pin': 'Lugar', 'ico.trophy': 'Trofeo', 'ico.umbrella': 'Paraguas', 'ico.book': 'Libro', 'ico.search': 'Búsqueda',
 
     // ---- Config: panel e integraciones ----
     'cp.loc.title': 'Ubicación y clima', 'cp.loc.hint': 'Se usa en el clima (Open-Meteo) y en el encabezado de la pantalla de inicio.', 'cp.loc.city': 'Ciudad', 'cp.loc.state': 'Estado',
@@ -182,6 +191,9 @@
     'cp.rot.title': 'Cámaras en la pantalla de inicio', 'cp.rot.hint': 'Cada cámara ocupa el lugar del Clima durante este tiempo y después vuelve el Clima (rotación).', 'cp.rot.secs': 'Segundos por cámara',
     'cp.soon.title': 'Aviso de caducidad', 'cp.soon.hint': 'Los artículos de la nevera y la despensa que caducan en hasta N días se destacan en ámbar (los caducados, en rojo).',
     'cp.soon.days': 'Avisar con cuántos días de antelación',
+    'cp.books.title': 'Libros (PDF y EPUB)', 'cp.books.hint': 'Los archivos están en la carpeta “Livros” del servidor. Aquí activa o desactiva la página y define las listas de categorías y dueños que aparecen al subir un libro.',
+    'cp.books.enable': 'Mostrar la página Libros (desactivada, desaparece del menú y el servidor no entrega los libros)', 'cp.books.cats': 'Categorías (una por línea)', 'cp.books.owners': 'Dueños (uno por línea)',
+    'cp.books.catsPh': 'Novela\nTécnico\nInfantil', 'cp.books.ownersPh': 'Ana\nBruno',
     'cp.vid.title': 'Página Vídeos (dirección de reproducción)', 'cp.vid.hint': 'Los archivos los entrega un servidor web de la máquina (nginx). La carpeta que lista el hub se configura en Integraciones.',
     'cp.vid.port': 'Puerto',
     'cp.locais.title': 'Lugares del inventario', 'cp.locais.hint': 'Dónde se guardan los artículos (aparecen como pestañas en Nevera y Despensa). Un lugar solo se puede quitar cuando está vacío.',

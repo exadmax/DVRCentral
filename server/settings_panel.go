@@ -57,6 +57,13 @@ type EstoqueLocal struct {
 	Icon  string `json:"icon"`
 }
 
+// BooksPanelSettings: página Livros (liga/desliga e as listas de categorias e de donos que o formulário de envio oferece).
+type BooksPanelSettings struct {
+	Enabled    bool     `json:"enabled"`
+	Categories []string `json:"categories"`
+	Owners     []string `json:"owners"`
+}
+
 // PanelSettings: cada grupo ausente (nil) significa "não editado": vale o padrão do painel (settings.js).
 type PanelSettings struct {
 	Location       *LocationSettings    `json:"location,omitempty"`
@@ -67,6 +74,7 @@ type PanelSettings struct {
 	Videos         *VideosPanelSettings `json:"videos,omitempty"`
 	LocalHolidays  *[]LocalHoliday      `json:"localHolidays,omitempty"`
 	Locais         *[]EstoqueLocal      `json:"locais,omitempty"`
+	Books          *BooksPanelSettings  `json:"books,omitempty"`
 }
 
 var (
@@ -200,6 +208,15 @@ func (m *settingsMgr) putPanel(body []byte) (interface{}, error) {
 			return nil, err
 		}
 	}
+	if in.Books != nil {
+		var err error
+		if in.Books.Categories, err = cleanNames(in.Books.Categories, 30, "categorias"); err != nil {
+			return nil, err
+		}
+		if in.Books.Owners, err = cleanNames(in.Books.Owners, 20, "donos"); err != nil {
+			return nil, err
+		}
+	}
 
 	p := m.st.Panel
 	if p == nil {
@@ -228,6 +245,9 @@ func (m *settingsMgr) putPanel(body []byte) (interface{}, error) {
 	}
 	if in.Locais != nil {
 		p.Locais = in.Locais
+	}
+	if in.Books != nil {
+		p.Books = in.Books
 	}
 	m.st.Panel = p
 	if err := m.saveLocked(); err != nil {
@@ -296,6 +316,37 @@ func (m *settingsMgr) checkLocais(list *[]EstoqueLocal) error {
 		}
 	}
 	return nil
+}
+
+// cleanNames valida uma lista de nomes (categorias, donos): sem vazios, até 40 caracteres, sem repetir (maiúsculas não contam).
+func cleanNames(in []string, max int, what string) ([]string, error) {
+	if len(in) > max {
+		return nil, badRequest("no máximo %d itens na lista", max)
+	}
+	out, seen := []string{}, map[string]bool{}
+	for _, n := range in {
+		n, err := cleanLabel(n, what)
+		if err != nil {
+			return nil, badRequest("%v", err)
+		}
+		if n == "" {
+			continue
+		}
+		if k := strings.ToLower(n); seen[k] {
+			return nil, badRequest("%q aparece mais de uma vez na lista", n)
+		} else {
+			seen[k] = true
+		}
+		out = append(out, n)
+	}
+	return out, nil
+}
+
+// booksEnabled: a página Livros está ligada? (padrão: sim, até alguém desligar na Config)
+func (m *settingsMgr) booksEnabled() bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.st.Panel == nil || m.st.Panel.Books == nil || m.st.Panel.Books.Enabled
 }
 
 func saveFailed(path string, err error) error {

@@ -81,6 +81,15 @@
         st.locais.map(localRow).join(''), btn('add:locais', t('cp.locais.add')));
     }
 
+    // Livros: liga/desliga a página e define as listas de categorias e de donos (uma por linha); vale na hora
+    function cBooks() {
+      const b = cfg.books || {}, cats = b.categories && b.categories.length ? b.categories : t('liv.cats');
+      const area = (f, v, ph) => '<textarea data-f="' + f + '" rows="7" placeholder="' + esc(ph) + '" spellcheck="false">' + esc((v || []).join('\n')) + '</textarea>';
+      return card('books', 'livros', t('cp.books.title'), t('cp.books.hint'),
+        grid('<div class="wide">' + check('enabled', b.enabled !== false, t('cp.books.enable')) + '</div>' +
+          fld(t('cp.books.cats'), area('categories', cats, t('cp.books.catsPh'))) + fld(t('cp.books.owners'), area('owners', b.owners, t('cp.books.ownersPh')))));
+    }
+
     function holRow(h, i) {
       return '<div class="cfg-item" data-r="' + i + '"><div class="cfg-grid">' + fld(t('cp.hol.date'), input('date', h.date ? '2000-' + h.date : '', { type: 'date' })) +
         fld(t('ce.name'), input('name', h.name, { ph: t('cp.hol.namePh') })) + fld(t('cp.hol.type'), select('type', h.type || 'municipal', HTYPES)) +
@@ -137,10 +146,10 @@
     }
 
     // ---------- desenho ----------
-    const R = { loc: cLoc, night: cNight, rot: cRot, soon: cSoon, vid: cVid, locais: cLocais, hol: cHol,
+    const R = { loc: cLoc, night: cNight, rot: cRot, soon: cSoon, vid: cVid, locais: cLocais, hol: cHol, books: cBooks,
       hubdrive: cDrive, hubsheet: cSheet, hubgames: cGames, hubmisc: cMisc };
     const HUBCARDS = ['hubdrive', 'hubsheet', 'hubgames', 'hubmisc'];
-    const ORDER = ['loc', 'night', 'rot', 'soon', 'locais', 'vid', 'hol', 'hubdrive', 'hubsheet', 'hubgames', 'hubmisc'];
+    const ORDER = ['loc', 'night', 'rot', 'soon', 'locais', 'vid', 'hol', 'books', 'hubdrive', 'hubsheet', 'hubgames', 'hubmisc'];
 
     function cardEl(id) { return root.querySelector('[data-card="' + id + '"]'); }
     function redraw(id) {
@@ -209,6 +218,7 @@
       if (id === 'rot') return { cameras: { rotateSeconds: int(o.rotateSeconds, 60) } };
       if (id === 'soon') return { estoque: { soonDays: int(o.soonDays, 3) } };
       if (id === 'vid') return { videos: { port: int(o.port, 8080), path: o.path } };
+      if (id === 'books') { const lines = v => String(v || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean); return { books: { enabled: !!o.enabled, categories: lines(o.categories), owners: lines(o.owners) } }; }
       collectList(id);
       if (id === 'locais') return { locais: st.locais.filter(l => l.id || (l.label || '').trim()).map(l => ({ id: l.id || '', label: l.label, color: l.color, icon: l.icon })) };
       return { localHolidays: st.hol.filter(h => h.date || (h.name || '').trim()).map(h => ({ date: h.date, name: h.name, type: h.type })) };

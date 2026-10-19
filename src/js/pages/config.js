@@ -14,7 +14,7 @@
 
   function mount(root) {
     // Subseções: cada cartão tem data-tab e só os da aba escolhida aparecem (o CSS esconde os outros; nada é redesenhado ao trocar de aba)
-    const TABS = ['servidor', 'cameras', 'agendas', 'painel', 'menu', 'integracoes', 'idioma', 'compat', 'ajuda'].map(id => [id, t('cfg.tab.' + id)]);
+    const TABS = ['servidor', 'cameras', 'agendas', 'painel', 'livros', 'menu', 'integracoes', 'idioma', 'compat', 'ajuda'].map(id => [id, t('cfg.tab.' + id)]);
     let tab = 'servidor';
     try { tab = (location.hash || '').slice(1) || sessionStorage.getItem('cd:cfgtab') || tab; } catch (e) { /* sem armazenamento */ }
     if (!TABS.some(t => t[0] === tab)) tab = 'servidor';
