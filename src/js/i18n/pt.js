@@ -71,7 +71,7 @@
     'est.e.number': 'Quantidade e peso devem ser números maiores ou iguais a zero.',
 
     // ---- serviços (profissionais) ----
-    'con.search': 'Buscar profissional', 'con.new': 'Novo profissional', 'con.edit': 'Editar profissional',
+    'con.wa': 'Tentar WhatsApp com {name}', 'con.search': 'Buscar profissional', 'con.new': 'Novo profissional', 'con.edit': 'Editar profissional',
     'con.count.one': '{n} profissional', 'con.count.other': '{n} profissionais', 'con.notfound': 'Nenhum profissional encontrado',
     'con.empty': 'Nenhum profissional cadastrado. Toque em “Novo profissional” para começar.',
     'con.f.name': 'Nome', 'con.f.type': 'Tipo de serviço', 'con.f.typePh': 'Ex.: Eletricista', 'con.f.contact': 'Contato', 'con.f.contactPh': 'Telefone, e-mail ou site',

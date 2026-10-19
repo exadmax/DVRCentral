@@ -70,7 +70,7 @@
     'est.e.number': 'La cantidad y el peso deben ser números mayores o iguales a cero.',
 
     // ---- servicios (profesionales) ----
-    'con.search': 'Buscar profesional', 'con.new': 'Nuevo profesional', 'con.edit': 'Editar profesional',
+    'con.wa': 'Probar WhatsApp con {name}', 'con.search': 'Buscar profesional', 'con.new': 'Nuevo profesional', 'con.edit': 'Editar profesional',
     'con.count.one': '{n} profesional', 'con.count.other': '{n} profesionales', 'con.notfound': 'No se encontró ningún profesional',
     'con.empty': 'Aún no hay profesionales. Toque “Nuevo profesional” para empezar.',
     'con.f.name': 'Nombre', 'con.f.type': 'Tipo de servicio', 'con.f.typePh': 'Ej.: Electricista', 'con.f.contact': 'Contacto', 'con.f.contactPh': 'Teléfono, correo o sitio web',

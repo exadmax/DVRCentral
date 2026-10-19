@@ -70,7 +70,7 @@
     'est.e.number': 'Quantity and weight must be numbers greater than or equal to zero.',
 
     // ---- services (professionals) ----
-    'con.search': 'Search professionals', 'con.new': 'New professional', 'con.edit': 'Edit professional',
+    'con.wa': 'Try WhatsApp with {name}', 'con.search': 'Search professionals', 'con.new': 'New professional', 'con.edit': 'Edit professional',
     'con.count.one': '{n} professional', 'con.count.other': '{n} professionals', 'con.notfound': 'No professionals found',
     'con.empty': 'No professionals yet. Tap “New professional” to get started.',
     'con.f.name': 'Name', 'con.f.type': 'Type of service', 'con.f.typePh': 'e.g. Electrician', 'con.f.contact': 'Contact', 'con.f.contactPh': 'Phone, e-mail or website',

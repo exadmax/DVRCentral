@@ -13,8 +13,16 @@
     const t = c.trim();
     if (/^[^\s@\/]+@[^\s@\/]+\.[^\s@\/]+$/.test(t)) return { href: 'mailto:' + t, icon: 'mail' };
     if (/^(https?:\/\/|www\.)\S+$/i.test(t)) return { href: /^www\./i.test(t) ? 'https://' + t : t, icon: 'link', blank: true };
-    if (/^[\d\s()+\-.]{8,}$/.test(t)) return { href: 'tel:' + t.replace(/[^\d+]/g, ''), icon: 'phone' };
+    if (/^[\d\s()+\-.]{8,}$/.test(t)) return { href: 'tel:' + t.replace(/[^\d+]/g, ''), icon: 'phone', wa: whatsappUrl(t) };
     return { icon: 'phone' };
+  }
+  // Link do WhatsApp (wa.me) para um número: com "+" ou "00" já vem com o país; sem isso, 10-11 dígitos (DDD + número) são do Brasil (55).
+  // Números sem DDD ou com tamanho estranho (vários números juntos) ficam sem botão.
+  function whatsappUrl(t) {
+    let d = t.replace(/\D/g, ''), min = 12;
+    if (/^\s*\+/.test(t) || /^\s*00/.test(t)) { d = d.replace(/^0+/, ''); min = 8; }        // já tem o código do país
+    else { d = d.replace(/^0+/, ''); if (d.length === 10 || d.length === 11) d = '55' + d; }
+    return d.length >= min && d.length <= 15 ? 'https://wa.me/' + d : '';
   }
 
   function mount(root) {
@@ -47,10 +55,14 @@
       $('#sum').innerHTML = all().length ? '<span class="spill ok">' + CD.i18n.n('con.count', all().length) + '</span>' : '';
     }
 
-    function contatoHtml(c) {
+    function contatoHtml(c, nome) {
       const l = contatoLink(c), inner = I.svg(l.icon, 'currentColor', 26, 2) + '<span class="num">' + esc(c) + '</span>';
-      return l.href ? '<a class="cc-tel" href="' + esc(l.href) + '"' + (l.blank ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
+      const main = l.href ? '<a class="cc-tel" href="' + esc(l.href) + '"' + (l.blank ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
         : '<div class="cc-tel">' + inner + '</div>';
+      if (!l.wa) return main;
+      const label = t('con.wa', { name: esc(nome) });
+      return '<div class="cc-contact">' + main + '<a class="cc-wa" href="' + esc(l.wa) + '" target="_blank" rel="noopener" title="' + label + '" aria-label="' + label + '">' +
+        I.svg('whatsapp', 'currentColor', 22, 2) + '<span>WhatsApp</span></a></div>';
     }
 
     function card(c) {
@@ -60,7 +72,7 @@
           '<button type="button" class="btn ghost" data-act="cancel">' + t('c.cancel') + '</button></div></article>';
       }
       return '<article class="cc"><div class="cc-top"><div class="cc-name">' + esc(c.nome) + '</div><span class="ctag">' + esc(cap(c.tipoServico)) + '</span></div>' +
-        (c.contato ? contatoHtml(c.contato) : '') +
+        (c.contato ? contatoHtml(c.contato, c.nome) : '') +
         (c.servico ? '<div class="cc-note">' + esc(c.servico) + '</div>' : '') +
         (c.indicacao ? '<div class="cc-line">' + I.svg('user', 'currentColor', 22, 2) + '<span>' + esc(c.indicacao) + '</span></div>' : '') +
         (c.obs ? '<div class="cc-line">' + I.svg('alert', 'currentColor', 22, 2) + '<span>' + esc(c.obs) + '</span></div>' : '') +

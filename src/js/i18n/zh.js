@@ -70,7 +70,7 @@
     'est.e.number': '数量和重量必须是大于或等于零的数字。',
 
     // ---- 服务（师傅与服务商） ----
-    'con.search': '搜索服务商', 'con.new': '新建服务商', 'con.edit': '编辑服务商',
+    'con.wa': '尝试通过 WhatsApp 联系 {name}', 'con.search': '搜索服务商', 'con.new': '新建服务商', 'con.edit': '编辑服务商',
     'con.count.other': '{n} 位服务商', 'con.notfound': '未找到服务商',
     'con.empty': '还没有服务商。点按“新建服务商”开始。',
     'con.f.name': '姓名', 'con.f.type': '服务类型', 'con.f.typePh': '例如：电工', 'con.f.contact': '联系方式', 'con.f.contactPh': '电话、邮箱或网站',

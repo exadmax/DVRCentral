@@ -99,6 +99,9 @@ a { color: inherit; }
 .ctag { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(77, 163, 255, .16); color: var(--blue); }
 .cc-tel { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 2px 0; border-radius: 8px; text-decoration: none; color: var(--green); font-size: 20px; font-weight: 600; }
 .cc-tel:focus { outline: none; box-shadow: 0 0 0 3px rgba(51, 225, 154, .4); }
+.cc-contact { align-self: flex-start; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
+.cc-wa { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 600; background: rgba(37, 211, 102, .16); color: #25d366; }
+.cc-wa:focus { outline: none; box-shadow: 0 0 0 3px rgba(37, 211, 102, .4); }
 .cc-line { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--dim); overflow-wrap: anywhere; }
 .cc-line svg { margin-top: 2px; }
 .cc-note { padding-top: 8px; border-top: 1px solid var(--line); font-size: 14px; color: rgba(242, 245, 250, .75); white-space: pre-wrap; overflow-wrap: anywhere; }
