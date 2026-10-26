@@ -29,8 +29,8 @@
 
     // ---- nomes de fábrica (menu, locais do estoque, agendas de exemplo) ----
     'def.games': 'Jogos', 'def.fridge': 'Geladeira', 'def.freezer': 'Freezer', 'def.pantry': 'Dispensa', 'def.services': 'Serviços',
-    'def.cameras': 'Câmeras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Livros', 'def.config': 'Config', 'def.couple': 'Casal',
-    'def.fridge.sub': 'Itens e validades', 'def.services.sub': 'Profissionais', 'def.cameras.sub': 'Ao vivo', 'def.videos.sub': 'Abrir no VLC', 'def.books.sub': 'PDF e EPUB', 'def.config.sub': 'Servidor',
+    'def.cameras': 'Câmeras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Livros', 'def.desktop': 'Desktop', 'def.config': 'Config', 'def.couple': 'Casal',
+    'def.fridge.sub': 'Itens e validades', 'def.services.sub': 'Profissionais', 'def.cameras.sub': 'Ao vivo', 'def.videos.sub': 'Abrir no VLC', 'def.books.sub': 'PDF e EPUB', 'def.desktop.sub': 'Área de trabalho', 'def.config.sub': 'Servidor',
 
     // ---- tela inicial ----
     'ag.today': 'Agenda de hoje', 'ag.events.one': '{n} evento', 'ag.events.other': '{n} eventos', 'ag.none': 'Nada agendado hoje',
@@ -182,7 +182,7 @@
     'ce.compat.tv': 'Navegador de TV detectado: {v}.',
     'ico.gamepad': 'Jogos', 'ico.fridge': 'Geladeira', 'ico.phone': 'Telefone', 'ico.camera': 'Câmera', 'ico.music': 'Música', 'ico.film': 'Filme', 'ico.folder': 'Pasta',
     'ico.gear': 'Engrenagem', 'ico.home': 'Casa', 'ico.link': 'Link', 'ico.box': 'Caixa', 'ico.clock': 'Relógio', 'ico.mail': 'E-mail', 'ico.user': 'Pessoa',
-    'ico.pin': 'Local', 'ico.trophy': 'Troféu', 'ico.umbrella': 'Guarda-chuva', 'ico.book': 'Livro', 'ico.search': 'Busca',
+    'ico.pin': 'Local', 'ico.trophy': 'Troféu', 'ico.umbrella': 'Guarda-chuva', 'ico.book': 'Livro', 'ico.desktop': 'Desktop', 'ico.search': 'Busca',
 
     // ---- Config: painel e integrações ----
     'cp.loc.title': 'Localização e clima', 'cp.loc.hint': 'Usada no clima (Open-Meteo) e no cabeçalho da tela inicial.', 'cp.loc.city': 'Cidade', 'cp.loc.state': 'Estado',

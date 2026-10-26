@@ -28,8 +28,8 @@
 
     // ---- 出厂名称（菜单、库存位置、示例日历） ----
     'def.games': '游戏', 'def.fridge': '冰箱', 'def.freezer': '冷冻室', 'def.pantry': '储藏室', 'def.services': '服务',
-    'def.cameras': '摄像头', 'def.music': '音乐', 'def.videos': '视频', 'def.books': '图书', 'def.config': '设置', 'def.couple': '夫妻',
-    'def.fridge.sub': '物品与保质期', 'def.services.sub': '师傅', 'def.cameras.sub': '实时', 'def.videos.sub': '用 VLC 打开', 'def.books.sub': 'PDF 和 EPUB', 'def.config.sub': '服务器',
+    'def.cameras': '摄像头', 'def.music': '音乐', 'def.videos': '视频', 'def.books': '图书', 'def.desktop': '桌面', 'def.config': '设置', 'def.couple': '夫妻',
+    'def.fridge.sub': '物品与保质期', 'def.services.sub': '师傅', 'def.cameras.sub': '实时', 'def.videos.sub': '用 VLC 打开', 'def.books.sub': 'PDF 和 EPUB', 'def.desktop.sub': '工作区', 'def.config.sub': '服务器',
 
     // ---- 主屏幕 ----
     'ag.today': '今日日程', 'ag.events.other': '{n} 个事件', 'ag.none': '今天没有安排',
@@ -181,7 +181,7 @@
     'ce.compat.tv': '是否检测到电视浏览器：{v}。',
     'ico.gamepad': '游戏', 'ico.fridge': '冰箱', 'ico.phone': '电话', 'ico.camera': '摄像头', 'ico.music': '音乐', 'ico.film': '影片', 'ico.folder': '文件夹',
     'ico.gear': '齿轮', 'ico.home': '家', 'ico.link': '链接', 'ico.box': '箱子', 'ico.clock': '时钟', 'ico.mail': '邮件', 'ico.user': '人物',
-    'ico.pin': '地点', 'ico.trophy': '奖杯', 'ico.umbrella': '雨伞', 'ico.book': '图书', 'ico.search': '搜索',
+    'ico.pin': '地点', 'ico.trophy': '奖杯', 'ico.umbrella': '雨伞', 'ico.book': '图书', 'ico.desktop': '桌面', 'ico.search': '搜索',
 
     // ---- 设置：面板与集成 ----
     'cp.loc.title': '位置与天气', 'cp.loc.hint': '用于天气（Open-Meteo）和主屏幕顶部的显示。', 'cp.loc.city': '城市', 'cp.loc.state': '州',

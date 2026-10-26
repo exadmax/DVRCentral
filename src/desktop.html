@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Desktop · Central Diogo</title>
+  <link rel="icon" href="assets/img/logo-192.png">
+  <link rel="stylesheet" href="css/desktop.css">
+</head>
+<body>
+  <div id="login">
+    <form class="card" id="loginForm">
+      <h1><img src="assets/img/logo-128.png" alt="">Desktop · Central Diogo</h1>
+      <input id="lu" placeholder="Usuário" autocomplete="username" required>
+      <input id="lp" type="password" placeholder="Senha" autocomplete="current-password" required>
+      <div class="err" id="le"></div>
+      <button class="pri">Entrar</button>
+      <a href="index.html" class="meta">← Voltar ao painel da casa</a>
+    </form>
+  </div>
+
+  <div id="force" class="hidden">
+    <form class="card" id="forceForm">
+      <h1><img src="assets/img/logo-128.png" alt="">Defina sua senha</h1>
+      <div>Este é o seu primeiro acesso: troque a senha provisória para continuar.</div>
+      <input id="fc" type="password" placeholder="Senha atual (provisória)" autocomplete="current-password" required>
+      <input id="fn" type="password" placeholder="Nova senha (mín. 8 caracteres)" autocomplete="new-password" required>
+      <input id="fn2" type="password" placeholder="Repita a nova senha" autocomplete="new-password" required>
+      <div class="err" id="fe"></div>
+      <button class="pri">Salvar senha</button>
+      <button type="button" id="forceOut">Sair</button>
+    </form>
+  </div>
+
+  <div id="desktop" class="hidden"><div class="icons" id="icons"></div></div>
+  <div id="startmenu" class="hidden"></div>
+  <div id="bar" class="hidden">
+    <button id="start"><img src="assets/img/logo-128.png" alt="">Iniciar</button>
+    <div id="tasks"></div><button id="bell" title="Notificações">🔔<b id="bellN" class="hidden"></b></button><span id="who"></span><button id="logout">Sair</button>
+    <span id="clock"></span>
+  </div>
+
+  <!-- Scripts clássicos (sem módulos ES), como o resto do painel. O i18n e o util só existem para o player de câmera ao vivo. -->
+  <script src="config/settings.example.js"></script>
+  <script src="config/settings.js" onerror="void 0"></script>
+  <script src="js/core/i18n.js"></script>
+  <script src="js/i18n/pt.js"></script>
+  <script src="js/i18n/en.js"></script>
+  <script src="js/i18n/es.js"></script>
+  <script src="js/i18n/zh.js"></script>
+  <script src="js/i18n/srv.js"></script>
+  <script src="js/core/util.js"></script>
+  <script src="js/services/cameraPlayer.js"></script>
+  <script src="js/services/calendar.js"></script>
+  <script src="js/desktop/core.js"></script>
+  <script src="js/desktop/files.js"></script>
+  <script src="js/desktop/viewers.js"></script>
+  <script src="js/desktop/video.js"></script>
+  <script src="js/desktop/terminal.js"></script>
+  <script src="js/desktop/computer.js"></script>
+  <script src="js/desktop/cameras.js"></script>
+  <script src="js/desktop/contacts.js"></script>
+  <script src="js/desktop/calendar.js"></script>
+  <script src="js/desktop/zip.js"></script>
+  <script src="js/desktop/docfmt.js"></script>
+  <script src="js/desktop/docs.js"></script>
+  <script src="js/desktop/admin.js"></script>
+  <script src="js/desktop/boot.js"></script>
+</body>
+</html>

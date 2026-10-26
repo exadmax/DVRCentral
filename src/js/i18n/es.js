@@ -28,8 +28,8 @@
 
     // ---- nombres de fábrica (menú, lugares del inventario, agendas de ejemplo) ----
     'def.games': 'Juegos', 'def.fridge': 'Nevera', 'def.freezer': 'Congelador', 'def.pantry': 'Despensa', 'def.services': 'Servicios',
-    'def.cameras': 'Cámaras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Libros', 'def.config': 'Config', 'def.couple': 'Pareja',
-    'def.fridge.sub': 'Caducidades', 'def.services.sub': 'Profesionales', 'def.cameras.sub': 'En vivo', 'def.videos.sub': 'Abrir en VLC', 'def.books.sub': 'PDF y EPUB', 'def.config.sub': 'Servidor',
+    'def.cameras': 'Cámaras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Libros', 'def.desktop': 'Escritorio', 'def.config': 'Config', 'def.couple': 'Pareja',
+    'def.fridge.sub': 'Caducidades', 'def.services.sub': 'Profesionales', 'def.cameras.sub': 'En vivo', 'def.videos.sub': 'Abrir en VLC', 'def.books.sub': 'PDF y EPUB', 'def.desktop.sub': 'Área de trabajo', 'def.config.sub': 'Servidor',
 
     // ---- pantalla de inicio ----
     'ag.today': 'Agenda de hoy', 'ag.events.one': '{n} evento', 'ag.events.other': '{n} eventos', 'ag.none': 'Nada programado hoy',
@@ -181,7 +181,7 @@
     'ce.compat.tv': 'Navegador de TV detectado: {v}.',
     'ico.gamepad': 'Juegos', 'ico.fridge': 'Nevera', 'ico.phone': 'Teléfono', 'ico.camera': 'Cámara', 'ico.music': 'Música', 'ico.film': 'Película', 'ico.folder': 'Carpeta',
     'ico.gear': 'Engranaje', 'ico.home': 'Casa', 'ico.link': 'Enlace', 'ico.box': 'Caja', 'ico.clock': 'Reloj', 'ico.mail': 'Correo', 'ico.user': 'Persona',
-    'ico.pin': 'Lugar', 'ico.trophy': 'Trofeo', 'ico.umbrella': 'Paraguas', 'ico.book': 'Libro', 'ico.search': 'Búsqueda',
+    'ico.pin': 'Lugar', 'ico.trophy': 'Trofeo', 'ico.umbrella': 'Paraguas', 'ico.book': 'Libro', 'ico.desktop': 'Escritorio', 'ico.search': 'Búsqueda',
 
     // ---- Config: panel e integraciones ----
     'cp.loc.title': 'Ubicación y clima', 'cp.loc.hint': 'Se usa en el clima (Open-Meteo) y en el encabezado de la pantalla de inicio.', 'cp.loc.city': 'Ciudad', 'cp.loc.state': 'Estado',

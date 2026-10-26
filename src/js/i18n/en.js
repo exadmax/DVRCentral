@@ -28,8 +28,8 @@
 
     // ---- factory names (menu, stock places, sample calendars) ----
     'def.games': 'Games', 'def.fridge': 'Fridge', 'def.freezer': 'Freezer', 'def.pantry': 'Pantry', 'def.services': 'Services',
-    'def.cameras': 'Cameras', 'def.music': 'Music', 'def.videos': 'Videos', 'def.books': 'Books', 'def.config': 'Config', 'def.couple': 'Couple',
-    'def.fridge.sub': 'Items & expiry', 'def.services.sub': 'Professionals', 'def.cameras.sub': 'Live', 'def.videos.sub': 'Open in VLC', 'def.books.sub': 'PDF and EPUB', 'def.config.sub': 'Server',
+    'def.cameras': 'Cameras', 'def.music': 'Music', 'def.videos': 'Videos', 'def.books': 'Books', 'def.desktop': 'Desktop', 'def.config': 'Config', 'def.couple': 'Couple',
+    'def.fridge.sub': 'Items & expiry', 'def.services.sub': 'Professionals', 'def.cameras.sub': 'Live', 'def.videos.sub': 'Open in VLC', 'def.books.sub': 'PDF and EPUB', 'def.desktop.sub': 'Workspace', 'def.config.sub': 'Server',
 
     // ---- home screen ----
     'ag.today': 'Today’s agenda', 'ag.events.one': '{n} event', 'ag.events.other': '{n} events', 'ag.none': 'Nothing scheduled today',
@@ -181,7 +181,7 @@
     'ce.compat.tv': 'TV browser detected: {v}.',
     'ico.gamepad': 'Games', 'ico.fridge': 'Fridge', 'ico.phone': 'Phone', 'ico.camera': 'Camera', 'ico.music': 'Music', 'ico.film': 'Film', 'ico.folder': 'Folder',
     'ico.gear': 'Gear', 'ico.home': 'Home', 'ico.link': 'Link', 'ico.box': 'Box', 'ico.clock': 'Clock', 'ico.mail': 'E-mail', 'ico.user': 'Person',
-    'ico.pin': 'Place', 'ico.trophy': 'Trophy', 'ico.umbrella': 'Umbrella', 'ico.book': 'Book', 'ico.search': 'Search',
+    'ico.pin': 'Place', 'ico.trophy': 'Trophy', 'ico.umbrella': 'Umbrella', 'ico.book': 'Book', 'ico.desktop': 'Desktop', 'ico.search': 'Search',
 
     // ---- Config: panel and integrations ----
     'cp.loc.title': 'Location and weather', 'cp.loc.hint': 'Used for the weather (Open-Meteo) and the home screen header.', 'cp.loc.city': 'City', 'cp.loc.state': 'State',
