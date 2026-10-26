@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"io"
@@ -31,6 +32,7 @@ type Config struct {
 	Cameras        []CameraConfig   `json:"cameras"`       // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
 	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
 	DriveSync      DriveSyncConfig  `json:"driveSync"`      // cópia diária das gravações para o Google Drive via rclone (drive.go)
+	Desk           DeskConfig       `json:"desk"`           // Desktop (desktop.html): usuários, arquivos, terminal (desk.go)
 	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
@@ -151,6 +153,11 @@ func main() {
 	ds.start()
 	sm.cams, sm.rec, sm.cal, sm.tr = cams, rec, cal, tr
 	sm.register(mux)
+	sys := newSysMon()
+	go sys.loop()
+	desk := newDesk(cfg, db, sm, sys, filepath.Dir(*cfgPath))
+	desk.ensureFirstInstall(context.Background())
+	desk.register(mux)
 	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
 	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
 	newBooks(cfg.Books, cfg.AllowedOrigins, sm.booksEnabled).register(mux)
@@ -165,8 +172,6 @@ func main() {
 		v, at := readVersion(verDir)
 		writeJSON(w, map[string]interface{}{"version": v, "installedAt": at})
 	})
-	sys := newSysMon()
-	go sys.loop()
 	mux.HandleFunc("/api/system", sys.handler)
 	mux.HandleFunc("/api/admin/desktop-off", powerHandler(sys, dmUnit, false))
 	mux.HandleFunc("/api/admin/hub-off", powerHandler(sys, "centraldiogo-hub.service", true))
@@ -209,7 +214,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,
-		Handler:           withCORS(mux),
+		Handler:           withCORS(desk.protectSettings(mux)),
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      60 * time.Second,
 		IdleTimeout:       60 * time.Second,

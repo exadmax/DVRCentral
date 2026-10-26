@@ -3,6 +3,9 @@
 # Instala o hub em /opt/centraldiogo, libera a porta 80 e ativa o serviço.
 # Cada instalação concluída soma 1 ao terceiro número da versão (arquivo VERSION: 1.0.1 -> 1.0.2).
 # Só consultar a versão instalada, sem sudo e sem alterar nada:  bash install.sh --check
+# Terminal e arquivos do computador no Desktop (opcional; veja SECURITY.md):
+#   sudo bash install.sh --desk-shell        permite ao serviço usar sudo (sudoers NOPASSWD + NoNewPrivileges=false)
+#   sudo bash install.sh --no-desk-shell     desfaz isso
 set -e
 cd "$(dirname "$0")"
 D=/opt/centraldiogo
@@ -25,6 +28,13 @@ fi
 
 [ "$(id -u)" = 0 ] || { echo "rode com sudo: sudo bash install.sh"; exit 1; }
 USER_RUN="${SUDO_USER:-root}"
+DESK_SHELL=""
+for a in "$@"; do
+  case "$a" in
+    --desk-shell) DESK_SHELL=on;;
+    --no-desk-shell) DESK_SHELL=off;;
+  esac
+done
 
 case "$(uname -m)" in
   x86_64) A=amd64;; i?86) A=386;; aarch64|arm64) A=arm64;; armv6*|armv7*|arm) A=arm;;
@@ -50,6 +60,25 @@ fi
 rm -rf "$D/www" && mkdir "$D/www" && tar -xzf www.tgz -C "$D/www"
 chown -R "$USER_RUN" "$D"
 sed "s/__USER__/$USER_RUN/" centraldiogo-hub.service > /etc/systemd/system/centraldiogo-hub.service
+
+# Desktop: sudo do usuário do serviço, para o Terminal e os arquivos do computador. É opt-in porque dá ao hub o poder de root:
+# quem tiver a permissão no Desktop (e a senha de um administrador dele) passa a administrar a máquina. Só vale com "desk": {"shell": true}
+# no hub.config.json. O sudo dentro de um serviço com NoNewPrivileges=true não funciona, por isso o drop-in abaixo.
+DROPIN=/etc/systemd/system/centraldiogo-hub.service.d/desk-shell.conf
+SUDOERS=/etc/sudoers.d/centraldiogo-desk
+if [ "$DESK_SHELL" = on ]; then
+  [ "$USER_RUN" = root ] && { echo "!! --desk-shell precisa do usuário normal (rode com sudo a partir dele, não como root direto)"; exit 1; }
+  mkdir -p "$(dirname "$DROPIN")"
+  printf '%s\n' '[Service]' 'NoNewPrivileges=false' > "$DROPIN"
+  TMP="$(mktemp)"; echo "$USER_RUN ALL=(ALL) NOPASSWD: ALL" > "$TMP"
+  visudo -cf "$TMP" >/dev/null || { rm -f "$TMP"; echo "!! sudoers inválido; nada foi alterado"; exit 1; }
+  install -m 440 "$TMP" "$SUDOERS"; rm -f "$TMP"
+  echo ">> sudo liberado para $USER_RUN (arquivos: $DROPIN e $SUDOERS)"
+  echo ">> falta ligar no hub.config.json:  \"desk\": {\"shell\": true}   e depois: sudo systemctl restart centraldiogo-hub"
+elif [ "$DESK_SHELL" = off ]; then
+  rm -f "$DROPIN" "$SUDOERS"; rmdir "$(dirname "$DROPIN")" 2>/dev/null || true
+  echo ">> sudo do Desktop desfeito"
+fi
 
 # firewall: libera a 80 se houver ufw/firewalld ativo
 if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then ufw allow 80/tcp; echo ">> ufw: porta 80 liberada"
