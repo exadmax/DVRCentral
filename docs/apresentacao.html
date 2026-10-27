@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apresentação — Central Diogo</title>
+  <meta name="description" content="Vídeo de apresentação da Central Diogo: o painel doméstico, o Diogows e as principais funcionalidades em ação.">
+  <meta name="theme-color" content="#0B1220">
+  <meta property="og:title" content="Apresentação — Central Diogo">
+  <meta property="og:description" content="Veja a Central Diogo em ação: painel, Diogows e funcionalidades.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://exadmax.github.io/DVRCentral/img/painel.png">
+  <link rel="icon" href="assets/logo-192.png">
+  <style>
+    @font-face { font-family: 'Inter'; font-weight: 400 700; font-display: swap; src: url(assets/fonts/inter-latin.woff2) format('woff2'); }
+    @font-face { font-family: 'Poppins'; font-weight: 600; font-display: swap; src: url(assets/fonts/poppins-600.woff2) format('woff2'); }
+    @font-face { font-family: 'Poppins'; font-weight: 700; font-display: swap; src: url(assets/fonts/poppins-700.woff2) format('woff2'); }
+    :root { --bg: #0B1220; --card: #131C2E; --line: rgba(242,245,250,.1); --text: #F2F5FA; --dim: rgba(242,245,250,.66); --blue: #4DA3FF; --green: #33E19A; --grad: linear-gradient(135deg, #4DA3FF, #33E19A); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 400 17px/1.6 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1 { font-family: 'Poppins', 'Inter', sans-serif; margin: 0; line-height: 1.15; }
+    .wrap { width: min(1000px, 100% - 40px); margin-inline: auto; }
+    .nav { position: sticky; top: 0; z-index: 50; background: rgba(11,18,32,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--text); font: 700 18px 'Poppins', sans-serif; }
+    .brand img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand:hover { text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(242,245,250,.28); color: var(--text); font: 600 14px 'Inter', sans-serif; }
+    .btn:hover { text-decoration: none; filter: brightness(1.15); }
+    .btn.pri { background: var(--grad); color: #06101F; border-color: transparent; }
+    main { padding: 56px 0 72px; background: radial-gradient(900px 500px at 78% -5%, rgba(77,163,255,.2), transparent 70%), radial-gradient(700px 420px at 12% 5%, rgba(51,225,154,.12), transparent 70%); }
+    .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    h1 { margin: 10px 0 14px; font-size: clamp(32px, 5vw, 48px); letter-spacing: -1px; }
+    .lead { margin: 0 0 32px; max-width: 680px; color: var(--dim); font-size: 19px; }
+    .frame { border-radius: 18px; padding: 8px; background: linear-gradient(145deg, rgba(77,163,255,.55), rgba(51,225,154,.35)); box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 90px rgba(77,163,255,.18); }
+    video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #000; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    footer { padding: 28px 0; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; }
+  </style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/logo-192.png" alt=""> Central Diogo</a>
+    <a class="btn" href="index.html">← Voltar ao início</a>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="eyebrow">Apresentação</div>
+    <h1>Conheça a Central Diogo</h1>
+    <p class="lead">Um passeio em vídeo pelo painel da casa e pelo Diogows, o desktop no navegador.</p>
+    <div class="frame">
+      <video controls preload="metadata" playsinline>
+        <source src="videos/diogocentral.mp4" type="video/mp4">
+        Seu navegador não suporta vídeo HTML5. <a href="videos/diogocentral.mp4">Baixe o vídeo</a>.
+      </video>
+    </div>
+    <div class="cta">
+      <a class="btn pri" href="index.html#comecar">Começar a usar</a>
+      <a class="btn" href="https://github.com/exadmax/DVRCentral">Código no GitHub</a>
+      <a class="btn" href="videos/diogocentral.mp4" download>Baixar o vídeo</a>
+    </div>
+  </div>
+</main>
+<footer><div class="wrap">Central Diogo · código aberto (GPL-3.0)</div></footer>
+</body>
+</html>
