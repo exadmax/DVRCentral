@@ -39,6 +39,7 @@ type DeskConfig struct {
 	Shell           bool   `json:"shell"`           // liga o Terminal e os arquivos do computador (padrão desligado; veja SECURITY.md)
 	ShellAnyNetwork bool   `json:"shellAnyNetwork"` // permite o terminal por HTTP puro vindo de fora das redes privadas (não recomendado)
 	ProtectSettings bool   `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Desktop
+	NoBrowser       bool   `json:"noBrowser"`       // true tira o navegador interno e os downloads
 	MaxUploadMB     int    `json:"maxUploadMB"`     // tamanho máximo de um envio (padrão 2048)
 }
 
@@ -80,12 +81,15 @@ type deskAPI struct {
 	lim    *deskLimiter
 	shell  *deskShellState
 
+	webClient *http.Client // navegador interno (só endereços públicos)
+	dlClient  *http.Client // downloads, sem limite de tempo total
+	dl        dlManager
 	calClient *http.Client // baixa as agendas iCal (só endereços públicos; os testes trocam por um cliente comum)
 	calCache  deskCalCache
 }
 
 func newDesk(cfg Config, st *store, sm *settingsMgr, sys *sysMon, cfgDir string) *deskAPI {
-	d := &deskAPI{st: st, cfg: cfg.Desk, sm: sm, sys: sys, videos: cfg.Videos, verDir: cfgDir, lim: newDeskLimiter(), calClient: newCalClient(),
+	d := &deskAPI{dl: dlManager{jobs: map[int64][]*dlJob{}}, st: st, cfg: cfg.Desk, sm: sm, sys: sys, videos: cfg.Videos, verDir: cfgDir, lim: newDeskLimiter(), calClient: newCalClient(), webClient: newSafeClient(35 * time.Second), dlClient: newSafeClient(0),
 		shell: &deskShellState{unlocks: map[string]deskUnlock{}, busy: map[int64]bool{}}}
 	d.dir = cfg.Desk.Dir
 	if d.dir == "" {
@@ -505,14 +509,18 @@ func (d *deskAPI) register(mux *http.ServeMux) {
 	d.registerShell(mux)
 	d.registerMisc(mux)
 	d.registerCalendar(mux)
+	d.registerBrowser(mux)
 }
 
 type deskMe struct {
 	*DeskUser
-	Shell bool `json:"shell"` // Terminal e arquivos do computador ligados neste servidor
+	Shell   bool `json:"shell"`   // Terminal e arquivos do computador ligados neste servidor
+	Browser bool `json:"browser"` // navegador interno e downloads disponíveis
 }
 
-func (d *deskAPI) meOf(u *DeskUser) deskMe { return deskMe{DeskUser: u, Shell: d.cfg.Shell} }
+func (d *deskAPI) meOf(u *DeskUser) deskMe {
+	return deskMe{DeskUser: u, Shell: d.cfg.Shell, Browser: !d.cfg.NoBrowser}
+}
 
 func (d *deskAPI) handleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
