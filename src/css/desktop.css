@@ -233,7 +233,7 @@ iframe.fill { flex: 1; width: 100%; border: 0; min-height: 0; background: #fff; 
 .sstage { position: relative; flex: 1; min-height: 0; outline: none; background: #fff; }
 .sscroll { position: absolute; inset: 0; overflow: scroll; }
 .scanvas { position: absolute; left: 0; top: 0; touch-action: none; }
-.sedit { position: absolute; z-index: 5; box-sizing: border-box; resize: none; overflow: hidden; margin: 0; padding: 2px 4px; border: 2px solid #2563eb; border-radius: 0; background: #fff; color: #111827; font: 13px/16px Calibri, 'Segoe UI', Arial, sans-serif; outline: none; white-space: pre; }
+.sedit { position: absolute; z-index: 5; box-sizing: border-box; min-height: 0; max-width: none; resize: none; overflow: hidden; margin: 0; padding: 2px 4px; border: 2px solid #2563eb; border-radius: 0; background: #fff; color: #111827; font: 13px/16px Calibri, 'Segoe UI', Arial, sans-serif; outline: none; white-space: pre; }
 .stabs { display: flex; gap: 2px; align-items: flex-end; padding: 3px 8px 0; background: #eef1f6; border-top: 1px solid var(--line); overflow-x: auto; }
 .stab { border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; background: #e2e7ef; padding: 3px 12px; font-size: 12px; white-space: nowrap; }
 .stab.on { background: #fff; font-weight: 600; }

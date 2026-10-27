@@ -350,7 +350,7 @@
           case 'Delete': case 'Backspace': e.preventDefault(); clearSel(); return;
           case 'Escape': if (clip) { clip = null; schedule(); } return;
         }
-        if (k.length === 1 || k === 'Dead' || k === 'Process') { startEdit(''); }      // a tecla digitada cai na caixa de edição (que ganha o foco)
+        if (k.length === 1 || k === 'Dead' || k === 'Process' || k === 'Unidentified') { startEdit(''); }      // a tecla digitada cai na caixa de edição (que ganha o foco)
       });
 
       function clearSel() {
