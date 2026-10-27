@@ -97,7 +97,7 @@
     const win = DK.el('div', { className: 'win' });
     const body = DK.el('div', { className: 'body' + (opts.flush ? ' flush' : '') });
     const bMin = DK.el('button', { textContent: '—', title: 'Minimizar' });
-    const bMax = DK.el('button', { textContent: '☐', title: 'Maximizar / restaurar' });
+    const bMax = DK.el('button', { className: 'bmax', textContent: '☐', title: 'Maximizar / restaurar' });
     const close = DK.el('button', { textContent: '✕', title: 'Fechar' });
     const titleEl = DK.el('b', { textContent: title });
     const head = DK.el('header', {}, titleEl, bMin, bMax, close);
@@ -106,6 +106,7 @@
     const n = Object.keys(wins).length;
     const W = Math.min(w || 480, innerWidth - 20), H = Math.min(h || 420, innerHeight - 70);
     win.style.cssText = 'left:' + Math.min(130 + (n % 8) * 26, Math.max(0, innerWidth - W)) + 'px;top:' + (20 + (n % 8) * 26) + 'px;width:' + W + 'px;height:' + H + 'px';
+    if (DK.layout.isMobile()) win.classList.add('max');      // celular: janela em tela cheia (o CSS do modo celular também garante)
     $('desktop').append(win);
     const task = DK.el('button', { textContent: title, onclick: () => taskClick(win) });
     $('tasks').append(task);
@@ -117,10 +118,22 @@
     const toggleMax = () => { const m = win.classList.toggle('max'); bMax.textContent = m ? '❐' : '☐'; };
     bMax.onclick = e => { e.stopPropagation(); toggleMax(); };
     head.addEventListener('dblclick', e => { if (e.target.tagName !== 'BUTTON') toggleMax(); });
+    if (win.classList.contains('max')) bMax.textContent = '❐';
+    // botão direito / toque longo: menus da janela (o resto do corpo da janela fica sem menu do Desktop, só o do navegador some)
+    head._ctx = () => [
+      { icon: win.classList.contains('max') ? '🗗' : '🗖', label: win.classList.contains('max') ? 'Restaurar' : 'Maximizar', fn: toggleMax },
+      { icon: '🗕', label: 'Minimizar', fn: () => minimizeWin(win) },
+      '-', { icon: '✕', label: 'Fechar', fn: () => closeWin(win), danger: true },
+    ];
+    task._ctx = () => [
+      { icon: '🗗', label: win.classList.contains('min') ? 'Restaurar' : 'Minimizar', fn: () => taskClick(win) },
+      '-', { icon: '✕', label: 'Fechar', fn: () => closeWin(win), danger: true },
+    ];
+    win._ctx = () => false;
     win.addEventListener('mousedown', () => focusWin(win));
     let dx, dy, drag = false;
     head.addEventListener('pointerdown', e => {
-      if (e.target.tagName === 'BUTTON' || win.classList.contains('max')) return;
+      if (e.target.tagName === 'BUTTON' || win.classList.contains('max') || DK.layout.isMobile()) return;
       drag = true; dx = e.clientX - win.offsetLeft; dy = e.clientY - win.offsetTop; head.setPointerCapture(e.pointerId); win.classList.add('dragging');
     });
     head.addEventListener('pointermove', e => { if (drag) { win.style.left = Math.max(0, e.clientX - dx) + 'px'; win.style.top = Math.max(0, e.clientY - dy) + 'px'; } });
@@ -147,6 +160,7 @@
   }
   DK.closeWin = closeWin;
   DK.closeAll = () => Object.keys(wins).forEach(k => closeWin(wins[k], true));
+  DK.minimizeAll = () => Object.keys(wins).forEach(k => minimizeWin(wins[k]));
 
   // ---------- diálogo de senha ----------
   // Pede senha (e, se askUser, o nome do usuário). Resolve { user, password }; rejeita com "Cancelado." se a pessoa desistir.

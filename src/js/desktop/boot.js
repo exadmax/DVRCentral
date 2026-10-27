@@ -26,33 +26,81 @@
   const openLink = l => window.open(linkHref(l), '_blank', 'noopener');
 
   // ---------- menu Iniciar e ícones ----------
-  const MENU_ORDER = ['control', 'programs', 'computer', 'explorer', 'browser', 'docs', 'notepad', 'images', 'pdf', 'video', 'calculator', 'cameras', 'contacts', 'messages', 'calendar', 'terminal', 'users', 'config', 'account'];
-  const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
-  const visible = () => DK.apps.filter(a => (!a.show || a.show(DK.me)) && (DK.prefs.hiddenApps || []).indexOf(a.id) < 0).concat(DK.programEntries ? DK.programEntries() : []);
+  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'terminal', 'docs', 'sheets', 'slides', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts', 'images', 'video', 'cameras', 'browser', 'messages', 'users', 'config', 'account'];
+  const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
+  // Categorias do menu Iniciar. Um aplicativo cai na primeira categoria que o reconhece (por id); o que sobrar vai para "Outros".
+  const CATS = [
+    { id: 'files', icon: '🗂️', label: 'Arquivos e sistema', match: a => ['explorer', 'computer', 'control', 'programs', 'terminal'].indexOf(a.id) >= 0 },
+    { id: 'office', icon: '📝', label: 'Escritório', match: a => ['docs', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts'].indexOf(a.id) >= 0 },
+    { id: 'media', icon: '🎞️', label: 'Imagens, vídeo e câmeras', match: a => ['images', 'video', 'cameras'].indexOf(a.id) >= 0 },
+    { id: 'net', icon: '🌐', label: 'Internet e comunicação', match: a => ['browser', 'messages'].indexOf(a.id) >= 0 },
+    { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS e Windows 95/98)', match: a => String(a.id).indexOf('prog:') === 0 },
+    { id: 'house', icon: '🏠', label: 'Painel e serviços da casa', match: a => String(a.id).indexOf('link:') === 0 },
+    { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: a => ['users', 'config', 'account'].indexOf(a.id) >= 0 },
+  ];
+  const linkApps = () => DK.links.map(l => ({ id: 'link:' + l.label, icon: LINK_ICONS[l.icon] || '🔗', label: l.label + (l.sub ? ' — ' + l.sub : ''), short: l.label, desktop: isExternal(l), open: () => openLink(l) }));
+  const visible = () => DK.apps.filter(a => (!a.show || a.show(DK.me)) && (DK.prefs.hiddenApps || []).indexOf(a.id) < 0).concat(DK.programEntries ? DK.programEntries() : []).concat(linkApps());
   const byOrder = (list, order) => list.slice().sort((a, b) => { const x = order.indexOf(a.id), y = order.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const hideMenu = () => $('startmenu').classList.add('hidden');
 
   function buildStartMenu() {
     const m = $('startmenu');
-    m.replaceChildren(el('header', {}, el('img', { src: 'assets/img/logo-128.png', alt: '' }), 'Iniciar'));
-    const add = (emoji, label, fn) => m.append(el('button', { onclick: () => { m.classList.add('hidden'); fn(); } }, el('span', { textContent: emoji }), label));
+    const search = el('input', { className: 'ssearch', type: 'search', placeholder: 'Pesquisar programas…', autocomplete: 'off' });
+    const list = el('div', { className: 'slist' });
+    const home = el('button', { className: 'shome', onclick: () => { hideMenu(); location.href = 'index.html'; } }, el('span', { textContent: '🏠' }), 'Voltar ao painel da casa');
+    const foot = [home];
+    if (DK.layout.canToggle()) foot.push(el('button', { className: 'shome', onclick: () => { hideMenu(); DK.layout.toggle(); } }, DK.layout.label()));
+    foot.push(el('button', { className: 'shome slogout', onclick: () => { hideMenu(); logout(); } }, el('span', { textContent: '🚪' }), 'Sair'));   // no celular a barra não tem o botão Sair
+    m.replaceChildren(el('header', {}, el('img', { src: 'assets/img/logo-128.png', alt: '' }), 'Iniciar', el('span', { className: 'swho', textContent: DK.me ? DK.me.username : '' })), search, list);
+    m.append.apply(m, foot);
+
     const apps = byOrder(visible(), MENU_ORDER);
-    apps.filter(a => !a.group && String(a.id).indexOf('prog:') !== 0).forEach(a => add(a.icon, a.label, a.open));
-    const progs = apps.filter(a => String(a.id).indexOf('prog:') === 0);
-    if (progs.length) { m.append(el('hr'), el('div', { className: 'meta', style: 'padding:6px 14px 2px', textContent: 'Meus programas (DOS e Windows 95/98)' })); progs.forEach(a => add(a.icon, a.label, a.open)); }
-    if (DK.links.length) {
-      m.append(el('hr'), el('div', { className: 'meta', style: 'padding:6px 14px 2px', textContent: 'Painel e serviços da casa (abrem em outra aba)' }));
-      DK.links.forEach(l => add(LINK_ICONS[l.icon] || '🔗', l.label + (l.sub ? ' — ' + l.sub : ''), () => openLink(l)));
+    const groups = CATS.map(c => ({ c: c, items: apps.filter(c.match) }));
+    const rest = apps.filter(a => !CATS.some(c => c.match(a)));
+    if (rest.length) groups.push({ c: { id: 'other', icon: '📦', label: 'Outros' }, items: rest });
+    const open = new Set(Array.isArray(DK.prefs.startOpen) ? DK.prefs.startOpen : ['files']);
+
+    const row = (a, suffix) => {
+      const b = el('button', { className: 'sitem', onclick: () => { hideMenu(); a.open(); } }, el('span', { textContent: a.icon }), a.label + (suffix || ''));
+      b._ctx = DK.appCtx(a);
+      return b;
+    };
+    function draw() {
+      list.replaceChildren();
+      const q = search.value.trim().toLowerCase();
+      if (q) {   // pesquisa: lista plana, sem categorias
+        const hits = [];
+        groups.forEach(g => g.items.forEach(a => { if (a.label.toLowerCase().indexOf(q) >= 0) hits.push([a, g.c.label]); }));
+        if (!hits.length) list.append(el('div', { className: 'meta', style: 'padding:14px', textContent: 'Nada encontrado.' }));
+        hits.forEach(h => list.append(row(h[0])));
+        return;
+      }
+      groups.filter(g => g.items.length).forEach(g => {
+        const isOpen = open.has(g.c.id);
+        const head = el('button', { className: 'scat' + (isOpen ? ' open' : ''), onclick: () => {
+          if (open.has(g.c.id)) open.delete(g.c.id); else open.add(g.c.id);
+          DK.prefs.startOpen = [...open]; DK.savePrefs(); draw();
+        } }, el('span', { textContent: g.c.icon }), g.c.label, el('i', { textContent: g.items.length }), el('em', { textContent: isOpen ? '▾' : '▸' }));
+        list.append(head);
+        if (isOpen) g.items.forEach(a => list.append(row(a)));
+      });
     }
-    m.append(el('hr'));
-    apps.filter(a => a.group).forEach(a => add(a.icon, a.label, a.open));
-    add('🏠', 'Painel da casa', () => { location.href = 'index.html'; });
+    search.oninput = draw;
+    search.onkeydown = e => {
+      if (e.key === 'Escape') { if (search.value) { search.value = ''; draw(); } else hideMenu(); }
+      if (e.key === 'Enter') { const f = list.querySelector('.sitem'); if (f) f.click(); }
+    };
+    m._focusSearch = () => { search.value = ''; draw(); if (!coarse) search.focus(); };
+    draw();
   }
+
   function buildIcons() {
     const icons = $('icons');
     icons.replaceChildren();
-    const add = (emoji, label, fn) => icons.append(el('button', { className: 'icon', onclick: fn }, el('span', { textContent: emoji }), label));
-    byOrder(visible().filter(a => a.desktop), ICON_ORDER).forEach(a => add(a.icon, a.label.replace(/ \(.*\)$/, ''), a.open));
-    DK.links.filter(isExternal).forEach(l => add(LINK_ICONS[l.icon] || '🔗', l.label, () => openLink(l)));   // Jogos (WebRCade), Música (Navidrome)...
+    const add = (emoji, label, fn, ctx, title) => { const b = el('button', { className: 'icon', onclick: fn, title: title || label }, el('span', { textContent: emoji }), label); b._ctx = ctx; icons.append(b); };
+    byOrder(visible().filter(DK.onDesk), ICON_ORDER).forEach(a => add(a.icon, a.short || a.label.replace(/ \(.*\)$/, ''), a.open, DK.appCtx(a), a.label));
+    (DK.prefs.deskFiles || []).forEach(f => add(f.type === 'dir' ? '📁' : DK.iconOf({ type: 'file', name: f.name }), f.name, () => DK.openFile(DK.deskRef(f)), DK.fileCtx(f), f.path));
     layoutIcons();
   }
   function layoutIcons() {
@@ -60,9 +108,10 @@
     $('icons').style.gridTemplateRows = 'repeat(' + rows + ', 88px)';
   }
   addEventListener('resize', layoutIcons);
+  DK.layout.onChange(() => { layoutIcons(); if (DK.me && !DK.me.must_change) buildStartMenu(); });   // o texto do botão de layout muda com o modo
   DK.refreshShell = () => { if (DK.me && !DK.me.must_change) { buildIcons(); buildStartMenu(); } };
 
-  $('start').onclick = e => { e.stopPropagation(); $('startmenu').classList.toggle('hidden'); };
+  $('start').onclick = e => { e.stopPropagation(); const m = $('startmenu'); m.classList.toggle('hidden'); if (!m.classList.contains('hidden') && m._focusSearch) m._focusSearch(); };
   $('bell').onclick = e => { e.stopPropagation(); DK.toggleNotifs(); };
   document.addEventListener('mousedown', e => { if (!$('startmenu').contains(e.target) && !$('start').contains(e.target)) $('startmenu').classList.add('hidden'); });
 
