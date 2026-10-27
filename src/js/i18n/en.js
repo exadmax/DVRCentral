@@ -28,7 +28,7 @@
 
     // ---- factory names (menu, stock places, sample calendars) ----
     'def.games': 'Games', 'def.fridge': 'Fridge', 'def.freezer': 'Freezer', 'def.pantry': 'Pantry', 'def.services': 'Services',
-    'def.cameras': 'Cameras', 'def.music': 'Music', 'def.videos': 'Videos', 'def.books': 'Books', 'def.desktop': 'Desktop', 'def.config': 'Config', 'def.couple': 'Couple',
+    'def.cameras': 'Cameras', 'def.music': 'Music', 'def.videos': 'Videos', 'def.books': 'Books', 'def.desktop': 'Diogows', 'def.config': 'Config', 'def.couple': 'Couple',
     'def.fridge.sub': 'Items & expiry', 'def.services.sub': 'Professionals', 'def.cameras.sub': 'Live', 'def.videos.sub': 'Open in VLC', 'def.books.sub': 'PDF and EPUB', 'def.desktop.sub': 'Workspace', 'def.config.sub': 'Server',
 
     // ---- home screen ----

@@ -1,6 +1,6 @@
-// Agregador de calendários do Desktop: cada usuário cadastra as próprias agendas iCal (Google Agenda, Outlook, Nextcloud...), que
+// Agregador de calendários do Diogows: cada usuário cadastra as próprias agendas iCal (Google Agenda, Outlook, Nextcloud...), que
 // ficam só dele. O servidor guarda as URLs (são segredos: quem tem a URL lê a agenda), baixa o iCal com cache e entrega o texto
-// ao Desktop, que monta o calendário e dispara os avisos. As agendas da casa (agenda do painel) continuam sendo lidas de /api/ics.
+// ao Diogows, que monta o calendário e dispara os avisos. As agendas da casa (agenda do painel) continuam sendo lidas de /api/ics.
 package main
 
 import (
@@ -331,7 +331,7 @@ type calFeedSource struct {
 	Error string `json:"error,omitempty"`
 }
 
-// calFeed devolve o iCal de cada agenda ligada do usuário (mesmo formato de /api/ics, que o Desktop já sabe ler). Com
+// calFeed devolve o iCal de cada agenda ligada do usuário (mesmo formato de /api/ics, que o Diogows já sabe ler). Com
 // falha na origem, usa a última cópia boa (stale); sem cópia, informa o erro dessa agenda sem derrubar as outras.
 func (d *deskAPI) calFeed(w http.ResponseWriter, r *http.Request, u *DeskUser) {
 	list, err := d.st.deskCalendars(r.Context(), u.ID)

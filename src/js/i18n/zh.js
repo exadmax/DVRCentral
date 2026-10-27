@@ -28,7 +28,7 @@
 
     // ---- 出厂名称（菜单、库存位置、示例日历） ----
     'def.games': '游戏', 'def.fridge': '冰箱', 'def.freezer': '冷冻室', 'def.pantry': '储藏室', 'def.services': '服务',
-    'def.cameras': '摄像头', 'def.music': '音乐', 'def.videos': '视频', 'def.books': '图书', 'def.desktop': '桌面', 'def.config': '设置', 'def.couple': '夫妻',
+    'def.cameras': '摄像头', 'def.music': '音乐', 'def.videos': '视频', 'def.books': '图书', 'def.desktop': 'Diogows', 'def.config': '设置', 'def.couple': '夫妻',
     'def.fridge.sub': '物品与保质期', 'def.services.sub': '师傅', 'def.cameras.sub': '实时', 'def.videos.sub': '用 VLC 打开', 'def.books.sub': 'PDF 和 EPUB', 'def.desktop.sub': '工作区', 'def.config.sub': '服务器',
 
     // ---- 主屏幕 ----

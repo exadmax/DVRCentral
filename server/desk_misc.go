@@ -1,4 +1,4 @@
-// Desktop: Meu Computador (informações da máquina), biblioteca de vídeos do player e gestão de câmeras (só administrador).
+// Diogows: Meu Computador (informações da máquina), biblioteca de vídeos do player e gestão de câmeras (só administrador).
 package main
 
 import (

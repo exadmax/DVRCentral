@@ -1,4 +1,4 @@
-// Arquivos do Desktop (Explorer, visualizadores, Bloco de Notas e player de vídeo). Existem dois "espaços":
+// Arquivos do Diogows (Explorer, visualizadores, Bloco de Notas e player de vídeo). Existem dois "espaços":
 //
 //	home     a pasta própria do usuário, presa à pasta dele (ninguém mais enxerga). Qualquer usuário.
 //	machine  o computador do servidor, como o usuário do serviço ou, com sudo=1, como root. Passa pelos portões do terminal

@@ -4,7 +4,7 @@ Painel de informações da casa: agenda, clima, trânsito, feriados, câmeras ao
 Roda em qualquer navegador (TV, celular, tablet ou computador), tudo a partir de um único código web em `src/`,
 servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um mini-PC ou um PC antigo, com 2 GB de RAM).
 
-> ⚠️ **Uso doméstico, sem login no painel.** O hub foi pensado para a rede da sua casa e o painel **não tem autenticação** (só o **Desktop** tem login): quem alcança a porta vê as câmeras
+> ⚠️ **Uso doméstico, sem login no painel.** O hub foi pensado para a rede da sua casa e o painel **não tem autenticação** (só o **Diogows** tem login): quem alcança a porta vê as câmeras
 > e a Config. **Não exponha à internet.** Para acesso de fora, use uma VPN (Tailscale, WireGuard). Veja [SECURITY.md](SECURITY.md).
 
 ## Sumário
@@ -34,7 +34,7 @@ servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um 
 | **Serviços** | Profissionais (eletricista, encanador...), com sincronização opcional com Google Planilhas | `contatos.html` |
 | **Vídeos** | Lista a pasta de vídeos do servidor; toca no navegador ou abre no VLC | `videos.html` |
 | **Livros** | PDFs e EPUBs no servidor, com envio pelo painel, categoria, dono e leitor de EPUB (desligável na Config) | `livros.html` |
-| **Desktop** | Área de trabalho no navegador, com **vários usuários**: Explorer, editor de **.docx/.odt**, visualizadores, player de vídeo, **câmeras em janelas separadas**, contatos, **calendário por usuário com avisos**, **navegador interno com downloads**, **programas DOS e Windows 95/98/ME no navegador (DOSBox-X ou js-dos)** com **Instalar Programas e Acessórios**, **Painel de Controle**, Meu Computador e Terminal com sudo (opcional). Interface a mais: o painel segue como era | `desktop.html` |
+| **Diogows** | Área de trabalho no navegador, com **vários usuários**: Explorer, editor de **.docx/.odt**, visualizadores, player de vídeo, **câmeras em janelas separadas**, contatos, **calendário por usuário com avisos**, **navegador interno com downloads**, **programas DOS e Windows 95/98/ME no navegador (DOSBox-X ou js-dos)** com **Instalar Programas e Acessórios**, **Painel de Controle**, Meu Computador e Terminal com sudo (opcional). Interface a mais: o painel segue como era | `desktop.html` |
 | **Config** | CPU/memória do servidor; câmeras, agendas, trânsito, menu, painel, livros e integrações em abas, com ajuda embutida; desligar desktop/hub | `config.html` |
 | **Modo noturno** | Das 23h às 5h: tela escura com clima e eventos de amanhã | Início |
 | **Idiomas** | Português, English, Español e 中文, escolhido por aparelho (ou automático, pelo navegador) | Config → Idioma |
@@ -106,7 +106,7 @@ Referência completa em `server/hub.config.example.json`.
 | `recordings.dir` | Pasta das gravações (padrão `~/securityCam`) |
 | `videos.dir` | Pasta de vídeos (padrão `~/Videos`) |
 | `books.dir`, `books.maxMB` | Pasta dos livros (padrão `~/Livros`) e tamanho máximo de cada envio (padrão 300 MB) |
-| `desk` | Desktop: `shell` (Terminal e arquivos do computador, desligado por padrão), `protectSettings`, `noBrowser`, `maxUploadMB` ([docs/desktop.md](docs/desktop.md)) |
+| `desk` | Diogows: `shell` (Terminal e arquivos do computador, desligado por padrão), `protectSettings`, `noBrowser`, `maxUploadMB` ([docs/desktop.md](docs/desktop.md)) |
 | `profissionaisSheet` | CSV do Google Planilhas e intervalo de sincronização (vazio desliga) |
 | `games` | Chaves de Steam, PSN, Xbox e RetroAchievements (subsistema sem tela) |
 | `dbPath`, `allowedOrigins`, `forceIPv4` | Banco SQLite, origens extras para gravar, uso de IPv4 nas consultas externas |
@@ -152,7 +152,7 @@ No servidor Linux, após copiar e extrair o pacote:
 sudo bash install.sh           # instala em /opt/centraldiogo, libera a porta 80 e ativa o serviço
 bash install.sh --check        # só mostra a versão instalada e a próxima (sem sudo, sem alterar nada)
 ```
-O `install.sh` **não toca no banco, na pasta de livros nem na `desk/`** (pastas dos usuários do Desktop): reinstalar preserva estoque, serviços, livros e usuários. Ele também grava a regra do polkit que permite
+O `install.sh` **não toca no banco, na pasta de livros nem na `desk/`** (pastas dos usuários do Diogows): reinstalar preserva estoque, serviços, livros e usuários. Ele também grava a regra do polkit que permite
 à página Config parar o desktop e o hub. Comandos úteis: `systemctl status centraldiogo-hub`, `journalctl -u centraldiogo-hub -f`.
 
 **Backup do banco** (modo WAL: não copie só o `.db` com o hub rodando):
@@ -175,7 +175,7 @@ sudo systemctl start centraldiogo-hub
 cd server && go test ./...
 ```
 Cobrem CRUD e validação de estoque/serviços, proteção de origem, sincronização da planilha, câmeras e gravador (retenção, movimento),
-vídeos e legendas, livros (envio, categoria/dono, leitor de EPUB, liga/desliga), trânsito, versão e métricas do sistema, e o Desktop (usuários e permissões, arquivos, terminal e sudo, agendas por usuário). O painel não tem testes automatizados; só há o verificador das traduções:
+vídeos e legendas, livros (envio, categoria/dono, leitor de EPUB, liga/desliga), trânsito, versão e métricas do sistema, e o Diogows (usuários e permissões, arquivos, terminal e sudo, agendas por usuário). O painel não tem testes automatizados; só há o verificador das traduções:
 ```bash
 node scripts/check-i18n.js
 ```
@@ -186,7 +186,7 @@ node scripts/check-i18n.js
 |---|---|
 | [docs/funcionalidades.md](docs/funcionalidades.md) | **Mapa de todas as funcionalidades**, API, rotinas e código |
 | [docs/cameras.md](docs/cameras.md) | Câmeras ao vivo, rodízio, gravações, modelos Intelbras |
-| [docs/desktop.md](docs/desktop.md) | **Desktop**: usuários, permissões, Terminal/sudo, calendário, LiteOffice (documentos, planilhas, apresentações e LibreOffice completo no navegador), API |
+| [docs/desktop.md](docs/desktop.md) | **Diogows**: usuários, permissões, Terminal/sudo, calendário, LiteOffice (documentos, planilhas, apresentações e LibreOffice completo no navegador), API |
 | [docs/estoque-contatos.md](docs/estoque-contatos.md) | Geladeira, Serviços, planilha, banco, API e segurança; páginas Vídeos e Livros |
 | [docs/jogos.md](docs/jogos.md) | Subsistema de conquistas (sem tela) |
 | [docs/spec-design.md](docs/spec-design.md) | Especificação visual (TV 1920×1080) |

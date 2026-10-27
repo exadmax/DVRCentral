@@ -29,7 +29,7 @@
 
     // ---- nomes de fábrica (menu, locais do estoque, agendas de exemplo) ----
     'def.games': 'Jogos', 'def.fridge': 'Geladeira', 'def.freezer': 'Freezer', 'def.pantry': 'Dispensa', 'def.services': 'Serviços',
-    'def.cameras': 'Câmeras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Livros', 'def.desktop': 'Desktop', 'def.config': 'Config', 'def.couple': 'Casal',
+    'def.cameras': 'Câmeras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Livros', 'def.desktop': 'Diogows', 'def.config': 'Config', 'def.couple': 'Casal',
     'def.fridge.sub': 'Itens e validades', 'def.services.sub': 'Profissionais', 'def.cameras.sub': 'Ao vivo', 'def.videos.sub': 'Abrir no VLC', 'def.books.sub': 'PDF e EPUB', 'def.desktop.sub': 'Área de trabalho', 'def.config.sub': 'Servidor',
 
     // ---- tela inicial ----

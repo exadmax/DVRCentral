@@ -35,7 +35,7 @@
       function setDoc(html) { frame.srcdoc = html; }
       function syncUi() { back.disabled = idx <= 0; fwd.disabled = idx >= hist.length - 1; addr.value = current; }
 
-      // Intercepta cliques e buscas dentro da página (é o Desktop que navega, não o iframe)
+      // Intercepta cliques e buscas dentro da página (é o Diogows que navega, não o iframe)
       frame.addEventListener('load', () => {
         let d; try { d = frame.contentDocument; } catch (e) { return; }
         if (!d) return;

@@ -1,5 +1,5 @@
 (function (DK) {
-  // Ciclo de sessão do Desktop: login, troca obrigatória de senha, menu Iniciar, ícones, relógio e os atalhos do painel da casa.
+  // Ciclo de sessão do Diogows: login, troca obrigatória de senha, menu Iniciar, ícones, relógio e os atalhos do painel da casa.
   const $ = DK.$, el = DK.el;
   DK.links = [];
 
@@ -135,7 +135,7 @@
     if (DK.loadPrograms) await DK.loadPrograms();
     buildIcons(); buildStartMenu();
     DK.chat.start();                           // mensagens novas dos outros usuários
-    DK.cal.startWatching();                    // avisos do calendário enquanto o Desktop estiver aberto
+    DK.cal.startWatching();                    // avisos do calendário enquanto o Diogows estiver aberto
   }
   function showLogin(msg) {
     DK.me = null; DK.prefs = {}; DK.notifs = []; DK.programs = [];

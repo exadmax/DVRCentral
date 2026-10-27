@@ -1,5 +1,5 @@
 (function (DK) {
-  // Casca do Desktop: menu de contexto (botão direito no computador, toque longo no celular/tablet) e itens da Área de Trabalho
+  // Casca do Diogows: menu de contexto (botão direito no computador, toque longo no celular/tablet) e itens da Área de Trabalho
   // (arquivos, pastas e ícones de aplicativos escolhidos pela pessoa; ficam nas preferências do usuário no servidor).
   // Qualquer elemento pode ter uma função `_ctx(evento)`: devolve a lista de itens do menu, `false` (sem menu, e some o menu do navegador)
   // ou nada (vale o elemento de cima). Item: { icon, label, fn, danger, disabled, sub: [...] } ou '-' para separador.
@@ -61,7 +61,7 @@
     if (items) DK.ctxMenu(x, y, items); else DK.closeCtx();
   }
 
-  // botão direito: menu do Desktop no lugar do menu do navegador (campos de texto e Shift+botão direito mantêm o do navegador)
+  // botão direito: menu do Diogows no lugar do menu do navegador (campos de texto e Shift+botão direito mantêm o do navegador)
   document.addEventListener('contextmenu', e => {
     if (!DK.me || editable(e.target) || e.shiftKey) return;
     e.preventDefault();

@@ -28,7 +28,7 @@
 
     // ---- nombres de fábrica (menú, lugares del inventario, agendas de ejemplo) ----
     'def.games': 'Juegos', 'def.fridge': 'Nevera', 'def.freezer': 'Congelador', 'def.pantry': 'Despensa', 'def.services': 'Servicios',
-    'def.cameras': 'Cámaras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Libros', 'def.desktop': 'Escritorio', 'def.config': 'Config', 'def.couple': 'Pareja',
+    'def.cameras': 'Cámaras', 'def.music': 'Música', 'def.videos': 'Vídeos', 'def.books': 'Libros', 'def.desktop': 'Diogows', 'def.config': 'Config', 'def.couple': 'Pareja',
     'def.fridge.sub': 'Caducidades', 'def.services.sub': 'Profesionales', 'def.cameras.sub': 'En vivo', 'def.videos.sub': 'Abrir en VLC', 'def.books.sub': 'PDF y EPUB', 'def.desktop.sub': 'Área de trabajo', 'def.config.sub': 'Servidor',
 
     // ---- pantalla de inicio ----

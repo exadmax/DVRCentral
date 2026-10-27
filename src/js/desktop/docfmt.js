@@ -511,7 +511,7 @@
       '<manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.text"/>' +
       ['content.xml', 'styles.xml', 'meta.xml'].map(f => '<manifest:file-entry manifest:full-path="' + f + '" manifest:media-type="text/xml"/>').join('') +
       media.map(m => '<manifest:file-entry manifest:full-path="' + m.name + '" manifest:media-type="' + m.type + '"/>').join('') + '</manifest:manifest>';
-    const meta = '<?xml version="1.0" encoding="UTF-8"?><office:document-meta ' + ODF_NS + ' office:version="1.2"><office:meta><meta:generator>Central Diogo Desktop</meta:generator><meta:creation-date>' + new Date().toISOString() + '</meta:creation-date></office:meta></office:document-meta>';
+    const meta = '<?xml version="1.0" encoding="UTF-8"?><office:document-meta ' + ODF_NS + ' office:version="1.2"><office:meta><meta:generator>Central Diogo Diogows</meta:generator><meta:creation-date>' + new Date().toISOString() + '</meta:creation-date></office:meta></office:document-meta>';
     const blob = await Z.write([{ name: 'mimetype', data: 'application/vnd.oasis.opendocument.text', store: true }, { name: 'content.xml', data: contentXml }, { name: 'styles.xml', data: stylesXml },
       { name: 'meta.xml', data: meta }, { name: 'META-INF/manifest.xml', data: manifest }].concat(media.map(m => ({ name: m.name, data: m.data, store: true }))));
     return { blob: blob, skippedImages: skipped };

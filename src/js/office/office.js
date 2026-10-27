@@ -1,4 +1,4 @@
-// LiteOffice Completo: abre um arquivo do Desktop no LibreOffice compilado para WebAssembly (ZetaOffice), que roda no navegador de quem usa.
+// LiteOffice Completo: abre um arquivo do Diogows no LibreOffice compilado para WebAssembly (ZetaOffice), que roda no navegador de quem usa.
 // O servidor só entrega o arquivo e guarda o resultado; nada é processado nele. Esta página precisa de "isolamento de origem cruzada"
 // (o hub já manda COOP/COEP para office.html) e de contexto seguro: HTTPS ou localhost. Veja docs/desktop.md, seção "LiteOffice Completo".
 // Modelo do exemplo "web-office" do zetajs (MIT, allotropia).
@@ -61,7 +61,7 @@
     switch (m.cmd) {
     case 'thr_running':
       (async () => {
-        say('Baixando o arquivo do Desktop…');
+        say('Baixando o arquivo do Diogows…');
         let bytes;
         try { bytes = await fetchDoc(); } catch (x) { fail('Não foi possível abrir “' + name + '”.', x.message); return; }
         try { FS.mkdir('/tmp/office/'); } catch (x) { /* já existe */ }
@@ -84,7 +84,7 @@
       break;
     case 'saved':
       (async () => {
-        try { await upload(FS.readFile('/tmp/office/' + FSNAME)); modified = false; $('state').textContent = 'salvo no Desktop às ' + new Date().toLocaleTimeString('pt-BR'); }
+        try { await upload(FS.readFile('/tmp/office/' + FSNAME)); modified = false; $('state').textContent = 'salvo no Diogows às ' + new Date().toLocaleTimeString('pt-BR'); }
         catch (x) { $('state').textContent = 'erro ao salvar: ' + x.message; }
         saving = false; $('save').disabled = false;
       })();
@@ -96,11 +96,11 @@
   }
 
   // ---------- início ----------
-  if (!fpath) { fail('Nenhum arquivo informado.', 'Abra esta página pelo Desktop (Explorer → botão direito → Abrir no Office completo).'); return; }
+  if (!fpath) { fail('Nenhum arquivo informado.', 'Abra esta página pelo Diogows (Explorer → botão direito → Abrir no Office completo).'); return; }
   if (!window.crossOriginIsolated || typeof SharedArrayBuffer === 'undefined') {
     fail('Este navegador não liberou o recurso que o LibreOffice precisa (SharedArrayBuffer).',
       window.isSecureContext ? 'O endereço está seguro, mas a página não está isolada: confira se o hub (ou o nginx na frente dele) está entregando office.html com os cabeçalhos Cross-Origin-Opener-Policy: same-origin e Cross-Origin-Embedder-Policy: require-corp.'
-        : 'Esta página está em HTTP puro (' + location.origin + '). O navegador só libera isso em HTTPS ou em localhost. Acesse o Desktop por HTTPS (veja docs/desktop.md) ou por http://localhost.');
+        : 'Esta página está em HTTP puro (' + location.origin + '). O navegador só libera isso em HTTPS ou em localhost. Acesse o Diogows por HTTPS (veja docs/desktop.md) ou por http://localhost.');
     return;
   }
   say('Carregando o LibreOffice…', 'Na primeira vez são ~50 MB (do ' + new URL(base).host + '); depois o navegador guarda em cache. Precisa de ~1 GB de memória livre no seu computador.');

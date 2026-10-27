@@ -1,14 +1,25 @@
-# Desktop (área de trabalho no navegador)
+# Diogows (área de trabalho no navegador)
 
-Uma **interface a mais** do Central Diogo, no molde de um WebDesktop: janelas, menu Iniciar, ícones e barra de tarefas, com login e
+Uma **interface a mais** do Central Diogo, no molde de uma área de trabalho clássica: janelas, menu Iniciar, ícones e barra de tarefas, com login e
 **vários usuários**. Fica em `http://<servidor>/desktop.html`. O painel de sempre (Início, Geladeira, Serviços, Câmeras, Vídeos, Livros,
-Config) **continua como era**: nada foi trocado, o Desktop só se soma a ele.
+Config) **continua como era**: nada foi trocado, o Diogows só se soma a ele.
 
-- No painel atual há o atalho **Desktop** no rodapé (menu padrão). Se o seu menu já foi editado na Config, acrescente o atalho lá:
-  *Config → aba Menu → + Adicionar atalho*, com nome "Desktop" e caminho `/desktop.html`.
-- No Desktop, o menu **Iniciar** traz também **todos os atalhos do painel**, na mesma lista da Config: **Jogos (WebRCade)**, **Música
+> **Nome:** o que antes aparecia como “Desktop” agora se chama **Diogows**. O endereço continua `/desktop.html` e a pasta *Desktop* dentro de *Meus arquivos* também; nada precisa ser migrado.
+
+- No painel atual há o atalho **Diogows** no rodapé (menu padrão). Se o seu menu já foi editado na Config, acrescente o atalho lá:
+  *Config → aba Menu → + Adicionar atalho*, com nome "Diogows" e caminho `/desktop.html`.
+- No Diogows, o menu **Iniciar** traz também **todos os atalhos do painel**, na mesma lista da Config: **Jogos (WebRCade)**, **Música
   (Navidrome)**, Geladeira, Serviços, Vídeos, Livros e os demais, e os serviços externos (Jogos, Música) ganham ícone na área de
   trabalho. Eles abrem em outra aba e usam a mesma regra de endereço do painel (porta própria, `{host}`). Nada foi removido nem duplicado.
+
+## Área de Trabalho, menu Iniciar e menu de contexto
+
+- **Menu Iniciar por categorias** (Arquivos e sistema, Escritório, Imagens, vídeo e câmeras, Internet e comunicação, Meus programas, Painel e serviços da casa e Administração e conta), com **busca** (lista plana) e o estado salvo nas preferências do usuário.
+- **Botão direito** (e **toque longo** no celular e no tablet) abre o menu do Diogows na área de trabalho, nos ícones, no Iniciar, na barra de tarefas, nas janelas e no Explorer.
+  Campos de texto e **Shift + botão direito** mantêm o menu do navegador.
+- **Área de Trabalho com itens seus:** aceita arquivos, pastas e ícones de aplicativos, enviados do aparelho, pelo Explorer ou arrastando e soltando. Os arquivos enviados ficam
+  na pasta *Desktop* de *Meus arquivos*; o limite das preferências sobe para 32 KB.
+- **Celular e tablet:** em telas estreitas as janelas abrem em tela cheia, os alvos de toque ficam maiores e as ações do Explorer passam para o menu de toque longo.
 
 ## Primeiro acesso
 
@@ -19,7 +30,7 @@ vez no log do hub** (não existe senha fixa no código):
 sudo journalctl -u centraldiogo-hub | grep "desktop: primeira instalação"
 ```
 
-No primeiro login o Desktop obriga a trocar a senha. Apagar usuários depois nunca recria o `admin` (só acontece com a tabela vazia).
+No primeiro login o Diogows obriga a trocar a senha. Apagar usuários depois nunca recria o `admin` (só acontece com a tabela vazia).
 Senha esquecida do único administrador: apague as linhas de `desk_users` e `desk_sessions` do banco com o hub parado e reinicie
 (`sqlite3 centraldiogo.db "DELETE FROM desk_users; DELETE FROM desk_sessions;"`): um novo `admin` é sorteado e mostrado no log.
 
@@ -59,12 +70,12 @@ bloqueiam por 5 minutos.
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
 | **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas Windows 95/98 e DOS instalados** |
-| **Instalar Programas e Acessórios** | todos | Instala programas DOS e Windows 95/98/ME na sua pasta e escolhe a engine; também liga ou desliga os acessórios do Desktop (abaixo) |
+| **Instalar Programas e Acessórios** | todos | Instala programas DOS e Windows 95/98/ME na sua pasta e escolhe a engine; também liga ou desliga os acessórios do Diogows (abaixo) |
 | **Navegador** | todos | Abre páginas pelo servidor e **baixa arquivos para Meus arquivos/Downloads** (abaixo) |
 | **Calculadora** | todos | Acessório simples |
 | **Câmeras** | todos veem; só o admin altera | Cada câmera abre numa **janela separada** (ou todas, ou em mosaico); a aba *Gerenciar* edita as câmeras (só admin) |
 | **Contatos** | todos | Os profissionais da casa (mesma lista da página Serviços): busca, filtro por tipo, ligar, WhatsApp, e-mail |
-| **Mensagens** | todos | Conversa entre usuários do Desktop, com envio de arquivos e imagens (arraste, cole um print ou use 📎), avisos no sino e “visto”. Ninguém envia mensagens ao administrador; ele escreve aos demais. Anexos ficam em `desk/_chat/` e podem ser salvos em *Meus arquivos/Recebidos* |
+| **Mensagens** | todos | Conversa entre usuários do Diogows, com envio de arquivos e imagens (arraste, cole um print ou use 📎), avisos no sino e “visto”. Ninguém envia mensagens ao administrador; ele escreve aos demais. Anexos ficam em `desk/_chat/` e podem ser salvos em *Meus arquivos/Recebidos* |
 | **Calendário** | cada um o seu | Agregador de agendas iCal por usuário, com visão mensal e dos próximos dias, e **avisos** (abaixo) |
 | **Terminal** | admin e liberados | Comandos no servidor, de qualquer aparelho da rede, com a opção **sudo** |
 | **Usuários / Configurações / Minha conta** | admin / admin / todos | Administração, a página Config numa janela e troca de senha |
@@ -88,7 +99,7 @@ Cada login, desbloqueio, comando, listagem, leitura e gravação no computador v
 
 ### Habilitar o sudo (Linux)
 
-O serviço roda com `NoNewPrivileges=true` e sem sudo. Para liberar o sudo do Desktop é preciso um passo explícito:
+O serviço roda com `NoNewPrivileges=true` e sem sudo. Para liberar o sudo do Diogows é preciso um passo explícito:
 
 ```bash
 sudo bash install.sh --desk-shell      # sudoers NOPASSWD para o usuário do serviço + NoNewPrivileges=false (drop-in do systemd)
@@ -97,13 +108,13 @@ sudo systemctl restart centraldiogo-hub
 sudo bash install.sh --no-desk-shell   # desfaz
 ```
 
-> ⚠️ Isto dá ao hub o poder de root. Quem tiver a permissão **e** a senha de um administrador do Desktop passa a administrar a máquina.
-> Na prática, a senha do administrador do Desktop passa a valer como senha de root: use uma senha longa e só em rede confiável.
+> ⚠️ Isto dá ao hub o poder de root. Quem tiver a permissão **e** a senha de um administrador do Diogows passa a administrar a máquina.
+> Na prática, a senha do administrador do Diogows passa a valer como senha de root: use uma senha longa e só em rede confiável.
 > Em HTTP puro (rede local) as senhas trafegam sem criptografia; para sair da rede de casa use VPN ou HTTPS.
 
 ## Navegador e downloads
 
-O **Navegador** do Desktop abre as páginas **pelo servidor**: o hub busca o site, tira scripts, objetos e iframes, e a janela mostra o resultado
+O **Navegador** do Diogows abre as páginas **pelo servidor**: o hub busca o site, tira scripts, objetos e iframes, e a janela mostra o resultado
 sem executar nada. Os arquivos (zip, exe, iso, pdf...) não passam pelo navegador: aparece **Baixar para Meus arquivos/Downloads**, o servidor
 baixa em segundo plano (com progresso, cancelamento e limite de 3 ao mesmo tempo) e, quando termina, dá para **instalar como programa** direto da lista.
 
@@ -138,11 +149,11 @@ Os programas rodam **no seu navegador**, dentro do **js-dos**, que traz as engin
    em *Meus arquivos/Programas*. Um **.jsdos** pronto é registrado como está.
 4. O programa entra no menu Iniciar (seção *Meus programas*), no Painel de Controle e, se quiser, na área de trabalho. *Desinstalar* apaga a pasta instalada.
 
-**Windows 95/98/ME:** a Microsoft não distribui esses sistemas, então **o Desktop não traz nenhum**. Use um pacote `.jsdos` com o Windows já instalado
+**Windows 95/98/ME:** a Microsoft não distribui esses sistemas, então **o Diogows não traz nenhum**. Use um pacote `.jsdos` com o Windows já instalado
 e que você tenha licença para usar (por exemplo, um que você mesmo montou). Esse caminho só aceita `.jsdos`, não `.zip`. Ele foi construído de acordo com a
 documentação do js-dos, mas **não foi testado com uma imagem real do Windows 9x** (não havia uma disponível no desenvolvimento): o fluxo DOS foi testado de ponta a ponta nas duas engines.
 
-**Acessórios:** a aba *Acessórios do Desktop* mostra os aplicativos do próprio Desktop (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
+**Acessórios:** a aba *Acessórios do Diogows* mostra os aplicativos do próprio Diogows (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
 esconde do menu e dos ícones; nada é apagado e dá para marcar de novo.
 
 ## Painel de Controle
@@ -158,13 +169,13 @@ vale `webcal://`). O servidor guarda a URL (que é um segredo) e a devolve **mas
 cair, usa a última cópia boa. Só endereços da internet são aceitos: o servidor **não baixa** de endereços da rede interna ou dele mesmo.
 Até 12 agendas por usuário. Opcionalmente o calendário mostra também as **agendas da casa** (as da tela inicial).
 
-Os **avisos** aparecem dentro do Desktop do usuário enquanto ele estiver aberto: sino na barra com contador, aviso na tela, som e, em HTTPS,
+Os **avisos** aparecem dentro do Diogows do usuário enquanto ele estiver aberto: sino na barra com contador, aviso na tela, som e, em HTTPS,
 avisos do navegador. Por padrão avisa **10 minutos antes** e **na hora** do compromisso, e de manhã (8h) os de dia inteiro. Tudo se ajusta em
 *Calendário → Agendas e avisos* e fica salvo na conta (acompanha o usuário em qualquer aparelho). O mesmo aviso não se repete.
 
 ## LiteOffice (documentos, planilhas, apresentações e o Office completo)
 
-O **LiteOffice** é a família de editores de escritório do Desktop. Os três primeiros são **leves e totalmente integrados** (Explorer, *Meus arquivos*,
+O **LiteOffice** é a família de editores de escritório do Diogows. Os três primeiros são **leves e totalmente integrados** (Explorer, *Meus arquivos*,
 o Computador para quem tem permissão); rodam **inteiros no navegador**, sem bibliotecas externas, então **nada pesa no servidor** (que tem só 2 GB de
 RAM). Para o que eles não fazem, o **LiteOffice Completo** abre o arquivo no LibreOffice de verdade, também no navegador. Os editores leves exigem um navegador com
 `DecompressionStream('deflate-raw')` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+). O *Explorer* tem os botões **📘 Novo documento**, **📗 Nova planilha** e **📙 Nova apresentação**.
@@ -208,13 +219,13 @@ Slides novos: capa, título e conteúdo, só título, em branco. Abre modelos do
 
 O **LibreOffice inteiro** (Writer, Calc, Impress, com todos os recursos) compilado para WebAssembly pelo projeto **ZetaOffice** (allotropia; o `zetajs` é MIT). Roda **no navegador de quem usa**: o servidor só entrega o arquivo e guarda o resultado.
 Abre `.docx .doc .odt .rtf`, `.xlsx .xls .ods .csv`, `.pptx .ppt .odp .odg` e mais. Acesso: menu Iniciar → *LiteOffice Completo*, **botão direito no arquivo → Abrir no Office completo**, ou clique direto em `.doc`, `.xls`, `.ppt`, `.rtf` no Explorer.
-Abre numa **nova aba** (`office.html`); o botão **💾 Salvar no Desktop** (ou Ctrl+S) grava no mesmo lugar e no mesmo formato. Ao fechar com alterações não salvas, o navegador avisa.
+Abre numa **nova aba** (`office.html`); o botão **💾 Salvar no Diogows** (ou Ctrl+S) grava no mesmo lugar e no mesmo formato. Ao fechar com alterações não salvas, o navegador avisa.
 
 **Requisitos (importante):**
 
 - **HTTPS ou `localhost`.** O WebAssembly com threads precisa de `SharedArrayBuffer`, que o navegador só libera em *contexto seguro*. Em `http://192.168.x.x:8080` (HTTP puro na rede local) **não funciona**:
   a página mostra o motivo. Use HTTPS (por exemplo o nginx do servidor com um certificado aceito pelos seus aparelhos) ou acesse por `http://localhost`.
-- O hub já manda os cabeçalhos `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` **só para `office.html`** e seus scripts (`server/office.go`); o resto do Desktop não é afetado.
+- O hub já manda os cabeçalhos `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` **só para `office.html`** e seus scripts (`server/office.go`); o resto do Diogows não é afetado.
   Se houver um proxy na frente, ele não pode removê-los.
 - **~50 MB de download na primeira abertura** (depois fica em cache) e **~1 GB de memória livre no computador de quem abre**. Em celular ou computador fraco, prefira os editores leves.
 - Por padrão os arquivos do LibreOffice (`soffice.js`, `.wasm`, `.data`) vêm do **CDN do ZetaOffice** (`https://cdn.zetaoffice.net/zetaoffice_latest/`), uma terceira parte: o navegador precisa de internet e confia nesse código.
@@ -235,17 +246,17 @@ Abre numa **nova aba** (`office.html`); o botão **💾 Salvar no Desktop** (ou 
 "desk": {
   "shell": false,            // liga Terminal e arquivos do computador (padrão desligado)
   "shellAnyNetwork": false,  // aceita o Terminal por HTTP puro vindo da internet (não recomendado)
-  "protectSettings": false,  // alterações de Config/câmeras exigem sessão de administrador do Desktop
+  "protectSettings": false,  // alterações de Config/câmeras exigem sessão de administrador do Diogows
   "maxUploadMB": 2048,       // tamanho máximo de cada envio
   "dir": "desk",             // onde ficam as pastas dos usuários (relativo ao hub.config.json)
   "noBrowser": false,        // true tira o Navegador e os downloads
-  "disabled": false          // true desliga o Desktop inteiro (/api/desk/* some)
+  "disabled": false          // true desliga o Diogows inteiro (/api/desk/* some)
 }
 ```
 
-**`protectSettings`:** a página Config e a API de câmeras do painel **continuam abertas** como sempre foram (o painel não tem login). No Desktop, só
+**`protectSettings`:** a página Config e a API de câmeras do painel **continuam abertas** como sempre foram (o painel não tem login). No Diogows, só
 o administrador mexe nelas. Ligando `protectSettings`, as gravações de `/api/settings/*`, `/api/admin/*` e das gravações passam a exigir uma sessão
-de administrador do Desktop no mesmo navegador, inclusive vindo da própria página Config, que então só salva depois de entrar no Desktop como admin.
+de administrador do Diogows no mesmo navegador, inclusive vindo da própria página Config, que então só salva depois de entrar no Diogows como admin.
 
 ## API (`/api/desk/*`)
 
@@ -265,7 +276,7 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 ## Limitações
 
 - Programas Windows 9x e o js-dos: veja acima o que foi e o que não foi testado. O emulador pede um PC razoável; em TV ou celular não é a proposta.
-- A interface do Desktop está **só em português**. O painel de sempre segue traduzido (pt, en, es, zh).
+- A interface do Diogows está **só em português**. O painel de sempre segue traduzido (pt, en, es, zh).
 - O sudo só existe no Linux do servidor. No Windows de desenvolvimento o Terminal usa o PowerShell e o Explorer mostra as unidades (`/C:/...`).
 - Funciona em navegador de computador; não foi feito para TV nem celular.
 - O **LiteOffice Completo** só roda em HTTPS ou `localhost` e pede ~50 MB de download e ~1 GB de memória no computador de quem usa (seção LiteOffice).

@@ -1,11 +1,11 @@
 (function (DK) {
-  // Painel de Controle: um lugar só para as configurações do Desktop e do painel da casa (a página Config, aba por aba), as contas,
+  // Painel de Controle: um lugar só para as configurações do Diogows e do painel da casa (a página Config, aba por aba), as contas,
   // as câmeras, o calendário, a rede e os programas Windows 95/98 e DOS instalados, que podem ser executados direto daqui.
   const el = DK.el;
 
   const CONFIG_TABS = [['servidor', '🖧', 'Servidor', 'Uso do servidor e botões de energia'], ['cameras', '📷', 'Câmeras e gravações', 'Gravação, retenção e Google Drive'],
     ['agendas', '🗓️', 'Agendas e rotas', 'iCal da casa e trânsito'], ['painel', '🖼️', 'Painel', 'Cidade, modo noturno, validade, locais'], ['livros', '📚', 'Livros', 'Página de livros e categorias'],
-    ['menu', '☰', 'Menu de atalhos', 'Jogos, Música, Desktop e os demais'], ['integracoes', '🔌', 'Integrações', 'Planilha, jogos, cache e rede'],
+    ['menu', '☰', 'Menu de atalhos', 'Jogos, Música, Diogows e os demais'], ['integracoes', '🔌', 'Integrações', 'Planilha, jogos, cache e rede'],
     ['idioma', '🌐', 'Idioma', 'Português, English, Español, 中文'], ['compat', '📺', 'Compatibilidade (TV)', 'Uma câmera por vez'], ['ajuda', '❓', 'Ajuda', 'Manual com busca']];
 
   function sections() {
@@ -14,7 +14,7 @@
     S.push({ title: 'Programas', items: [
       { icon: '🧩', label: 'Instalar Programas e Acessórios', sub: 'DOS, Windows 95/98/ME e acessórios', open: () => DK.programsApp() },
       { icon: '➕', label: 'Instalar programa', sub: 'A partir de .zip ou .jsdos', open: () => DK.programsApp({ tab: 'install' }) },
-      { icon: '🧰', label: 'Acessórios do Desktop', sub: 'Mostrar ou esconder aplicativos', open: () => DK.programsApp({ tab: 'acc' }) }] });
+      { icon: '🧰', label: 'Acessórios do Diogows', sub: 'Mostrar ou esconder aplicativos', open: () => DK.programsApp({ tab: 'acc' }) }] });
     if (DK.programs.length) S.push({ title: 'Programas instalados (clique para executar)', items: DK.programs.map(p => (
       { icon: p.kind === 'win9x' ? '🪟' : '🕹️', label: p.name, sub: (p.kind === 'win9x' ? 'Windows 95/98/ME' : 'DOS') + ' · ' + (p.engine === 'dosbox' ? 'js-dos' : 'DOSBox-X'), open: () => DK.runProgram(p) })) });
     S.push({ title: 'Sistema e manutenção', items: [

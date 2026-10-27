@@ -1,5 +1,5 @@
 (function (DK) {
-  // LiteOffice — editor de documentos (.docx e .odt), a opção leve e integrada ao Desktop (roda todo no navegador): abre e salva nas pastas dos usuários (Meus arquivos) e, para quem tem permissão, no Computador.
+  // LiteOffice — editor de documentos (.docx e .odt), a opção leve e integrada ao Diogows (roda todo no navegador): abre e salva nas pastas dos usuários (Meus arquivos) e, para quem tem permissão, no Computador.
   // A edição usa um <div contenteditable>; a conversão de/para os pacotes fica em docfmt.js (sem bibliotecas externas).
   const el = DK.el;
 

@@ -2,7 +2,7 @@ package main
 
 // Office completo (LiteOffice Completo): a página office.html roda o LibreOffice compilado para WebAssembly (ZetaOffice) no navegador de quem a abre,
 // então o servidor só entrega arquivos. O WebAssembly usa threads (SharedArrayBuffer), que o navegador só libera em páginas com "isolamento de origem
-// cruzada" (COOP + COEP). Por isso só essa página e os scripts dela recebem os cabeçalhos abaixo: o resto do Desktop e do painel continua como era,
+// cruzada" (COOP + COEP). Por isso só essa página e os scripts dela recebem os cabeçalhos abaixo: o resto do Diogows e do painel continua como era,
 // porque o COEP quebraria visualizadores em iframe e imagens de outros sites.
 
 import (

@@ -1,4 +1,4 @@
-// Desktop: uma área de trabalho no navegador (desktop.html), com login e vários usuários. É uma interface a mais: o painel
+// Diogows: uma área de trabalho no navegador (desktop.html), com login e vários usuários. É uma interface a mais: o painel
 // atual (TV, celular, Config) continua exatamente como era. Aqui ficam a configuração, as tabelas, as sessões e a
 // administração de usuários; os arquivos estão em desk_fs.go, o terminal em desk_shell.go e o resto em desk_misc.go.
 //
@@ -38,7 +38,7 @@ type DeskConfig struct {
 	Dir             string `json:"dir"`             // pasta das pastas dos usuários (padrão: "desk" ao lado do hub.config.json)
 	Shell           bool   `json:"shell"`           // liga o Terminal e os arquivos do computador (padrão desligado; veja SECURITY.md)
 	ShellAnyNetwork bool   `json:"shellAnyNetwork"` // permite o terminal por HTTP puro vindo de fora das redes privadas (não recomendado)
-	ProtectSettings bool   `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Desktop
+	ProtectSettings bool   `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Diogows
 	NoBrowser       bool   `json:"noBrowser"`       // true tira o navegador interno e os downloads
 	MaxUploadMB     int    `json:"maxUploadMB"`     // tamanho máximo de um envio (padrão 2048)
 }
@@ -771,7 +771,7 @@ func (d *deskAPI) handleDeleteUser(w http.ResponseWriter, r *http.Request, admin
 func (d *deskAPI) userDir(id int64) string { return filepath.Join(d.dir, strconv.FormatInt(id, 10)) }
 
 // protectSettings (opção "protectSettings"): alterações de Config, câmeras e energia passam a exigir uma sessão de
-// administrador do Desktop, mesmo vindo das páginas antigas (config.html). Leitura continua aberta como sempre foi.
+// administrador do Diogows, mesmo vindo das páginas antigas (config.html). Leitura continua aberta como sempre foi.
 func (d *deskAPI) protectSettings(next http.Handler) http.Handler {
 	if !d.cfg.ProtectSettings || d.cfg.Disabled {
 		return next
@@ -781,7 +781,7 @@ func (d *deskAPI) protectSettings(next http.Handler) http.Handler {
 		write := r.Method != http.MethodGet && r.Method != http.MethodHead && r.Method != http.MethodOptions
 		if write && (strings.HasPrefix(p, "/api/settings/") || strings.HasPrefix(p, "/api/admin/") || p == "/api/recordings/settings" || strings.HasPrefix(p, "/api/recordings/drive")) {
 			if u := d.sessionUser(r); u == nil || !u.IsAdmin || u.MustChange {
-				deskErr(w, http.StatusUnauthorized, "entre no Desktop como administrador para alterar a configuração")
+				deskErr(w, http.StatusUnauthorized, "entre no Diogows como administrador para alterar a configuração")
 				return
 			}
 		}

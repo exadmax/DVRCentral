@@ -1,6 +1,6 @@
 (function (DK) {
-  // Núcleo do Desktop: pedidos à API (/api/desk), janelas, diálogos de senha e o desbloqueio do computador (Terminal, arquivos, sudo).
-  // Texto da interface só em português (o resto do painel é traduzido; o Desktop é uma interface de uso do administrador da casa).
+  // Núcleo do Diogows: pedidos à API (/api/desk), janelas, diálogos de senha e o desbloqueio do computador (Terminal, arquivos, sudo).
+  // Texto da interface só em português (o resto do painel é traduzido; o Diogows é uma interface de uso do administrador da casa).
   const $ = id => document.getElementById(id);
   DK.$ = $;
   DK.me = null;       // usuário logado
@@ -119,7 +119,7 @@
     bMax.onclick = e => { e.stopPropagation(); toggleMax(); };
     head.addEventListener('dblclick', e => { if (e.target.tagName !== 'BUTTON') toggleMax(); });
     if (win.classList.contains('max')) bMax.textContent = '❐';
-    // botão direito / toque longo: menus da janela (o resto do corpo da janela fica sem menu do Desktop, só o do navegador some)
+    // botão direito / toque longo: menus da janela (o resto do corpo da janela fica sem menu do Diogows, só o do navegador some)
     head._ctx = () => [
       { icon: win.classList.contains('max') ? '🗗' : '🗖', label: win.classList.contains('max') ? 'Restaurar' : 'Maximizar', fn: toggleMax },
       { icon: '🗕', label: 'Minimizar', fn: () => minimizeWin(win) },

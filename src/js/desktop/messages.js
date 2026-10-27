@@ -1,5 +1,5 @@
 (function (DK) {
-  // Mensagens: conversa um a um entre os usuários do Desktop, com envio de arquivos e imagens (/api/desk/chat). Enquanto o Desktop
+  // Mensagens: conversa um a um entre os usuários do Diogows, com envio de arquivos e imagens (/api/desk/chat). Enquanto o Diogows
   // estiver aberto, consulta o servidor a cada poucos segundos: atualiza a conversa aberta e avisa (sino, aviso na tela e som) das
   // mensagens novas de quem não está na conversa aberta.
   const el = DK.el;
