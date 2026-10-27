@@ -1,5 +1,6 @@
 node_modules/
 src/config/settings.js
+src/vendor/zetaoffice/
 build/
 
 server/hub.config.json

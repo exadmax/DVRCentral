@@ -1,14 +1,26 @@
-# Desktop (área de trabalho no navegador)
+# Diogows (área de trabalho no navegador)
 
-Uma **interface a mais** do Central Diogo, no molde de um WebDesktop: janelas, menu Iniciar, ícones e barra de tarefas, com login e
+Uma **interface a mais** do Central Diogo, no molde de uma área de trabalho clássica: janelas, menu Iniciar, ícones e barra de tarefas, com login e
 **vários usuários**. Fica em `http://<servidor>/desktop.html`. O painel de sempre (Início, Geladeira, Serviços, Câmeras, Vídeos, Livros,
-Config) **continua como era**: nada foi trocado, o Desktop só se soma a ele.
+Config) **continua como era**: nada foi trocado, o Diogows só se soma a ele.
 
-- No painel atual há o atalho **Desktop** no rodapé (menu padrão). Se o seu menu já foi editado na Config, acrescente o atalho lá:
-  *Config → aba Menu → + Adicionar atalho*, com nome "Desktop" e caminho `/desktop.html`.
-- No Desktop, o menu **Iniciar** traz também **todos os atalhos do painel**, na mesma lista da Config: **Jogos (WebRCade)**, **Música
+> **Nome:** o que antes aparecia como “Desktop” agora se chama **Diogows**. O endereço continua `/desktop.html` e a pasta *Desktop* dentro de *Meus arquivos* também; nada precisa ser migrado.
+
+- No painel atual há o atalho **Diogows** no rodapé (menu padrão). Se o seu menu já foi editado na Config, acrescente o atalho lá:
+  *Config → aba Menu → + Adicionar atalho*, com nome "Diogows" e caminho `/desktop.html`.
+- No Diogows, o menu **Iniciar** traz também **todos os atalhos do painel**, na mesma lista da Config: **Jogos (WebRCade)**, **Música
   (Navidrome)**, Geladeira, Serviços, Vídeos, Livros e os demais, e os serviços externos (Jogos, Música) ganham ícone na área de
   trabalho. Eles abrem em outra aba e usam a mesma regra de endereço do painel (porta própria, `{host}`). Nada foi removido nem duplicado.
+
+## Área de Trabalho, menu Iniciar e menu de contexto
+
+- **Menu Iniciar por categorias** (Arquivos e sistema, Escritório, Imagens, vídeo e câmeras, Internet e comunicação, Meus programas, Painel e serviços da casa e Administração e conta), com **busca** (lista plana) e o estado salvo nas preferências do usuário.
+- **Botão direito** (e **toque longo** no celular e no tablet) abre o menu do Diogows na área de trabalho, nos ícones, no Iniciar, na barra de tarefas, nas janelas e no Explorer.
+  Campos de texto e **Shift + botão direito** mantêm o menu do navegador.
+- **Área de Trabalho com itens seus:** aceita arquivos, pastas e ícones de aplicativos, enviados do aparelho, pelo Explorer ou arrastando e soltando. Os arquivos enviados ficam
+  na pasta *Desktop* de *Meus arquivos*; o limite das preferências sobe para 32 KB.
+- **Personalizar:** *botão direito na Área de Trabalho → 🎨 Personalizar* (ou na barra de tarefas e no menu Iniciar) abre a janela de aparência. **Fundo:** cor sólida, degradê (com ângulo) ou uma **imagem** escolhida no Explorer (preencher, ajustar ou lado a lado), com modelos prontos. **Menu Iniciar e barra:** modelos (Escuro, Azul, Verde, Roxo, Noturno, Claro) e cores da barra, do cabeçalho, do fundo e do texto do menu. Fica nas preferências da conta (acompanha o usuário em qualquer aparelho); a imagem é só uma referência ao arquivo, e *Restaurar o padrão* desfaz tudo. Código em `src/js/desktop/theme.js`.
+- **Celular e tablet:** em telas estreitas as janelas abrem em tela cheia, os alvos de toque ficam maiores e as ações do Explorer passam para o menu de toque longo.
 
 ## Primeiro acesso
 
@@ -19,7 +31,7 @@ vez no log do hub** (não existe senha fixa no código):
 sudo journalctl -u centraldiogo-hub | grep "desktop: primeira instalação"
 ```
 
-No primeiro login o Desktop obriga a trocar a senha. Apagar usuários depois nunca recria o `admin` (só acontece com a tabela vazia).
+No primeiro login o Diogows obriga a trocar a senha. Apagar usuários depois nunca recria o `admin` (só acontece com a tabela vazia).
 Senha esquecida do único administrador: apague as linhas de `desk_users` e `desk_sessions` do banco com o hub parado e reinicie
 (`sqlite3 centraldiogo.db "DELETE FROM desk_users; DELETE FROM desk_sessions;"`): um novo `admin` é sorteado e mostrado no log.
 
@@ -52,16 +64,19 @@ bloqueiam por 5 minutos.
 | **Meu Computador** (também na área de trabalho) | todos | Sistema, CPU, memória, tempo ligado, carga, rede, discos e atalhos para as unidades no Explorer |
 | **Explorer** | todos | Navega, cria pastas, envia (botão ou arrastando), renomeia, **move arrastando**, baixa e apaga. **Meus arquivos** para todos; **💻 Computador** para quem tem permissão, com o botão **🔓 sudo** para agir como root |
 | **Bloco de Notas** | todos | Texto até 1 MB com **realce de cores** por tipo (JSON, log, Markdown, CSV, INI/ENV/YAML, XML/HTML, código); abre arquivos de *Meus arquivos* ou do *Computador* |
-| **LiteOffice (Documentos)** | todos | Editor leve de documentos (.docx / .odt) que abre e salva nas pastas dos usuários (veja abaixo) |
+| **LiteOffice Documentos** | todos | Editor leve de documentos (.docx / .odt) que abre e salva nas pastas dos usuários (veja abaixo) |
+| **LiteOffice Planilhas** | todos | Planilha leve (.xlsx / .ods, e abre/exporta CSV): fórmulas, várias abas, formatos, congelar e mesclar |
+| **LiteOffice Apresentações** | todos | Editor leve de slides (.pptx / .odp): textos, formas, imagens, notas e apresentação em tela cheia |
+| **LiteOffice Completo** | todos | O **LibreOffice inteiro** rodando no seu navegador (WebAssembly), para o que os editores leves não fazem; exige HTTPS ou localhost (veja abaixo) |
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
 | **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas Windows 95/98 e DOS instalados** |
-| **Instalar Programas e Acessórios** | todos | Instala programas DOS e Windows 95/98/ME na sua pasta e escolhe a engine; também liga ou desliga os acessórios do Desktop (abaixo) |
+| **Instalar Programas e Acessórios** | todos | Instala programas DOS e Windows 95/98/ME na sua pasta e escolhe a engine; também liga ou desliga os acessórios do Diogows (abaixo) |
 | **Navegador** | todos | Abre páginas pelo servidor e **baixa arquivos para Meus arquivos/Downloads** (abaixo) |
 | **Calculadora** | todos | Acessório simples |
 | **Câmeras** | todos veem; só o admin altera | Cada câmera abre numa **janela separada** (ou todas, ou em mosaico); a aba *Gerenciar* edita as câmeras (só admin) |
 | **Contatos** | todos | Os profissionais da casa (mesma lista da página Serviços): busca, filtro por tipo, ligar, WhatsApp, e-mail |
-| **Mensagens** | todos | Conversa entre usuários do Desktop, com envio de arquivos e imagens (arraste, cole um print ou use 📎), avisos no sino e “visto”. Ninguém envia mensagens ao administrador; ele escreve aos demais. Anexos ficam em `desk/_chat/` e podem ser salvos em *Meus arquivos/Recebidos* |
+| **Mensagens** | todos | Conversa entre usuários do Diogows, com envio de arquivos e imagens (arraste, cole um print ou use 📎), avisos no sino e “visto”. Ninguém envia mensagens ao administrador; ele escreve aos demais. Anexos ficam em `desk/_chat/` e podem ser salvos em *Meus arquivos/Recebidos* |
 | **Calendário** | cada um o seu | Agregador de agendas iCal por usuário, com visão mensal e dos próximos dias, e **avisos** (abaixo) |
 | **Terminal** | admin e liberados | Comandos no servidor, de qualquer aparelho da rede, com a opção **sudo** |
 | **Usuários / Configurações / Minha conta** | admin / admin / todos | Administração, a página Config numa janela e troca de senha |
@@ -85,7 +100,7 @@ Cada login, desbloqueio, comando, listagem, leitura e gravação no computador v
 
 ### Habilitar o sudo (Linux)
 
-O serviço roda com `NoNewPrivileges=true` e sem sudo. Para liberar o sudo do Desktop é preciso um passo explícito:
+O serviço roda com `NoNewPrivileges=true` e sem sudo. Para liberar o sudo do Diogows é preciso um passo explícito:
 
 ```bash
 sudo bash install.sh --desk-shell      # sudoers NOPASSWD para o usuário do serviço + NoNewPrivileges=false (drop-in do systemd)
@@ -94,13 +109,13 @@ sudo systemctl restart centraldiogo-hub
 sudo bash install.sh --no-desk-shell   # desfaz
 ```
 
-> ⚠️ Isto dá ao hub o poder de root. Quem tiver a permissão **e** a senha de um administrador do Desktop passa a administrar a máquina.
-> Na prática, a senha do administrador do Desktop passa a valer como senha de root: use uma senha longa e só em rede confiável.
+> ⚠️ Isto dá ao hub o poder de root. Quem tiver a permissão **e** a senha de um administrador do Diogows passa a administrar a máquina.
+> Na prática, a senha do administrador do Diogows passa a valer como senha de root: use uma senha longa e só em rede confiável.
 > Em HTTP puro (rede local) as senhas trafegam sem criptografia; para sair da rede de casa use VPN ou HTTPS.
 
 ## Navegador e downloads
 
-O **Navegador** do Desktop abre as páginas **pelo servidor**: o hub busca o site, tira scripts, objetos e iframes, e a janela mostra o resultado
+O **Navegador** do Diogows abre as páginas **pelo servidor**: o hub busca o site, tira scripts, objetos e iframes, e a janela mostra o resultado
 sem executar nada. Os arquivos (zip, exe, iso, pdf...) não passam pelo navegador: aparece **Baixar para Meus arquivos/Downloads**, o servidor
 baixa em segundo plano (com progresso, cancelamento e limite de 3 ao mesmo tempo) e, quando termina, dá para **instalar como programa** direto da lista.
 
@@ -135,11 +150,11 @@ Os programas rodam **no seu navegador**, dentro do **js-dos**, que traz as engin
    em *Meus arquivos/Programas*. Um **.jsdos** pronto é registrado como está.
 4. O programa entra no menu Iniciar (seção *Meus programas*), no Painel de Controle e, se quiser, na área de trabalho. *Desinstalar* apaga a pasta instalada.
 
-**Windows 95/98/ME:** a Microsoft não distribui esses sistemas, então **o Desktop não traz nenhum**. Use um pacote `.jsdos` com o Windows já instalado
+**Windows 95/98/ME:** a Microsoft não distribui esses sistemas, então **o Diogows não traz nenhum**. Use um pacote `.jsdos` com o Windows já instalado
 e que você tenha licença para usar (por exemplo, um que você mesmo montou). Esse caminho só aceita `.jsdos`, não `.zip`. Ele foi construído de acordo com a
 documentação do js-dos, mas **não foi testado com uma imagem real do Windows 9x** (não havia uma disponível no desenvolvimento): o fluxo DOS foi testado de ponta a ponta nas duas engines.
 
-**Acessórios:** a aba *Acessórios do Desktop* mostra os aplicativos do próprio Desktop (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
+**Acessórios:** a aba *Acessórios do Diogows* mostra os aplicativos do próprio Diogows (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
 esconde do menu e dos ícones; nada é apagado e dá para marcar de novo.
 
 ## Painel de Controle
@@ -155,15 +170,20 @@ vale `webcal://`). O servidor guarda a URL (que é um segredo) e a devolve **mas
 cair, usa a última cópia boa. Só endereços da internet são aceitos: o servidor **não baixa** de endereços da rede interna ou dele mesmo.
 Até 12 agendas por usuário. Opcionalmente o calendário mostra também as **agendas da casa** (as da tela inicial).
 
-Os **avisos** aparecem dentro do Desktop do usuário enquanto ele estiver aberto: sino na barra com contador, aviso na tela, som e, em HTTPS,
+Os **avisos** aparecem dentro do Diogows do usuário enquanto ele estiver aberto: sino na barra com contador, aviso na tela, som e, em HTTPS,
 avisos do navegador. Por padrão avisa **10 minutos antes** e **na hora** do compromisso, e de manhã (8h) os de dia inteiro. Tudo se ajusta em
 *Calendário → Agendas e avisos* e fica salvo na conta (acompanha o usuário em qualquer aparelho). O mesmo aviso não se repete.
 
-## LiteOffice (.docx e .odt)
+## LiteOffice (documentos, planilhas, apresentações e o Office completo)
 
-O **LiteOffice** é a opção leve do Desktop: poucos recursos de formatação, mas roda inteiro no navegador (nada pesa no servidor) e é totalmente integrado ao Explorer e às pastas dos usuários. Abre e salva `.docx` (Word) e `.odt` (LibreOffice) nas pastas dos usuários (ou no Computador, para quem tem permissão).
-Também abre ao clicar no arquivo no Explorer; *📘 Novo documento* cria um na pasta atual. *Salvar como…* converte entre os dois formatos.
-Funciona sem biblioteca externa (o hub não precisa de internet) e exige um navegador com `DecompressionStream('deflate-raw')` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+).
+O **LiteOffice** é a família de editores de escritório do Diogows. Os três primeiros são **leves e totalmente integrados** (Explorer, *Meus arquivos*,
+o Computador para quem tem permissão); rodam **inteiros no navegador**, sem bibliotecas externas, então **nada pesa no servidor** (que tem só 2 GB de
+RAM). Para o que eles não fazem, o **LiteOffice Completo** abre o arquivo no LibreOffice de verdade, também no navegador. Os editores leves exigem um navegador com
+`DecompressionStream('deflate-raw')` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+). O *Explorer* tem os botões **📘 Novo documento**, **📗 Nova planilha** e **📙 Nova apresentação**.
+
+### LiteOffice Documentos (.docx e .odt)
+
+Abre e salva `.docx` (Word) e `.odt` (LibreOffice). Também abre ao clicar no arquivo no Explorer; *Salvar como…* converte entre os dois formatos.
 
 **Mantém:** parágrafos, títulos 1–3, negrito, itálico, sublinhado, tachado, fonte, tamanho, cor, alinhamento, listas (com níveis e numeração
 que recomeça), tabelas (com células mescladas na horizontal), links e imagens PNG/JPEG/GIF (outros formatos viram PNG ao inserir).
@@ -172,8 +192,54 @@ que recomeça), tabelas (com células mescladas na horizontal), links e imagens 
 documento que tenha isso, o editor **avisa** e, ao salvar por cima do original, **pergunta antes**: use *Salvar como…* para ficar com
 uma cópia. Documentos protegidos por senha não abrem. Colar de outro lugar vem **limpo** (só o que o editor entende).
 
-> O `.docx` gerado foi validado com o `python-docx`. O `.odt` foi validado na estrutura e na releitura pelo próprio editor, mas não foi aberto no
-> LibreOffice durante o desenvolvimento: se algum documento sair estranho, avise.
+### LiteOffice Planilhas (.xlsx e .ods)
+
+Abre e salva `.xlsx` (Excel) e `.ods` (LibreOffice); abre `.csv`/`.tsv` (vira planilha nova) e **exporta a aba atual em CSV**. A grade é desenhada num `<canvas>` e só pinta o que
+aparece, então planilhas grandes ficam fluidas (testado com 200 mil células: abriu em menos de 3 s). Digita-se com vírgula decimal (`1,5`, `12%`, `R$ 10,50`, `05/03/2024`).
+
+- **Fórmulas** no formato do Excel (`=SUM(A1:A10)`) e **também em português** (`=SOMA(A1:A10)`, `=SE(...)`, `=PROCV(...)`): o programa grava sempre o nome em inglês, como o Excel. Cerca de 100 funções:
+  soma, média, mínimo, máximo, contagens, `SUMIF(S)`, `COUNTIF(S)`, `AVERAGEIF`, `SUMPRODUCT`, `IF`, `IFS`, `IFERROR`, `AND/OR/NOT`, arredondamentos, texto (`LEFT`, `MID`, `TEXT`, `TEXTJOIN`, `SUBSTITUTE`…),
+  datas (`TODAY`, `DATE`, `YEAR`…), `VLOOKUP`, `HLOOKUP`, `INDEX`, `MATCH`, `CHOOSE`. Referências entre abas (`=Vendas!B2`), intervalos de coluna inteira (`A:A`) e `$`. Fórmulas com funções
+  que o programa não calcula (por exemplo `XLOOKUP`) **mantêm o último valor calculado** pelo programa de origem, e o arquivo é avisado na abertura.
+- Editor: edição na célula e barra de fórmulas, caixa de nome, selecionar e arrastar, **preencher arrastando** (copia, continua sequências e incrementa "Item 1"), copiar, recortar e colar (as fórmulas acompanham a posição),
+  **desfazer e refazer**, inserir e excluir linhas e colunas (**as fórmulas se ajustam**), ordenar, soma automática, **congelar painéis**, **mesclar**, várias **abas** (renomear ajusta as fórmulas), localizar (Ctrl+F),
+  soma, média e contagem da seleção na barra de status, redimensionar colunas e linhas, formatos de número e de data.
+- **Mantém:** valores, fórmulas, abas, negrito, itálico, sublinhado, tachado, cor do texto e do fundo, alinhamento, quebra de linha, bordas, formatos de número e de data, larguras e alturas, células mescladas e (só no `.xlsx`) painéis congelados.
+- **Não mantém:** gráficos, imagens, tabelas dinâmicas, comentários, macros, formatação condicional, validação de dados e filtros. Como nos documentos, o programa **avisa ao abrir** e **pergunta antes de sobrescrever** o original.
+
+### LiteOffice Apresentações (.pptx e .odp)
+
+Abre e salva `.pptx` (PowerPoint) e `.odp` (LibreOffice). Slides em miniatura, **caixas de texto** com negrito, itálico, sublinhado, tachado, tamanho, cor, alinhamento e marcadores (edição direto no slide), **retângulo, elipse, linha, seta e imagens**, mover e redimensionar
+com alças, trazer à frente e enviar para trás, duplicar, desfazer e refazer, cor de fundo do slide, **notas do apresentador** (só o `.odp` as guarda) e **▶ Apresentar** em tela cheia (setas, espaço, clique; Esc sai).
+Slides novos: capa, título e conteúdo, só título, em branco. Abre modelos do PowerPoint herdando posição, tamanho e cor dos marcadores de título e de conteúdo.
+
+**Não mantém:** animações e transições, tabelas, gráficos, SmartArt, vídeos, fundos com imagem ou degradê, formas especiais (viram retângulos), níveis de recuo nas listas e o slide mestre
+(logotipos e fundos do modelo **viram parte de cada slide**). O programa avisa ao abrir e pergunta antes de sobrescrever.
+
+### LiteOffice Completo (LibreOffice no navegador)
+
+O **LibreOffice inteiro** (Writer, Calc, Impress, com todos os recursos) compilado para WebAssembly pelo projeto **ZetaOffice** (allotropia; o `zetajs` é MIT). Roda **no navegador de quem usa**: o servidor só entrega o arquivo e guarda o resultado.
+Abre `.docx .doc .odt .rtf`, `.xlsx .xls .ods .csv`, `.pptx .ppt .odp .odg` e mais. Acesso: menu Iniciar → *LiteOffice Completo*, **botão direito no arquivo → Abrir no Office completo**, ou clique direto em `.doc`, `.xls`, `.ppt`, `.rtf` no Explorer.
+Abre numa **nova aba** (`office.html`); o botão **💾 Salvar no Diogows** (ou Ctrl+S) grava no mesmo lugar e no mesmo formato. Ao fechar com alterações não salvas, o navegador avisa.
+
+**Requisitos (importante):**
+
+- **HTTPS ou `localhost`.** O WebAssembly com threads precisa de `SharedArrayBuffer`, que o navegador só libera em *contexto seguro*. Em `http://192.168.x.x:8080` (HTTP puro na rede local) **não funciona**:
+  a página mostra o motivo. Use HTTPS (por exemplo o nginx do servidor com um certificado aceito pelos seus aparelhos) ou acesse por `http://localhost`.
+- O hub já manda os cabeçalhos `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` **só para `office.html`** e seus scripts (`server/office.go`); o resto do Diogows não é afetado.
+  Se houver um proxy na frente, ele não pode removê-los.
+- **~50 MB de download na primeira abertura** (depois fica em cache) e **~1 GB de memória livre no computador de quem abre**. Em celular ou computador fraco, prefira os editores leves.
+- Por padrão os arquivos do LibreOffice (`soffice.js`, `.wasm`, `.data`) vêm do **CDN do ZetaOffice** (`https://cdn.zetaoffice.net/zetaoffice_latest/`), uma terceira parte: o navegador precisa de internet e confia nesse código.
+  Para servir **de dentro do hub**, baixe esses arquivos para `src/vendor/zetaoffice/` (a pasta é ignorada pelo git) e defina em `config/settings.js`: `window.CD_SETTINGS_LOCAL = { zetaoffice: { base: 'vendor/zetaoffice/' } };`.
+  O endereço **só vem da configuração**, nunca da URL da página (um link montado por outra pessoa não escolhe que código executar).
+- A interface do LibreOffice apareceu **em inglês** na compilação testada. Arquivos de *Meus arquivos* funcionam direto; os do *Computador* precisam estar desbloqueados no Explorer.
+
+### O que foi e o que não foi validado
+
+- **Planilha:** o `.xlsx` gerado foi aberto pelo `openpyxl` e pelo **LibreOffice real** (via LiteOffice Completo), com valores e fórmulas corretos, e o `.xlsx` regravado pelo LibreOffice foi relido pelo LiteOffice. Lê arquivos do `openpyxl` (estilos, fórmulas, mescladas, painel congelado).
+- **Apresentação:** o `.pptx` gerado foi aberto pelo `python-pptx`; lê modelos do `python-pptx` com marcadores de título e conteúdo.
+- O **`.ods` e o `.odp`** foram validados na estrutura (XML bem formado) e na ida e volta pelo próprio programa, mas **não foram abertos no LibreOffice de mesa durante o desenvolvimento**; o **Excel e o PowerPoint também não foram usados**. Se algum arquivo sair estranho, avise.
+- Documentos: o `.docx` foi validado com o `python-docx`; o `.odt` na estrutura e na releitura.
 
 ## Configuração (`hub.config.json`)
 
@@ -181,17 +247,17 @@ uma cópia. Documentos protegidos por senha não abrem. Colar de outro lugar vem
 "desk": {
   "shell": false,            // liga Terminal e arquivos do computador (padrão desligado)
   "shellAnyNetwork": false,  // aceita o Terminal por HTTP puro vindo da internet (não recomendado)
-  "protectSettings": false,  // alterações de Config/câmeras exigem sessão de administrador do Desktop
+  "protectSettings": false,  // alterações de Config/câmeras exigem sessão de administrador do Diogows
   "maxUploadMB": 2048,       // tamanho máximo de cada envio
   "dir": "desk",             // onde ficam as pastas dos usuários (relativo ao hub.config.json)
   "noBrowser": false,        // true tira o Navegador e os downloads
-  "disabled": false          // true desliga o Desktop inteiro (/api/desk/* some)
+  "disabled": false          // true desliga o Diogows inteiro (/api/desk/* some)
 }
 ```
 
-**`protectSettings`:** a página Config e a API de câmeras do painel **continuam abertas** como sempre foram (o painel não tem login). No Desktop, só
+**`protectSettings`:** a página Config e a API de câmeras do painel **continuam abertas** como sempre foram (o painel não tem login). No Diogows, só
 o administrador mexe nelas. Ligando `protectSettings`, as gravações de `/api/settings/*`, `/api/admin/*` e das gravações passam a exigir uma sessão
-de administrador do Desktop no mesmo navegador, inclusive vindo da própria página Config, que então só salva depois de entrar no Desktop como admin.
+de administrador do Diogows no mesmo navegador, inclusive vindo da própria página Config, que então só salva depois de entrar no Diogows como admin.
 
 ## API (`/api/desk/*`)
 
@@ -211,9 +277,10 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 ## Limitações
 
 - Programas Windows 9x e o js-dos: veja acima o que foi e o que não foi testado. O emulador pede um PC razoável; em TV ou celular não é a proposta.
-- A interface do Desktop está **só em português**. O painel de sempre segue traduzido (pt, en, es, zh).
+- A interface do Diogows está **só em português**. O painel de sempre segue traduzido (pt, en, es, zh).
 - O sudo só existe no Linux do servidor. No Windows de desenvolvimento o Terminal usa o PowerShell e o Explorer mostra as unidades (`/C:/...`).
 - Funciona em navegador de computador; não foi feito para TV nem celular.
+- O **LiteOffice Completo** só roda em HTTPS ou `localhost` e pede ~50 MB de download e ~1 GB de memória no computador de quem usa (seção LiteOffice).
 - Os dados ficam no banco (`centraldiogo.db`: usuários, sessões, agendas, preferências) e em `desk/` (arquivos). Entram no mesmo backup do banco; o `install.sh` não mexe neles.
 
 ## Onde está o código
@@ -230,3 +297,6 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | Programas, emulador e Painel de Controle | `src/js/desktop/programs.js`, `panel.js`, `src/emulator.html`, `src/vendor/js-dos/` (GPL-2.0, sem alterações) |
 | Interface | `src/desktop.html`, `src/css/desktop.css`, `src/js/desktop/*.js` |
 | Conversão .docx/.odt e ZIP | `src/js/desktop/docfmt.js`, `zip.js` |
+| LiteOffice Planilhas: motor de fórmulas, .xlsx/.ods e editor | `src/js/desktop/formula.js`, `sheetfmt.js`, `sheets.js` |
+| LiteOffice Apresentações: .pptx/.odp e editor | `src/js/desktop/slidefmt.js`, `slides.js` |
+| LiteOffice Completo (LibreOffice em WebAssembly) | `src/office.html`, `src/js/office/*.js`, `src/js/desktop/office.js`, `server/office.go`, `src/vendor/zetajs/` (MIT, sem alterações) |

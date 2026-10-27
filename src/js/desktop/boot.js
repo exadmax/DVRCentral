@@ -1,5 +1,5 @@
 (function (DK) {
-  // Ciclo de sessão do Desktop: login, troca obrigatória de senha, menu Iniciar, ícones, relógio e os atalhos do painel da casa.
+  // Ciclo de sessão do Diogows: login, troca obrigatória de senha, menu Iniciar, ícones, relógio e os atalhos do painel da casa.
   const $ = DK.$, el = DK.el;
   DK.links = [];
 
@@ -26,12 +26,12 @@
   const openLink = l => window.open(linkHref(l), '_blank', 'noopener');
 
   // ---------- menu Iniciar e ícones ----------
-  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'terminal', 'docs', 'sheets', 'slides', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts', 'images', 'video', 'cameras', 'browser', 'messages', 'users', 'config', 'account'];
+  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'terminal', 'docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts', 'images', 'video', 'cameras', 'browser', 'messages', 'users', 'config', 'account'];
   const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
   // Categorias do menu Iniciar. Um aplicativo cai na primeira categoria que o reconhece (por id); o que sobrar vai para "Outros".
   const CATS = [
     { id: 'files', icon: '🗂️', label: 'Arquivos e sistema', match: a => ['explorer', 'computer', 'control', 'programs', 'terminal'].indexOf(a.id) >= 0 },
-    { id: 'office', icon: '📝', label: 'Escritório', match: a => ['docs', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts'].indexOf(a.id) >= 0 },
+    { id: 'office', icon: '📝', label: 'Escritório', match: a => ['docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts'].indexOf(a.id) >= 0 },
     { id: 'media', icon: '🎞️', label: 'Imagens, vídeo e câmeras', match: a => ['images', 'video', 'cameras'].indexOf(a.id) >= 0 },
     { id: 'net', icon: '🌐', label: 'Internet e comunicação', match: a => ['browser', 'messages'].indexOf(a.id) >= 0 },
     { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS e Windows 95/98)', match: a => String(a.id).indexOf('prog:') === 0 },
@@ -131,14 +131,15 @@
     $('who').textContent = DK.me.username + (DK.me.is_admin ? ' (admin)' : '');
     tickClock(); buildIcons(); buildStartMenu();
     await DK.loadPrefs();
+    DK.applyLook();
     await loadLinks();
     if (DK.loadPrograms) await DK.loadPrograms();
     buildIcons(); buildStartMenu();
     DK.chat.start();                           // mensagens novas dos outros usuários
-    DK.cal.startWatching();                    // avisos do calendário enquanto o Desktop estiver aberto
+    DK.cal.startWatching();                    // avisos do calendário enquanto o Diogows estiver aberto
   }
   function showLogin(msg) {
-    DK.me = null; DK.prefs = {}; DK.notifs = []; DK.programs = [];
+    DK.me = null; DK.prefs = {}; if (DK.applyLook) DK.applyLook(); DK.notifs = []; DK.programs = [];
     DK.cal.stopWatching(); DK.chat.stop();
     DK.closeAll();
     const n = $('notifs'); if (n) n.remove();

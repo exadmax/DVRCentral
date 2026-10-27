@@ -1,4 +1,4 @@
-// Terminal e arquivos do computador no Desktop. Como é execução de comando no servidor, cada chamada passa por portões:
+// Terminal e arquivos do computador no Diogows. Como é execução de comando no servidor, cada chamada passa por portões:
 //
 //  1. "desk.shell": true no hub.config.json (desligado por padrão);
 //  2. usuário administrador, ou que o administrador liberou para o Terminal / para os arquivos do computador;

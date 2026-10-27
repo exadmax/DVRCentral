@@ -1,6 +1,6 @@
 (function (DK) {
   // Calendário: agrega as agendas iCal do PRÓPRIO usuário (cadastradas aqui, guardadas no servidor) e, se ele quiser, as agendas da
-  // casa (as mesmas da tela inicial). Mostra o mês ou os próximos dias e avisa dentro do Desktop dos compromissos que se aproximam.
+  // casa (as mesmas da tela inicial). Mostra o mês ou os próximos dias e avisa dentro do Diogows dos compromissos que se aproximam.
   // O iCal é interpretado pelo mesmo código do painel (services/calendar.js), inclusive eventos que se repetem.
   const el = DK.el;
   const cal = DK.cal = { model: null, error: '', at: 0, loading: null };
@@ -152,7 +152,7 @@
           en.onchange = async () => { try { await DK.api('PUT', '/calendars/' + c.id, { name: c.name, color: c.color, enabled: en.checked }); cal.load(true).then(draw); } catch (e) { err.textContent = e.message; en.checked = !en.checked; } };
           rows.firstChild.append(el('tr', {}, el('td', {}, en), el('td', {}, sw, c.name), el('td', { className: 'meta', textContent: c.url }),
             el('td', {}, el('button', { className: 'del', textContent: 'Remover', onclick: async () => {
-              if (!confirm('Remover a agenda “' + c.name + '” do seu Desktop? (A agenda original não é alterada.)')) return;
+              if (!confirm('Remover a agenda “' + c.name + '” do seu Diogows? (A agenda original não é alterada.)')) return;
               try { await DK.api('DELETE', '/calendars/' + c.id); cal.load(true); drawSettings(); } catch (e) { err.textContent = e.message; }
             } }))));
         });
@@ -182,15 +182,15 @@
           const b = el('button', { textContent: Notification.permission === 'granted' ? 'Avisos do navegador: permitidos' : 'Permitir avisos do navegador', disabled: Notification.permission === 'granted' });
           b.onclick = async () => { const r = await Notification.requestPermission(); DK.prefs.browser = r === 'granted'; DK.savePrefs(); drawSettings(); };
           brow.append(b, el('span', { className: 'meta', textContent: 'aparecem quando esta aba está em segundo plano' }));
-        } else brow.append(el('span', { className: 'meta', textContent: 'Avisos do navegador exigem HTTPS; dentro do Desktop os avisos aparecem normalmente (sino, tela e som).' }));
+        } else brow.append(el('span', { className: 'meta', textContent: 'Avisos do navegador exigem HTTPS; dentro do Diogows os avisos aparecem normalmente (sino, tela e som).' }));
 
         box.append(el('div', { className: 'sec', textContent: 'Minhas agendas (só você vê)' }), rows,
           el('div', { className: 'row grow' }, name, color, url), el('div', { className: 'row' }, add), err,
-          el('div', { className: 'sec', textContent: 'Avisos no Desktop' }),
+          el('div', { className: 'sec', textContent: 'Avisos no Diogows' }),
           el('div', { className: 'row' }, 'Avisar ', rem), chk('atStart', 'avisar também na hora do compromisso', true), chk('allDay', 'avisar compromissos de dia inteiro às 8h', true),
           chk('sound', 'tocar um som', true), brow,
           chk('house', 'mostrar também as agendas da casa (as da tela inicial)', false, () => cal.load(true).then(draw)),
-          el('div', { className: 'meta', textContent: 'Os avisos só aparecem enquanto o seu Desktop está aberto. As agendas são relidas a cada 5 minutos.' }));
+          el('div', { className: 'meta', textContent: 'Os avisos só aparecem enquanto o seu Diogows está aberto. As agendas são relidas a cada 5 minutos.' }));
       }
 
       function draw() {

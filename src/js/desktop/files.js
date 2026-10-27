@@ -6,6 +6,7 @@
   const TEXT_EXT = ['.txt', '.log', '.md', '.json', '.csv', '.tsv', '.ini', '.env', '.conf', '.cfg', '.properties', '.yaml', '.yml', '.toml',
     '.xml', '.html', '.htm', '.config', '.csproj', '.xaml', '.css', '.js', '.ts', '.cs', '.java', '.go', '.py', '.sh', '.ps1', '.bat', '.sql', '.c', '.cpp', '.php', '.service', '.list', '.rules'];
   const IMG_EXT = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'];
+  const OFFICE_ONLY = ['.doc', '.dot', '.rtf', '.xls', '.xlt', '.ppt', '.pot', '.odg'];
   const VIDEO_EXT = ['.mp4', '.m4v', '.webm', '.mkv', '.mov', '.ogv', '.avi', '.wmv', '.ts', '.mp3', '.m4a', '.ogg', '.wav', '.flac'];
 
   DK.TEXT_EXT = TEXT_EXT;
@@ -19,11 +20,12 @@
     if (e === '.docx' || e === '.odt') return 'doc';
     if (e === '.xlsx' || e === '.ods') return 'sheet';
     if (e === '.pptx' || e === '.odp') return 'slide';
+    if (OFFICE_ONLY.indexOf(e) >= 0) return 'office';      // formatos que só o LibreOffice completo abre (LiteOffice Completo)
     if (e === '.jsdos') return 'program';
     if (VIDEO_EXT.indexOf(e) >= 0) return 'video';
     return 'other';
   };
-  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', sheet: '📗', slide: '📙', program: '🕹️', video: '🎬', other: '📄' })[DK.kindOf(it)];
+  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', sheet: '📗', slide: '📙', office: '🏢', program: '🕹️', video: '🎬', other: '📄' })[DK.kindOf(it)];
 
   // Abre um arquivo no aplicativo certo. siblings = itens da mesma pasta (anterior/próxima nas imagens e no vídeo).
   DK.openFile = function (it, siblings) {
@@ -35,6 +37,7 @@
       case 'doc': DK.docApp({ item: it }); break;
       case 'sheet': DK.sheetApp({ item: it }); break;
       case 'slide': DK.slideApp({ item: it }); break;
+      case 'office': DK.officeApp({ item: it }); break;
       case 'program': DK.installProgramApp(it); break;
       case 'video': DK.videoApp({ item: it, siblings: siblings }); break;
       default: location.href = DK.fileUrl(it, 'download');
@@ -122,7 +125,7 @@
       function draw() {
         flist.replaceChildren();
         const t = el('table'), tbody = el('tbody'); t.append(tbody); flist.append(t);
-        const shown = st.entries.filter(it => !o.pick || it.type === 'dir' || o.pick === 'any' || DK.kindOf(it) === o.pick || (o.pick === 'sheet' && /\.(csv|tsv)$/i.test(it.name)) || (o.pick === 'program' && DK.extOf(it.name) === '.zip'));
+        const shown = st.entries.filter(it => !o.pick || it.type === 'dir' || o.pick === 'any' || DK.kindOf(it) === o.pick || (o.pick === 'sheet' && /\.(csv|tsv)$/i.test(it.name)) || (o.pick === 'office' && DK.isOfficeFile(it)) || (o.pick === 'program' && DK.extOf(it.name) === '.zip'));
         if (!shown.length) tbody.append(el('tr', {}, el('td', { className: 'meta', textContent: o.pick ? 'Nenhum arquivo deste tipo aqui.' : 'Pasta vazia. Arraste arquivos para cá.' })));
         shown.forEach(e => {
           const it = ref(e), k = DK.kindOf(it);
@@ -144,6 +147,7 @@
           };
           tr._ctx = () => o.pick ? [{ icon: '▶️', label: k === 'folder' ? 'Abrir pasta' : 'Escolher', fn: open }] : [
             { icon: '▶️', label: 'Abrir', fn: open },
+            DK.isOfficeFile(it) ? { icon: '🏢', label: 'Abrir no Office completo', fn: () => DK.officeApp({ item: it }) } : null,
             { icon: '📌', label: 'Adicionar à Área de Trabalho', fn: () => DK.deskAddFile(it) },
             '-',
             { icon: '✏️', label: 'Renomear', fn: rename },

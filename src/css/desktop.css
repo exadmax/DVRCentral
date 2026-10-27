@@ -1,12 +1,12 @@
-/* Desktop (desktop.html): área de trabalho com janelas, no molde do WebDesktop de referência. Interface própria, separada das
+/* Diogows (desktop.html): área de trabalho com janelas, no molde de uma área de trabalho clássica. Interface própria, separada das
    páginas do painel (que seguem com o tema escuro em pages.css). Só roda em navegador de computador; mesmo assim sem
    recursos novos de CSS. */
 
 @font-face { font-family: 'Inter'; font-weight: 400 700; font-display: swap; src: url(../assets/fonts/inter-latin.woff2) format('woff2'); }
 
-:root { --barh: 42px; --bg: #1f3a5f; --panel: #fff; --ink: #1c2430; --mute: #667085; --line: #d8dde6; --acc: #2563eb; --danger: #c62828; --ok: #2e7d32; --bar: #111a27; }
+:root { --barh: 42px; --bg: #1f3a5f; --panel: #fff; --ink: #1c2430; --mute: #667085; --line: #d8dde6; --acc: #2563eb; --danger: #c62828; --ok: #2e7d32; --bar: #111a27; --bar-ink: #fff; --menu-head: #111a27; --menu-head-ink: #fff; --menu-bg: #fff; --menu-ink: #1c2430; --menu-hover: #e9eef6; --menu-cat: #f3f6fb; --icon-ink: #fff; }
 * { box-sizing: border-box; }
-body { margin: 0; font: 14px/1.4 'Inter', system-ui, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); height: 100vh; overflow: hidden; }
+body { margin: 0; font: 14px/1.4 'Inter', system-ui, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); background-attachment: fixed; height: 100vh; overflow: hidden; }
 button, input, textarea, select { font: inherit; }
 button, select { cursor: pointer; border: 1px solid var(--line); background: #f5f7fa; border-radius: 6px; padding: 4px 9px; color: var(--ink); }
 button:hover { background: #e9eef6; }
@@ -32,10 +32,10 @@ a { color: var(--acc); }
 /* área de trabalho, ícones, barra e menu Iniciar */
 #desktop { position: fixed; top: 0; right: 0; bottom: var(--barh); left: 0; }
 .icons { display: grid; grid-auto-flow: column; grid-template-rows: repeat(6, 88px); gap: 6px 4px; padding: 14px; position: absolute; top: 0; left: 0; }
-.icon { background: none; border: 0; color: #fff; text-align: center; padding: 6px; border-radius: 8px; width: 104px; font-size: 13px; line-height: 1.2; overflow: hidden; }
+.icon { background: none; border: 0; color: var(--icon-ink); text-align: center; padding: 6px; border-radius: 8px; width: 104px; font-size: 13px; line-height: 1.2; overflow: hidden; }
 .icon:hover { background: rgba(255, 255, 255, .13); }
 .icon span { display: block; font-size: 30px; }
-#bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); background: var(--bar); color: #fff; display: flex; align-items: center; gap: 8px; padding: 0 8px; z-index: 8000; }
+#bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); background: var(--bar); color: var(--bar-ink); display: flex; align-items: center; gap: 8px; padding: 0 8px; z-index: 8000; }
 #start { background: #2a3a52; color: #fff; border-color: #3b4d68; display: flex; align-items: center; gap: 8px; padding: 3px 12px 3px 6px; font-weight: 600; }
 #start img { width: 26px; height: 26px; object-fit: contain; }
 #tasks { flex: 1; display: flex; gap: 6px; overflow: auto; }
@@ -43,19 +43,19 @@ a { color: var(--acc); }
 #tasks button.act { background: #3b5a8a; }
 #tasks button.mini { opacity: .6; font-style: italic; }
 #bar #logout { background: #fff; }
-#clock { color: #fff; text-align: right; line-height: 1.15; font-size: 12px; padding: 0 6px 0 10px; min-width: 74px; cursor: default; white-space: nowrap; }
+#clock { color: var(--bar-ink); text-align: right; line-height: 1.15; font-size: 12px; padding: 0 6px 0 10px; min-width: 74px; cursor: default; white-space: nowrap; }
 #clock b { display: block; font-size: 14px; font-weight: 600; }
-#startmenu { position: fixed; left: 8px; bottom: calc(var(--barh) + 4px); width: 320px; display: flex; flex-direction: column; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0, 0, 0, .55); z-index: 8500; overflow: hidden; max-height: calc(100vh - var(--barh) - 16px); }
-#startmenu header { display: flex; gap: 10px; align-items: center; padding: 12px; background: #111a27; color: #fff; font-weight: 600; }
+#startmenu { position: fixed; left: 8px; bottom: calc(var(--barh) + 4px); width: 320px; display: flex; flex-direction: column; background: var(--menu-bg); border-radius: 10px; box-shadow: 0 8px 30px rgba(0, 0, 0, .55); color: var(--menu-ink); z-index: 8500; overflow: hidden; max-height: calc(100vh - var(--barh) - 16px); }
+#startmenu header { display: flex; gap: 10px; align-items: center; padding: 12px; background: var(--menu-head); color: var(--menu-head-ink); font-weight: 600; }
 #startmenu header img { width: 32px; height: 32px; }
 #startmenu header { flex: none; }
 #startmenu .ssearch { flex: none; margin: 8px 10px 4px; width: auto; }
 #startmenu .slist { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 4px; }
-#startmenu button { display: flex; width: 100%; gap: 10px; align-items: center; border: 0; border-radius: 0; background: #fff; padding: 8px 14px; text-align: left; }
-#startmenu button:hover { background: #e9eef6; }
+#startmenu button { display: flex; width: 100%; gap: 10px; align-items: center; border: 0; border-radius: 0; background: transparent; color: var(--menu-ink); padding: 8px 14px; text-align: left; }
+#startmenu button:hover { background: var(--menu-hover); }
 #startmenu button span { width: 22px; text-align: center; flex: none; }
 #startmenu .sitem { padding-left: 26px; }
-#startmenu .scat { font-weight: 600; background: #f3f6fb; border-top: 1px solid var(--line); }
+#startmenu .scat { font-weight: 600; background: var(--menu-cat); border-top: 1px solid var(--line); }
 #startmenu .scat i { margin-left: auto; font-style: normal; font-weight: 400; font-size: 11px; color: var(--mute); }
 #startmenu .scat em { font-style: normal; color: var(--mute); width: 12px; }
 #startmenu .shome { flex: none; border-top: 1px solid var(--line); }
@@ -240,6 +240,32 @@ iframe.fill { flex: 1; width: 100%; border: 0; min-height: 0; background: #fff; 
 .stab.add { background: transparent; border-color: transparent; font-size: 14px; padding: 1px 8px; }
 .scolor { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 26px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; }
 .scolor input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+/* LiteOffice Apresentações */
+.sbody { flex: 1; min-height: 0; display: flex; outline: none; background: #d9dee6; }
+.sthumbs { width: 172px; flex: none; overflow-y: auto; padding: 10px 8px; background: #eef1f6; border-right: 1px solid var(--line); }
+.sthumb { position: relative; margin: 0 0 10px; padding: 3px; border: 2px solid transparent; border-radius: 6px; cursor: pointer; }
+.sthumb.on { border-color: #2563eb; background: #dbe7fb; }
+.sthumb .sn { position: absolute; left: 6px; top: 6px; z-index: 2; font-size: 10px; background: rgba(17, 24, 39, .65); color: #fff; border-radius: 4px; padding: 0 4px; }
+.sthw { position: relative; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); pointer-events: none; }
+.spane { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sview { flex: 1; min-height: 0; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 20px; user-select: none; touch-action: none; }
+.sbox { position: relative; flex: none; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); background: #fff; }
+.sl { position: absolute; left: 0; top: 0; overflow: hidden; font-family: Calibri, 'Segoe UI', Arial, sans-serif; color: #000; }
+.sh { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
+.sh-line, .sh-arrow { overflow: visible; display: block; }
+.sh-image img { width: 100%; height: 100%; display: block; pointer-events: none; }
+.stx { width: 100%; box-sizing: border-box; padding: 5px 10px; line-height: 1.2; white-space: pre-wrap; word-wrap: break-word; outline: none; font-size: 24px; }
+.stx p { margin: 0 0 .15em; }
+.stx p.bul { position: relative; padding-left: 1.1em; }
+.stx p.bul::before { content: '•'; position: absolute; left: .1em; }
+.stx[contenteditable="true"] { background: rgba(37, 99, 235, .06); cursor: text; user-select: text; }
+.sov { position: absolute; inset: 0; cursor: default; }
+.sfr { position: absolute; box-sizing: border-box; border: 1.5px solid #2563eb; pointer-events: none; }
+.sh-h { position: absolute; width: 9px; height: 9px; margin: -5px 0 0 -5px; box-sizing: border-box; background: #fff; border: 1.5px solid #2563eb; pointer-events: auto; }
+.sh-h.h-nw, .sh-h.h-se { cursor: nwse-resize; } .sh-h.h-ne, .sh-h.h-sw { cursor: nesw-resize; } .sh-h.h-n, .sh-h.h-s { cursor: ns-resize; } .sh-h.h-e, .sh-h.h-w { cursor: ew-resize; }
+.snotes { flex: none; height: 58px; resize: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 6px 10px; font-size: 13px; }
+.splay { position: fixed; inset: 0; z-index: 99999; background: #000; display: flex; align-items: center; justify-content: center; outline: none; cursor: none; }
+.splay-in { position: relative; background: #fff; overflow: hidden; }
 
 /* Navegador, programas e Painel de Controle */
 .bpanel { border-top: 1px solid var(--line); background: #fff; max-height: 40%; overflow: auto; padding: 8px 10px; display: grid; gap: 8px; }

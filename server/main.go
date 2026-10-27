@@ -32,7 +32,7 @@ type Config struct {
 	Cameras        []CameraConfig   `json:"cameras"`       // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
 	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
 	DriveSync      DriveSyncConfig  `json:"driveSync"`      // cópia diária das gravações para o Google Drive via rclone (drive.go)
-	Desk           DeskConfig       `json:"desk"`           // Desktop (desktop.html): usuários, arquivos, terminal (desk.go)
+	Desk           DeskConfig       `json:"desk"`           // Diogows (desktop.html): usuários, arquivos, terminal (desk.go)
 	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
 }
 
@@ -210,7 +210,7 @@ func main() {
 		go gm.refresh()
 		writeJSON(w, map[string]interface{}{"ok": true, "gamertag": a.gtg})
 	})
-	mux.Handle("/", http.FileServer(http.Dir(cfg.StaticDir)))
+	mux.Handle("/", withOfficeIsolation(http.FileServer(http.Dir(cfg.StaticDir))))
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,

@@ -16,9 +16,13 @@ window.CD_SETTINGS = {
     { label: 'Música', sub: 'Navidrome', icon: 'music',   port: 4533, path: '/' },
     { label: 'Vídeos', sub: 'Abrir no VLC', icon: 'film', path: '/videos.html' },
     { label: 'Livros', sub: 'PDF e EPUB', icon: 'book', path: '/livros.html' },
-    { label: 'Desktop', sub: 'Área de trabalho', icon: 'desktop', path: '/desktop.html' },
+    { label: 'Diogows', sub: 'Área de trabalho', icon: 'desktop', path: '/desktop.html' },
     { label: 'Config', sub: 'Servidor', icon: 'gear', path: '/config.html' }
   ],
+
+  // LiteOffice Completo (LibreOffice no navegador): de onde baixar os arquivos do ZetaOffice (soffice.js, .wasm, .data; ~50 MB).
+  // Padrão: o CDN do ZetaOffice. Para servir de dentro do hub, copie os arquivos para src/vendor/zetaoffice/ e use base: 'vendor/zetaoffice/'.
+  zetaoffice: { base: 'https://cdn.zetaoffice.net/zetaoffice_latest/' },
 
   // Página Vídeos: os arquivos são servidos pelo nginx do servidor (porta e caminho abaixo); o hub só lista a pasta.
   videos: { port: 8080, path: '/videos/' },

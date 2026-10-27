@@ -1,5 +1,5 @@
 (function (DK) {
-  // Layout do Desktop: detecta celular e liga a interface adaptativa (classe "mob" no <html>; o CSS faz o resto). A pessoa pode forçar
+  // Layout do Diogows: detecta celular e liga a interface adaptativa (classe "mob" no <html>; o CSS faz o resto). A pessoa pode forçar
   // o "Layout PC puro": a mesma tela do computador, numa viewport de 1280 px (com zoom por pinça). A escolha vale por aparelho (localStorage).
   // Carregado no <head> para a classe já estar no <html> antes da primeira pintura.
   const KEY = 'desk.layout', PC_WIDTH = 1280;

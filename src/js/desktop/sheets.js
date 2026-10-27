@@ -817,7 +817,11 @@
         g.fillStyle = v instanceof C.FErr ? '#b91c1c' : st.c || '#111827';
         const isNum = typeof v === 'number', al = st.al || (isNum ? 'right' : typeof v === 'string' ? 'left' : 'center');
         const pad = 4;
-        if (isNum && g.measureText(text).width > w - 2 * pad && !/E/.test(text)) text = '#'.repeat(Math.max(1, Math.floor((w - 2 * pad) / 8)));
+        if (isNum && g.measureText(text).width > w - 2 * pad) {
+          let sci = '';      // formato Geral: tenta a notação científica (2,97E+09) antes de desistir e mostrar ####
+          if (!st.nf) for (let d = 5; d >= 0 && !sci; d--) { const t = v.toExponential(d).replace('.', ',').replace(/e([+-])(\d+)/, (m, sg, ex) => 'E' + sg + ex.padStart(2, '0')); if (g.measureText(t).width <= w - 2 * pad) sci = t; }
+          text = sci || '#'.repeat(Math.max(1, Math.floor((w - 2 * pad) / 8)));
+        }
         // texto à esquerda avança sobre as células vazias da direita
         let tw = w;
         if (al === 'left' && !st.wrap && typeof v === 'string' && !mTop[key(r, c)]) {

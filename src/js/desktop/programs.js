@@ -4,7 +4,7 @@
   //
   //  - Programa DOS: um .zip com os arquivos do programa (o instalador monta o pacote) ou um pacote .jsdos pronto.
   //  - Windows 95/98/ME: um pacote .jsdos que já tenha o Windows instalado (o Windows é da Microsoft e não vem aqui: use o seu, com licença).
-  //  - Acessórios: os aplicativos do próprio Desktop, que podem ser instalados (aparecem no menu) ou removidos (somem do menu).
+  //  - Acessórios: os aplicativos do próprio Diogows, que podem ser instalados (aparecem no menu) ou removidos (somem do menu).
   const el = DK.el, esc = DK.esc;
   const DIR = '/Programas', REG = DIR + '/programas.json';
   DK.programs = [];
@@ -62,7 +62,7 @@
       const main = el('div', { style: 'flex:1;min-height:0;overflow:auto;padding:12px;display:grid;gap:10px;align-content:start' });
       body.append(tabs, main);
       const tabBtn = (id, label) => { const b = el('button', { textContent: label, onclick: () => { tab = id; draw(); } }); b.dataset.t = id; tabs.append(b); };
-      tabBtn('list', '🕹️ Programas instalados'); tabBtn('install', '➕ Instalar programa'); tabBtn('acc', '🧰 Acessórios do Desktop');
+      tabBtn('list', '🕹️ Programas instalados'); tabBtn('install', '➕ Instalar programa'); tabBtn('acc', '🧰 Acessórios do Diogows');
 
       function draw() {
         [].forEach.call(tabs.querySelectorAll('button'), b => b.classList.toggle('pri', b.dataset.t === tab));
@@ -108,7 +108,7 @@
         const engNote = el('div', { className: 'dwarn' });
         const desk = el('input', { type: 'checkbox', checked: true });
         const go = el('button', { className: 'pri', textContent: 'Instalar' });
-        const win9note = el('div', { className: 'dwarn hidden', innerHTML: '<b>Windows 95/98/ME:</b> a Microsoft não distribui esses sistemas, então o Desktop não os traz. Use um pacote <code>.jsdos</code> com o Windows já instalado e que você tenha licença para usar (por exemplo, um que você mesmo montou). O Windows leva um tempo para iniciar e exige um PC com folga de memória.' });
+        const win9note = el('div', { className: 'dwarn hidden', innerHTML: '<b>Windows 95/98/ME:</b> a Microsoft não distribui esses sistemas, então o Diogows não os traz. Use um pacote <code>.jsdos</code> com o Windows já instalado e que você tenha licença para usar (por exemplo, um que você mesmo montou). O Windows leva um tempo para iniciar e exige um PC com folga de memória.' });
 
         function refreshEngine() {
           kind = kindSel.value;
@@ -194,7 +194,7 @@
         if (src) chosen(src);
       }
 
-      // ---- acessórios (os aplicativos do Desktop) ----
+      // ---- acessórios (os aplicativos do Diogows) ----
       function drawAcc() {
         const fixed = ['programs', 'control', 'account', 'explorer'];
         const hidden = DK.prefs.hiddenApps || [];

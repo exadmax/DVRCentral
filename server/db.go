@@ -69,11 +69,11 @@ var migrations = []string{
 	DROP TABLE itens;
 	ALTER TABLE itens_novo RENAME TO itens;
 	CREATE INDEX itens_validade ON itens (validade);`,
-	// Desktop (desk.go): usuários e sessões.
+	// Diogows (desk.go): usuários e sessões.
 	deskMigration,
-	// Desktop: agendas iCal por usuário e preferências (desk_calendar.go).
+	// Diogows: agendas iCal por usuário e preferências (desk_calendar.go).
 	deskCalendarMigration,
-	// Desktop: mensagens entre usuários (desk_chat.go).
+	// Diogows: mensagens entre usuários (desk_chat.go).
 	deskChatMigration,
 }
 

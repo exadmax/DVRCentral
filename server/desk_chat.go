@@ -1,4 +1,4 @@
-// Desktop: Mensagens. Conversa um a um entre os usuários do Desktop, com envio de arquivos e imagens. O texto e os dados do
+// Diogows: Mensagens. Conversa um a um entre os usuários do Diogows, com envio de arquivos e imagens. O texto e os dados do
 // anexo ficam no SQLite; o conteúdo dos anexos fica em <desk>/_chat/ (nome sorteado, nunca o nome enviado). Só quem enviou e
 // quem recebeu alcança uma mensagem ou o anexo dela.
 package main
