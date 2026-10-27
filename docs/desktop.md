@@ -68,6 +68,7 @@ bloqueiam por 5 minutos.
 | **LiteOffice Planilhas** | todos | Planilha leve (.xlsx / .ods, e abre/exporta CSV): fórmulas, várias abas, formatos, congelar e mesclar |
 | **LiteOffice Apresentações** | todos | Editor leve de slides (.pptx / .odp): textos, formas, imagens, notas e apresentação em tela cheia |
 | **LiteOffice Completo** | todos | O **LibreOffice inteiro** rodando no seu navegador (WebAssembly), para o que os editores leves não fazem; exige HTTPS ou localhost (veja abaixo) |
+| **Zip Manager** | todos | Abre, cria e altera arquivos **.zip** no navegador: lista o conteúdo, extrai tudo ou só o escolhido, adiciona arquivos e pastas (do aparelho, do Explorer ou arrastando), remove e salva. No Explorer: clique num `.zip` abre o Zip Manager; botão direito → **Extrair aqui** e **Compactar em ZIP** (arquivo ou pasta) (abaixo) |
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
 | **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas Windows 95/98 e DOS instalados** |
@@ -112,6 +113,16 @@ sudo bash install.sh --no-desk-shell   # desfaz
 > ⚠️ Isto dá ao hub o poder de root. Quem tiver a permissão **e** a senha de um administrador do Diogows passa a administrar a máquina.
 > Na prática, a senha do administrador do Diogows passa a valer como senha de root: use uma senha longa e só em rede confiável.
 > Em HTTP puro (rede local) as senhas trafegam sem criptografia; para sair da rede de casa use VPN ou HTTPS.
+
+## Zip Manager
+
+Tudo roda **no navegador** (sem carga no servidor): o ZIP é lido pelo diretório central, e só a entrada extraída é descomprimida, com **verificação de CRC**. Ao salvar, as entradas que não mudaram são copiadas já compactadas (não recomprime). Detalhes e limites:
+
+- Extrair pede a pasta de destino e uma subpasta opcional; arquivos que já existem perguntam (substituir, substituir todos, pular, pular todos). Nomes com `..`, barra inicial ou `:` são **descartados** (proteção contra ZIP malicioso).
+- Compactar uma pasta mantém a estrutura e as pastas vazias; gera `nome.zip` ao lado do original.
+- Limite de **1 GB** de conteúdo por operação (a memória é a do navegador) e 20 mil arquivos por pasta.
+- **Não suporta** ZIP64 (acima de 4 GB), arquivos com **senha** (aparecem com 🔒 e não extraem) nem outros formatos (`.rar`, `.7z`, `.tar.gz`). A data dos itens regravados passa a ser a do salvamento. Exige navegador com `CompressionStream`/`DecompressionStream` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+).
+- Código: `src/js/desktop/zipman.js` (e `zip.js`, que ganhou a cópia de entradas já compactadas).
 
 ## Navegador e downloads
 

@@ -26,11 +26,11 @@
   const openLink = l => window.open(linkHref(l), '_blank', 'noopener');
 
   // ---------- menu Iniciar e ícones ----------
-  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'terminal', 'docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts', 'images', 'video', 'cameras', 'browser', 'messages', 'users', 'config', 'account'];
+  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'zip', 'terminal', 'docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts', 'images', 'video', 'cameras', 'browser', 'messages', 'users', 'config', 'account'];
   const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
   // Categorias do menu Iniciar. Um aplicativo cai na primeira categoria que o reconhece (por id); o que sobrar vai para "Outros".
   const CATS = [
-    { id: 'files', icon: '🗂️', label: 'Arquivos e sistema', match: a => ['explorer', 'computer', 'control', 'programs', 'terminal'].indexOf(a.id) >= 0 },
+    { id: 'files', icon: '🗂️', label: 'Arquivos e sistema', match: a => ['explorer', 'computer', 'control', 'programs', 'zip', 'terminal'].indexOf(a.id) >= 0 },
     { id: 'office', icon: '📝', label: 'Escritório', match: a => ['docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts'].indexOf(a.id) >= 0 },
     { id: 'media', icon: '🎞️', label: 'Imagens, vídeo e câmeras', match: a => ['images', 'video', 'cameras'].indexOf(a.id) >= 0 },
     { id: 'net', icon: '🌐', label: 'Internet e comunicação', match: a => ['browser', 'messages'].indexOf(a.id) >= 0 },

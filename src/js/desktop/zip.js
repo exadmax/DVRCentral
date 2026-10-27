@@ -66,19 +66,20 @@
     const chunks = [], central = [];
     let off = 0;
     for (const e of entries) {
-      const raw = typeof e.data === 'string' ? enc.encode(e.data) : e.data;
-      const nameB = enc.encode(e.name), crc = crc32(raw);
-      let data = raw, method = 0;
-      if (!e.store && canDeflate() && raw.length > 120) {
+      // e.pre = { data (já compactado), method, crc, size }: copia a entrada de outro ZIP sem descomprimir (Zip Manager)
+      const raw = e.pre ? null : (typeof e.data === 'string' ? enc.encode(e.data) : e.data);
+      const nameB = enc.encode(e.name), crc = e.pre ? e.pre.crc : crc32(raw), rawLen = e.pre ? e.pre.size : raw.length;
+      let data = e.pre ? e.pre.data : raw, method = e.pre ? e.pre.method : 0;
+      if (!e.pre && !e.store && canDeflate() && raw.length > 120) {
         try { const z = await pipe(raw, new CompressionStream('deflate-raw')); if (z.length < raw.length) { data = z; method = 8; } } catch (x) { /* guarda sem comprimir */ }
       }
       const lh = [];
       u32(lh, 0x04034b50); u16(lh, 20); u16(lh, 0x0800); u16(lh, method); u16(lh, time); u16(lh, date);
-      u32(lh, crc); u32(lh, data.length); u32(lh, raw.length); u16(lh, nameB.length); u16(lh, 0);
+      u32(lh, crc); u32(lh, data.length); u32(lh, rawLen); u16(lh, nameB.length); u16(lh, 0);
       chunks.push(new Uint8Array(lh), nameB, data);
       const ch = [];
       u32(ch, 0x02014b50); u16(ch, 20); u16(ch, 20); u16(ch, 0x0800); u16(ch, method); u16(ch, time); u16(ch, date);
-      u32(ch, crc); u32(ch, data.length); u32(ch, raw.length); u16(ch, nameB.length); u16(ch, 0); u16(ch, 0); u16(ch, 0); u16(ch, 0); u32(ch, 0); u32(ch, off);
+      u32(ch, crc); u32(ch, data.length); u32(ch, rawLen); u16(ch, nameB.length); u16(ch, 0); u16(ch, 0); u16(ch, 0); u16(ch, 0); u32(ch, 0); u32(ch, off);
       central.push(new Uint8Array(ch), nameB);
       off += lh.length + nameB.length + data.length;
     }
