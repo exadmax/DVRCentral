@@ -20,6 +20,10 @@ window.CD_SETTINGS = {
     { label: 'Config', sub: 'Servidor', icon: 'gear', path: '/config.html' }
   ],
 
+  // LiteOffice Completo (LibreOffice no navegador): de onde baixar os arquivos do ZetaOffice (soffice.js, .wasm, .data; ~50 MB).
+  // Padrão: o CDN do ZetaOffice. Para servir de dentro do hub, copie os arquivos para src/vendor/zetaoffice/ e use base: 'vendor/zetaoffice/'.
+  zetaoffice: { base: 'https://cdn.zetaoffice.net/zetaoffice_latest/' },
+
   // Página Vídeos: os arquivos são servidos pelo nginx do servidor (porta e caminho abaixo); o hub só lista a pasta.
   videos: { port: 8080, path: '/videos/' },
 

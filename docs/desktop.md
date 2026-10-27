@@ -52,7 +52,10 @@ bloqueiam por 5 minutos.
 | **Meu Computador** (também na área de trabalho) | todos | Sistema, CPU, memória, tempo ligado, carga, rede, discos e atalhos para as unidades no Explorer |
 | **Explorer** | todos | Navega, cria pastas, envia (botão ou arrastando), renomeia, **move arrastando**, baixa e apaga. **Meus arquivos** para todos; **💻 Computador** para quem tem permissão, com o botão **🔓 sudo** para agir como root |
 | **Bloco de Notas** | todos | Texto até 1 MB com **realce de cores** por tipo (JSON, log, Markdown, CSV, INI/ENV/YAML, XML/HTML, código); abre arquivos de *Meus arquivos* ou do *Computador* |
-| **LiteOffice (Documentos)** | todos | Editor leve de documentos (.docx / .odt) que abre e salva nas pastas dos usuários (veja abaixo) |
+| **LiteOffice Documentos** | todos | Editor leve de documentos (.docx / .odt) que abre e salva nas pastas dos usuários (veja abaixo) |
+| **LiteOffice Planilhas** | todos | Planilha leve (.xlsx / .ods, e abre/exporta CSV): fórmulas, várias abas, formatos, congelar e mesclar |
+| **LiteOffice Apresentações** | todos | Editor leve de slides (.pptx / .odp): textos, formas, imagens, notas e apresentação em tela cheia |
+| **LiteOffice Completo** | todos | O **LibreOffice inteiro** rodando no seu navegador (WebAssembly), para o que os editores leves não fazem; exige HTTPS ou localhost (veja abaixo) |
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
 | **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas Windows 95/98 e DOS instalados** |
@@ -159,11 +162,16 @@ Os **avisos** aparecem dentro do Desktop do usuário enquanto ele estiver aberto
 avisos do navegador. Por padrão avisa **10 minutos antes** e **na hora** do compromisso, e de manhã (8h) os de dia inteiro. Tudo se ajusta em
 *Calendário → Agendas e avisos* e fica salvo na conta (acompanha o usuário em qualquer aparelho). O mesmo aviso não se repete.
 
-## LiteOffice (.docx e .odt)
+## LiteOffice (documentos, planilhas, apresentações e o Office completo)
 
-O **LiteOffice** é a opção leve do Desktop: poucos recursos de formatação, mas roda inteiro no navegador (nada pesa no servidor) e é totalmente integrado ao Explorer e às pastas dos usuários. Abre e salva `.docx` (Word) e `.odt` (LibreOffice) nas pastas dos usuários (ou no Computador, para quem tem permissão).
-Também abre ao clicar no arquivo no Explorer; *📘 Novo documento* cria um na pasta atual. *Salvar como…* converte entre os dois formatos.
-Funciona sem biblioteca externa (o hub não precisa de internet) e exige um navegador com `DecompressionStream('deflate-raw')` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+).
+O **LiteOffice** é a família de editores de escritório do Desktop. Os três primeiros são **leves e totalmente integrados** (Explorer, *Meus arquivos*,
+o Computador para quem tem permissão); rodam **inteiros no navegador**, sem bibliotecas externas, então **nada pesa no servidor** (que tem só 2 GB de
+RAM). Para o que eles não fazem, o **LiteOffice Completo** abre o arquivo no LibreOffice de verdade, também no navegador. Os editores leves exigem um navegador com
+`DecompressionStream('deflate-raw')` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+). O *Explorer* tem os botões **📘 Novo documento**, **📗 Nova planilha** e **📙 Nova apresentação**.
+
+### LiteOffice Documentos (.docx e .odt)
+
+Abre e salva `.docx` (Word) e `.odt` (LibreOffice). Também abre ao clicar no arquivo no Explorer; *Salvar como…* converte entre os dois formatos.
 
 **Mantém:** parágrafos, títulos 1–3, negrito, itálico, sublinhado, tachado, fonte, tamanho, cor, alinhamento, listas (com níveis e numeração
 que recomeça), tabelas (com células mescladas na horizontal), links e imagens PNG/JPEG/GIF (outros formatos viram PNG ao inserir).
@@ -172,8 +180,54 @@ que recomeça), tabelas (com células mescladas na horizontal), links e imagens 
 documento que tenha isso, o editor **avisa** e, ao salvar por cima do original, **pergunta antes**: use *Salvar como…* para ficar com
 uma cópia. Documentos protegidos por senha não abrem. Colar de outro lugar vem **limpo** (só o que o editor entende).
 
-> O `.docx` gerado foi validado com o `python-docx`. O `.odt` foi validado na estrutura e na releitura pelo próprio editor, mas não foi aberto no
-> LibreOffice durante o desenvolvimento: se algum documento sair estranho, avise.
+### LiteOffice Planilhas (.xlsx e .ods)
+
+Abre e salva `.xlsx` (Excel) e `.ods` (LibreOffice); abre `.csv`/`.tsv` (vira planilha nova) e **exporta a aba atual em CSV**. A grade é desenhada num `<canvas>` e só pinta o que
+aparece, então planilhas grandes ficam fluidas (testado com 200 mil células: abriu em menos de 3 s). Digita-se com vírgula decimal (`1,5`, `12%`, `R$ 10,50`, `05/03/2024`).
+
+- **Fórmulas** no formato do Excel (`=SUM(A1:A10)`) e **também em português** (`=SOMA(A1:A10)`, `=SE(...)`, `=PROCV(...)`): o programa grava sempre o nome em inglês, como o Excel. Cerca de 100 funções:
+  soma, média, mínimo, máximo, contagens, `SUMIF(S)`, `COUNTIF(S)`, `AVERAGEIF`, `SUMPRODUCT`, `IF`, `IFS`, `IFERROR`, `AND/OR/NOT`, arredondamentos, texto (`LEFT`, `MID`, `TEXT`, `TEXTJOIN`, `SUBSTITUTE`…),
+  datas (`TODAY`, `DATE`, `YEAR`…), `VLOOKUP`, `HLOOKUP`, `INDEX`, `MATCH`, `CHOOSE`. Referências entre abas (`=Vendas!B2`), intervalos de coluna inteira (`A:A`) e `$`. Fórmulas com funções
+  que o programa não calcula (por exemplo `XLOOKUP`) **mantêm o último valor calculado** pelo programa de origem, e o arquivo é avisado na abertura.
+- Editor: edição na célula e barra de fórmulas, caixa de nome, selecionar e arrastar, **preencher arrastando** (copia, continua sequências e incrementa "Item 1"), copiar, recortar e colar (as fórmulas acompanham a posição),
+  **desfazer e refazer**, inserir e excluir linhas e colunas (**as fórmulas se ajustam**), ordenar, soma automática, **congelar painéis**, **mesclar**, várias **abas** (renomear ajusta as fórmulas), localizar (Ctrl+F),
+  soma, média e contagem da seleção na barra de status, redimensionar colunas e linhas, formatos de número e de data.
+- **Mantém:** valores, fórmulas, abas, negrito, itálico, sublinhado, tachado, cor do texto e do fundo, alinhamento, quebra de linha, bordas, formatos de número e de data, larguras e alturas, células mescladas e (só no `.xlsx`) painéis congelados.
+- **Não mantém:** gráficos, imagens, tabelas dinâmicas, comentários, macros, formatação condicional, validação de dados e filtros. Como nos documentos, o programa **avisa ao abrir** e **pergunta antes de sobrescrever** o original.
+
+### LiteOffice Apresentações (.pptx e .odp)
+
+Abre e salva `.pptx` (PowerPoint) e `.odp` (LibreOffice). Slides em miniatura, **caixas de texto** com negrito, itálico, sublinhado, tachado, tamanho, cor, alinhamento e marcadores (edição direto no slide), **retângulo, elipse, linha, seta e imagens**, mover e redimensionar
+com alças, trazer à frente e enviar para trás, duplicar, desfazer e refazer, cor de fundo do slide, **notas do apresentador** (só o `.odp` as guarda) e **▶ Apresentar** em tela cheia (setas, espaço, clique; Esc sai).
+Slides novos: capa, título e conteúdo, só título, em branco. Abre modelos do PowerPoint herdando posição, tamanho e cor dos marcadores de título e de conteúdo.
+
+**Não mantém:** animações e transições, tabelas, gráficos, SmartArt, vídeos, fundos com imagem ou degradê, formas especiais (viram retângulos), níveis de recuo nas listas e o slide mestre
+(logotipos e fundos do modelo **viram parte de cada slide**). O programa avisa ao abrir e pergunta antes de sobrescrever.
+
+### LiteOffice Completo (LibreOffice no navegador)
+
+O **LibreOffice inteiro** (Writer, Calc, Impress, com todos os recursos) compilado para WebAssembly pelo projeto **ZetaOffice** (allotropia; o `zetajs` é MIT). Roda **no navegador de quem usa**: o servidor só entrega o arquivo e guarda o resultado.
+Abre `.docx .doc .odt .rtf`, `.xlsx .xls .ods .csv`, `.pptx .ppt .odp .odg` e mais. Acesso: menu Iniciar → *LiteOffice Completo*, **botão direito no arquivo → Abrir no Office completo**, ou clique direto em `.doc`, `.xls`, `.ppt`, `.rtf` no Explorer.
+Abre numa **nova aba** (`office.html`); o botão **💾 Salvar no Desktop** (ou Ctrl+S) grava no mesmo lugar e no mesmo formato. Ao fechar com alterações não salvas, o navegador avisa.
+
+**Requisitos (importante):**
+
+- **HTTPS ou `localhost`.** O WebAssembly com threads precisa de `SharedArrayBuffer`, que o navegador só libera em *contexto seguro*. Em `http://192.168.x.x:8080` (HTTP puro na rede local) **não funciona**:
+  a página mostra o motivo. Use HTTPS (por exemplo o nginx do servidor com um certificado aceito pelos seus aparelhos) ou acesse por `http://localhost`.
+- O hub já manda os cabeçalhos `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` **só para `office.html`** e seus scripts (`server/office.go`); o resto do Desktop não é afetado.
+  Se houver um proxy na frente, ele não pode removê-los.
+- **~50 MB de download na primeira abertura** (depois fica em cache) e **~1 GB de memória livre no computador de quem abre**. Em celular ou computador fraco, prefira os editores leves.
+- Por padrão os arquivos do LibreOffice (`soffice.js`, `.wasm`, `.data`) vêm do **CDN do ZetaOffice** (`https://cdn.zetaoffice.net/zetaoffice_latest/`), uma terceira parte: o navegador precisa de internet e confia nesse código.
+  Para servir **de dentro do hub**, baixe esses arquivos para `src/vendor/zetaoffice/` (a pasta é ignorada pelo git) e defina em `config/settings.js`: `window.CD_SETTINGS_LOCAL = { zetaoffice: { base: 'vendor/zetaoffice/' } };`.
+  O endereço **só vem da configuração**, nunca da URL da página (um link montado por outra pessoa não escolhe que código executar).
+- A interface do LibreOffice apareceu **em inglês** na compilação testada. Arquivos de *Meus arquivos* funcionam direto; os do *Computador* precisam estar desbloqueados no Explorer.
+
+### O que foi e o que não foi validado
+
+- **Planilha:** o `.xlsx` gerado foi aberto pelo `openpyxl` e pelo **LibreOffice real** (via LiteOffice Completo), com valores e fórmulas corretos, e o `.xlsx` regravado pelo LibreOffice foi relido pelo LiteOffice. Lê arquivos do `openpyxl` (estilos, fórmulas, mescladas, painel congelado).
+- **Apresentação:** o `.pptx` gerado foi aberto pelo `python-pptx`; lê modelos do `python-pptx` com marcadores de título e conteúdo.
+- O **`.ods` e o `.odp`** foram validados na estrutura (XML bem formado) e na ida e volta pelo próprio programa, mas **não foram abertos no LibreOffice de mesa durante o desenvolvimento**; o **Excel e o PowerPoint também não foram usados**. Se algum arquivo sair estranho, avise.
+- Documentos: o `.docx` foi validado com o `python-docx`; o `.odt` na estrutura e na releitura.
 
 ## Configuração (`hub.config.json`)
 
@@ -214,6 +268,7 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 - A interface do Desktop está **só em português**. O painel de sempre segue traduzido (pt, en, es, zh).
 - O sudo só existe no Linux do servidor. No Windows de desenvolvimento o Terminal usa o PowerShell e o Explorer mostra as unidades (`/C:/...`).
 - Funciona em navegador de computador; não foi feito para TV nem celular.
+- O **LiteOffice Completo** só roda em HTTPS ou `localhost` e pede ~50 MB de download e ~1 GB de memória no computador de quem usa (seção LiteOffice).
 - Os dados ficam no banco (`centraldiogo.db`: usuários, sessões, agendas, preferências) e em `desk/` (arquivos). Entram no mesmo backup do banco; o `install.sh` não mexe neles.
 
 ## Onde está o código
@@ -230,3 +285,6 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | Programas, emulador e Painel de Controle | `src/js/desktop/programs.js`, `panel.js`, `src/emulator.html`, `src/vendor/js-dos/` (GPL-2.0, sem alterações) |
 | Interface | `src/desktop.html`, `src/css/desktop.css`, `src/js/desktop/*.js` |
 | Conversão .docx/.odt e ZIP | `src/js/desktop/docfmt.js`, `zip.js` |
+| LiteOffice Planilhas: motor de fórmulas, .xlsx/.ods e editor | `src/js/desktop/formula.js`, `sheetfmt.js`, `sheets.js` |
+| LiteOffice Apresentações: .pptx/.odp e editor | `src/js/desktop/slidefmt.js`, `slides.js` |
+| LiteOffice Completo (LibreOffice em WebAssembly) | `src/office.html`, `src/js/office/*.js`, `src/js/desktop/office.js`, `server/office.go`, `src/vendor/zetajs/` (MIT, sem alterações) |

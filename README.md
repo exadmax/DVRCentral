@@ -186,7 +186,7 @@ node scripts/check-i18n.js
 |---|---|
 | [docs/funcionalidades.md](docs/funcionalidades.md) | **Mapa de todas as funcionalidades**, API, rotinas e código |
 | [docs/cameras.md](docs/cameras.md) | Câmeras ao vivo, rodízio, gravações, modelos Intelbras |
-| [docs/desktop.md](docs/desktop.md) | **Desktop**: usuários, permissões, Terminal/sudo, calendário, editor de documentos, API |
+| [docs/desktop.md](docs/desktop.md) | **Desktop**: usuários, permissões, Terminal/sudo, calendário, LiteOffice (documentos, planilhas, apresentações e LibreOffice completo no navegador), API |
 | [docs/estoque-contatos.md](docs/estoque-contatos.md) | Geladeira, Serviços, planilha, banco, API e segurança; páginas Vídeos e Livros |
 | [docs/jogos.md](docs/jogos.md) | Subsistema de conquistas (sem tela) |
 | [docs/spec-design.md](docs/spec-design.md) | Especificação visual (TV 1920×1080) |

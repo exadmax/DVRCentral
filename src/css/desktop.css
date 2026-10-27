@@ -240,6 +240,32 @@ iframe.fill { flex: 1; width: 100%; border: 0; min-height: 0; background: #fff; 
 .stab.add { background: transparent; border-color: transparent; font-size: 14px; padding: 1px 8px; }
 .scolor { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 26px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; }
 .scolor input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+/* LiteOffice Apresentações */
+.sbody { flex: 1; min-height: 0; display: flex; outline: none; background: #d9dee6; }
+.sthumbs { width: 172px; flex: none; overflow-y: auto; padding: 10px 8px; background: #eef1f6; border-right: 1px solid var(--line); }
+.sthumb { position: relative; margin: 0 0 10px; padding: 3px; border: 2px solid transparent; border-radius: 6px; cursor: pointer; }
+.sthumb.on { border-color: #2563eb; background: #dbe7fb; }
+.sthumb .sn { position: absolute; left: 6px; top: 6px; z-index: 2; font-size: 10px; background: rgba(17, 24, 39, .65); color: #fff; border-radius: 4px; padding: 0 4px; }
+.sthw { position: relative; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); pointer-events: none; }
+.spane { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sview { flex: 1; min-height: 0; position: relative; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 20px; user-select: none; touch-action: none; }
+.sbox { position: relative; flex: none; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); background: #fff; }
+.sl { position: absolute; left: 0; top: 0; overflow: hidden; font-family: Calibri, 'Segoe UI', Arial, sans-serif; color: #000; }
+.sh { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
+.sh-line, .sh-arrow { overflow: visible; display: block; }
+.sh-image img { width: 100%; height: 100%; display: block; pointer-events: none; }
+.stx { width: 100%; box-sizing: border-box; padding: 5px 10px; line-height: 1.2; white-space: pre-wrap; word-wrap: break-word; outline: none; font-size: 24px; }
+.stx p { margin: 0 0 .15em; }
+.stx p.bul { position: relative; padding-left: 1.1em; }
+.stx p.bul::before { content: '•'; position: absolute; left: .1em; }
+.stx[contenteditable="true"] { background: rgba(37, 99, 235, .06); cursor: text; user-select: text; }
+.sov { position: absolute; inset: 0; cursor: default; }
+.sfr { position: absolute; box-sizing: border-box; border: 1.5px solid #2563eb; pointer-events: none; }
+.sh-h { position: absolute; width: 9px; height: 9px; margin: -5px 0 0 -5px; box-sizing: border-box; background: #fff; border: 1.5px solid #2563eb; pointer-events: auto; }
+.sh-h.h-nw, .sh-h.h-se { cursor: nwse-resize; } .sh-h.h-ne, .sh-h.h-sw { cursor: nesw-resize; } .sh-h.h-n, .sh-h.h-s { cursor: ns-resize; } .sh-h.h-e, .sh-h.h-w { cursor: ew-resize; }
+.snotes { flex: none; height: 58px; resize: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 6px 10px; font-size: 13px; }
+.splay { position: fixed; inset: 0; z-index: 99999; background: #000; display: flex; align-items: center; justify-content: center; outline: none; cursor: none; }
+.splay-in { position: relative; background: #fff; overflow: hidden; }
 
 /* Navegador, programas e Painel de Controle */
 .bpanel { border-top: 1px solid var(--line); background: #fff; max-height: 40%; overflow: auto; padding: 8px 10px; display: grid; gap: 8px; }

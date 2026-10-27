@@ -27,6 +27,7 @@ a página Config e as APIs de sempre continuam abertas a quem alcança a porta, 
   da rede da casa, do próprio servidor e de nuvem (metadados) são recusados. Os downloads vão para a pasta do usuário e nada baixado é executado no servidor. `desk.noBrowser` desliga tudo isso.
 - Os **emuladores** (js-dos) rodam no navegador, num iframe isolado, sem rede (`noNetworking`) e sem a nuvem do js-dos. O Windows 95/98/ME é software proprietário e **não é distribuído**: use só imagens que você tenha licença para usar.
 - O editor de documentos e o visualizador nunca interpretam HTML, SVG ou scripts de arquivos: texto, imagem, PDF e vídeo são servidos com `nosniff` e política restritiva.
+- O **LiteOffice Completo** (`office.html`, LibreOffice em WebAssembly) executa, no navegador, código baixado do CDN do ZetaOffice (terceira parte) ou da cópia local configurada. O endereço de onde esse código vem só é lido da configuração (`config/settings.js`), nunca da URL da página, e os cabeçalhos de isolamento (COOP/COEP) valem só para essa página e seus scripts, não para o resto do Desktop.
 
 ## Reportar uma vulnerabilidade
 Abra um *security advisory* privado no GitHub (aba **Security** do repositório) em vez de uma issue pública. Descreva o problema e
