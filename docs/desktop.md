@@ -19,6 +19,7 @@ Config) **continua como era**: nada foi trocado, o Diogows só se soma a ele.
   Campos de texto e **Shift + botão direito** mantêm o menu do navegador.
 - **Área de Trabalho com itens seus:** aceita arquivos, pastas e ícones de aplicativos, enviados do aparelho, pelo Explorer ou arrastando e soltando. Os arquivos enviados ficam
   na pasta *Desktop* de *Meus arquivos*; o limite das preferências sobe para 32 KB.
+- **Personalizar:** *botão direito na Área de Trabalho → 🎨 Personalizar* (ou na barra de tarefas e no menu Iniciar) abre a janela de aparência. **Fundo:** cor sólida, degradê (com ângulo) ou uma **imagem** escolhida no Explorer (preencher, ajustar ou lado a lado), com modelos prontos. **Menu Iniciar e barra:** modelos (Escuro, Azul, Verde, Roxo, Noturno, Claro) e cores da barra, do cabeçalho, do fundo e do texto do menu. Fica nas preferências da conta (acompanha o usuário em qualquer aparelho); a imagem é só uma referência ao arquivo, e *Restaurar o padrão* desfaz tudo. Código em `src/js/desktop/theme.js`.
 - **Celular e tablet:** em telas estreitas as janelas abrem em tela cheia, os alvos de toque ficam maiores e as ações do Explorer passam para o menu de toque longo.
 
 ## Primeiro acesso

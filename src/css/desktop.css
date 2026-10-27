@@ -4,9 +4,9 @@
 
 @font-face { font-family: 'Inter'; font-weight: 400 700; font-display: swap; src: url(../assets/fonts/inter-latin.woff2) format('woff2'); }
 
-:root { --barh: 42px; --bg: #1f3a5f; --panel: #fff; --ink: #1c2430; --mute: #667085; --line: #d8dde6; --acc: #2563eb; --danger: #c62828; --ok: #2e7d32; --bar: #111a27; }
+:root { --barh: 42px; --bg: #1f3a5f; --panel: #fff; --ink: #1c2430; --mute: #667085; --line: #d8dde6; --acc: #2563eb; --danger: #c62828; --ok: #2e7d32; --bar: #111a27; --bar-ink: #fff; --menu-head: #111a27; --menu-head-ink: #fff; --menu-bg: #fff; --menu-ink: #1c2430; --menu-hover: #e9eef6; --menu-cat: #f3f6fb; --icon-ink: #fff; }
 * { box-sizing: border-box; }
-body { margin: 0; font: 14px/1.4 'Inter', system-ui, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); height: 100vh; overflow: hidden; }
+body { margin: 0; font: 14px/1.4 'Inter', system-ui, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); background-attachment: fixed; height: 100vh; overflow: hidden; }
 button, input, textarea, select { font: inherit; }
 button, select { cursor: pointer; border: 1px solid var(--line); background: #f5f7fa; border-radius: 6px; padding: 4px 9px; color: var(--ink); }
 button:hover { background: #e9eef6; }
@@ -32,10 +32,10 @@ a { color: var(--acc); }
 /* área de trabalho, ícones, barra e menu Iniciar */
 #desktop { position: fixed; top: 0; right: 0; bottom: var(--barh); left: 0; }
 .icons { display: grid; grid-auto-flow: column; grid-template-rows: repeat(6, 88px); gap: 6px 4px; padding: 14px; position: absolute; top: 0; left: 0; }
-.icon { background: none; border: 0; color: #fff; text-align: center; padding: 6px; border-radius: 8px; width: 104px; font-size: 13px; line-height: 1.2; overflow: hidden; }
+.icon { background: none; border: 0; color: var(--icon-ink); text-align: center; padding: 6px; border-radius: 8px; width: 104px; font-size: 13px; line-height: 1.2; overflow: hidden; }
 .icon:hover { background: rgba(255, 255, 255, .13); }
 .icon span { display: block; font-size: 30px; }
-#bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); background: var(--bar); color: #fff; display: flex; align-items: center; gap: 8px; padding: 0 8px; z-index: 8000; }
+#bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); background: var(--bar); color: var(--bar-ink); display: flex; align-items: center; gap: 8px; padding: 0 8px; z-index: 8000; }
 #start { background: #2a3a52; color: #fff; border-color: #3b4d68; display: flex; align-items: center; gap: 8px; padding: 3px 12px 3px 6px; font-weight: 600; }
 #start img { width: 26px; height: 26px; object-fit: contain; }
 #tasks { flex: 1; display: flex; gap: 6px; overflow: auto; }
@@ -43,19 +43,19 @@ a { color: var(--acc); }
 #tasks button.act { background: #3b5a8a; }
 #tasks button.mini { opacity: .6; font-style: italic; }
 #bar #logout { background: #fff; }
-#clock { color: #fff; text-align: right; line-height: 1.15; font-size: 12px; padding: 0 6px 0 10px; min-width: 74px; cursor: default; white-space: nowrap; }
+#clock { color: var(--bar-ink); text-align: right; line-height: 1.15; font-size: 12px; padding: 0 6px 0 10px; min-width: 74px; cursor: default; white-space: nowrap; }
 #clock b { display: block; font-size: 14px; font-weight: 600; }
-#startmenu { position: fixed; left: 8px; bottom: calc(var(--barh) + 4px); width: 320px; display: flex; flex-direction: column; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0, 0, 0, .55); z-index: 8500; overflow: hidden; max-height: calc(100vh - var(--barh) - 16px); }
-#startmenu header { display: flex; gap: 10px; align-items: center; padding: 12px; background: #111a27; color: #fff; font-weight: 600; }
+#startmenu { position: fixed; left: 8px; bottom: calc(var(--barh) + 4px); width: 320px; display: flex; flex-direction: column; background: var(--menu-bg); border-radius: 10px; box-shadow: 0 8px 30px rgba(0, 0, 0, .55); color: var(--menu-ink); z-index: 8500; overflow: hidden; max-height: calc(100vh - var(--barh) - 16px); }
+#startmenu header { display: flex; gap: 10px; align-items: center; padding: 12px; background: var(--menu-head); color: var(--menu-head-ink); font-weight: 600; }
 #startmenu header img { width: 32px; height: 32px; }
 #startmenu header { flex: none; }
 #startmenu .ssearch { flex: none; margin: 8px 10px 4px; width: auto; }
 #startmenu .slist { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 4px; }
-#startmenu button { display: flex; width: 100%; gap: 10px; align-items: center; border: 0; border-radius: 0; background: #fff; padding: 8px 14px; text-align: left; }
-#startmenu button:hover { background: #e9eef6; }
+#startmenu button { display: flex; width: 100%; gap: 10px; align-items: center; border: 0; border-radius: 0; background: transparent; color: var(--menu-ink); padding: 8px 14px; text-align: left; }
+#startmenu button:hover { background: var(--menu-hover); }
 #startmenu button span { width: 22px; text-align: center; flex: none; }
 #startmenu .sitem { padding-left: 26px; }
-#startmenu .scat { font-weight: 600; background: #f3f6fb; border-top: 1px solid var(--line); }
+#startmenu .scat { font-weight: 600; background: var(--menu-cat); border-top: 1px solid var(--line); }
 #startmenu .scat i { margin-left: auto; font-style: normal; font-weight: 400; font-size: 11px; color: var(--mute); }
 #startmenu .scat em { font-style: normal; color: var(--mute); width: 12px; }
 #startmenu .shome { flex: none; border-top: 1px solid var(--line); }

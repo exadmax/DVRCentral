@@ -177,12 +177,20 @@
       { icon: '🗂️', label: 'Abrir Explorer', fn: () => DK.openApp('explorer') },
       { icon: '🎛️', label: 'Painel de Controle', fn: () => DK.openApp('control') },
       '-',
+      { icon: '🎨', label: 'Personalizar', sub: [
+        { icon: '🖼️', label: 'Fundo da Área de Trabalho…', fn: () => DK.lookApp('bg') },
+        { icon: '☰', label: 'Menu Iniciar e barra de tarefas…', fn: () => DK.lookApp('menu') },
+      ] },
       { icon: '🔄', label: 'Atualizar', fn: () => { DK.refreshShell(); } },
     ];
   };
 
+  // menu Iniciar (fora dos itens)
+  $('startmenu')._ctx = () => [{ icon: '🎨', label: 'Personalizar menu e barra…', fn: () => { $('startmenu').classList.add('hidden'); DK.lookApp('menu'); } }];
+
   // barra de tarefas
   $('bar')._ctx = () => [
+    { icon: '🎨', label: 'Personalizar menu e barra…', fn: () => DK.lookApp('menu') },
     { icon: '🖥️', label: 'Mostrar a Área de Trabalho', fn: DK.minimizeAll },
     { icon: '✕', label: 'Fechar todas as janelas', fn: () => { if (Object.keys(DK.wins).length && confirm('Fechar todas as janelas?')) DK.closeAll(); }, danger: true },
   ];

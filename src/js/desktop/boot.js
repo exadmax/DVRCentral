@@ -131,6 +131,7 @@
     $('who').textContent = DK.me.username + (DK.me.is_admin ? ' (admin)' : '');
     tickClock(); buildIcons(); buildStartMenu();
     await DK.loadPrefs();
+    DK.applyLook();
     await loadLinks();
     if (DK.loadPrograms) await DK.loadPrograms();
     buildIcons(); buildStartMenu();
@@ -138,7 +139,7 @@
     DK.cal.startWatching();                    // avisos do calendário enquanto o Diogows estiver aberto
   }
   function showLogin(msg) {
-    DK.me = null; DK.prefs = {}; DK.notifs = []; DK.programs = [];
+    DK.me = null; DK.prefs = {}; if (DK.applyLook) DK.applyLook(); DK.notifs = []; DK.programs = [];
     DK.cal.stopWatching(); DK.chat.stop();
     DK.closeAll();
     const n = $('notifs'); if (n) n.remove();
