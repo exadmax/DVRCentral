@@ -61,6 +61,7 @@ bloqueiam por 5 minutos.
 | **Calculadora** | todos | Acessório simples |
 | **Câmeras** | todos veem; só o admin altera | Cada câmera abre numa **janela separada** (ou todas, ou em mosaico); a aba *Gerenciar* edita as câmeras (só admin) |
 | **Contatos** | todos | Os profissionais da casa (mesma lista da página Serviços): busca, filtro por tipo, ligar, WhatsApp, e-mail |
+| **Mensagens** | todos | Conversa entre usuários do Desktop, com envio de arquivos e imagens (arraste, cole um print ou use 📎), avisos no sino e “visto”. Ninguém envia mensagens ao administrador; ele escreve aos demais. Anexos ficam em `desk/_chat/` e podem ser salvos em *Meus arquivos/Recebidos* |
 | **Calendário** | cada um o seu | Agregador de agendas iCal por usuário, com visão mensal e dos próximos dias, e **avisos** (abaixo) |
 | **Terminal** | admin e liberados | Comandos no servidor, de qualquer aparelho da rede, com a opção **sudo** |
 | **Usuários / Configurações / Minha conta** | admin / admin / todos | Administração, a página Config numa janela e troca de senha |

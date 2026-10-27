@@ -26,8 +26,8 @@
   const openLink = l => window.open(linkHref(l), '_blank', 'noopener');
 
   // ---------- menu Iniciar e ícones ----------
-  const MENU_ORDER = ['control', 'programs', 'computer', 'explorer', 'browser', 'docs', 'notepad', 'images', 'pdf', 'video', 'calculator', 'cameras', 'contacts', 'calendar', 'terminal', 'users', 'config', 'account'];
-  const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'cameras', 'contacts', 'calendar', 'video', 'terminal'];
+  const MENU_ORDER = ['control', 'programs', 'computer', 'explorer', 'browser', 'docs', 'notepad', 'images', 'pdf', 'video', 'calculator', 'cameras', 'contacts', 'messages', 'calendar', 'terminal', 'users', 'config', 'account'];
+  const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
   const visible = () => DK.apps.filter(a => (!a.show || a.show(DK.me)) && (DK.prefs.hiddenApps || []).indexOf(a.id) < 0).concat(DK.programEntries ? DK.programEntries() : []);
   const byOrder = (list, order) => list.slice().sort((a, b) => { const x = order.indexOf(a.id), y = order.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
 
@@ -85,11 +85,12 @@
     await loadLinks();
     if (DK.loadPrograms) await DK.loadPrograms();
     buildIcons(); buildStartMenu();
+    DK.chat.start();                           // mensagens novas dos outros usuários
     DK.cal.startWatching();                    // avisos do calendário enquanto o Desktop estiver aberto
   }
   function showLogin(msg) {
     DK.me = null; DK.prefs = {}; DK.notifs = []; DK.programs = [];
-    DK.cal.stopWatching();
+    DK.cal.stopWatching(); DK.chat.stop();
     DK.closeAll();
     const n = $('notifs'); if (n) n.remove();
     $('bellN').classList.add('hidden');
