@@ -52,9 +52,13 @@ bloqueiam por 5 minutos.
 | **Meu Computador** (também na área de trabalho) | todos | Sistema, CPU, memória, tempo ligado, carga, rede, discos e atalhos para as unidades no Explorer |
 | **Explorer** | todos | Navega, cria pastas, envia (botão ou arrastando), renomeia, **move arrastando**, baixa e apaga. **Meus arquivos** para todos; **💻 Computador** para quem tem permissão, com o botão **🔓 sudo** para agir como root |
 | **Bloco de Notas** | todos | Texto até 1 MB com **realce de cores** por tipo (JSON, log, Markdown, CSV, INI/ENV/YAML, XML/HTML, código); abre arquivos de *Meus arquivos* ou do *Computador* |
-| **Documentos (.docx / .odt)** | todos | Editor de documentos que abre e salva nas pastas dos usuários (veja abaixo) |
+| **LiteOffice (Documentos)** | todos | Editor leve de documentos (.docx / .odt) que abre e salva nas pastas dos usuários (veja abaixo) |
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
+| **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas Windows 95/98 e DOS instalados** |
+| **Instalar Programas e Acessórios** | todos | Instala programas DOS e Windows 95/98/ME na sua pasta e escolhe a engine; também liga ou desliga os acessórios do Desktop (abaixo) |
+| **Navegador** | todos | Abre páginas pelo servidor e **baixa arquivos para Meus arquivos/Downloads** (abaixo) |
+| **Calculadora** | todos | Acessório simples |
 | **Câmeras** | todos veem; só o admin altera | Cada câmera abre numa **janela separada** (ou todas, ou em mosaico); a aba *Gerenciar* edita as câmeras (só admin) |
 | **Contatos** | todos | Os profissionais da casa (mesma lista da página Serviços): busca, filtro por tipo, ligar, WhatsApp, e-mail |
 | **Calendário** | cada um o seu | Agregador de agendas iCal por usuário, com visão mensal e dos próximos dias, e **avisos** (abaixo) |
@@ -93,6 +97,56 @@ sudo bash install.sh --no-desk-shell   # desfaz
 > Na prática, a senha do administrador do Desktop passa a valer como senha de root: use uma senha longa e só em rede confiável.
 > Em HTTP puro (rede local) as senhas trafegam sem criptografia; para sair da rede de casa use VPN ou HTTPS.
 
+## Navegador e downloads
+
+O **Navegador** do Desktop abre as páginas **pelo servidor**: o hub busca o site, tira scripts, objetos e iframes, e a janela mostra o resultado
+sem executar nada. Os arquivos (zip, exe, iso, pdf...) não passam pelo navegador: aparece **Baixar para Meus arquivos/Downloads**, o servidor
+baixa em segundo plano (com progresso, cancelamento e limite de 3 ao mesmo tempo) e, quando termina, dá para **instalar como programa** direto da lista.
+
+Limites, sem rodeios:
+
+- **Sem JavaScript.** Sites feitos como aplicativo (muitos de hoje) aparecem vazios ou incompletos. Páginas de texto, Wikipédia, buscas (o início usa o
+  DuckDuckGo sem JS), fóruns e páginas de download funcionam bem. Vídeo e áudio embutidos são removidos (o link continua).
+- Formulários só do tipo GET (buscas). Nada de login, compras ou formulários que enviam dados.
+- **Só sites da internet:** o servidor não abre endereços da rede da casa nem dele mesmo, para o navegador não virar uma porta para dentro da sua rede.
+- Cada download vai para a pasta do próprio usuário e é registrado no log (usuário e site). Nada baixado é executado no servidor.
+- Para desligar tudo isto: `"desk": {"noBrowser": true}`.
+
+## Instalar Programas e Acessórios (DOS e Windows 95/98/ME)
+
+Os programas rodam **no seu navegador**, dentro do **js-dos**, que traz as engines **DOSBox** e **DOSBox-X** em WebAssembly (já dentro do hub, em
+`src/vendor/js-dos`, sem internet e sem instalar nada). Cada programa abre num iframe próprio (`emulator.html`), então fechar a janela encerra o emulador.
+
+**Escolha da engine**, cada uma com seus limites:
+
+| Engine | Quando usar | Limitações |
+|---|---|---|
+| **DOSBox-X** (padrão) | Programas DOS exigentes e **Windows 95/98/ME** | A mais pesada: baixa ~8 MB, usa mais CPU e memória, pode ficar lenta em PCs fracos. Windows 9x leva um bom tempo para iniciar |
+| **js-dos (DOSBox)** | Jogos e programas DOS comuns | Leve e rápida, mas **não roda Windows 9x** e tem menos recursos de compatibilidade (alguns modos de vídeo e dispositivos avançados ficam de fora) |
+
+(Na prática as duas são o js-dos: ele é o player e escolhe entre os dois motores. Windows 9x só existe no DOSBox-X.)
+
+**Como instalar:**
+
+1. Traga o programa: baixe pelo **Navegador** (vai para *Downloads*) ou envie do seu computador.
+2. Abra **Instalar Programas e Acessórios → Instalar programa**, escolha o arquivo e o tipo (DOS ou Windows 95/98/ME).
+3. Um **.zip** com os arquivos de um programa DOS: o instalador lista os `.exe/.com/.bat` e você escolhe o que abre ao iniciar; ele monta o pacote
+   em *Meus arquivos/Programas*. Um **.jsdos** pronto é registrado como está.
+4. O programa entra no menu Iniciar (seção *Meus programas*), no Painel de Controle e, se quiser, na área de trabalho. *Desinstalar* apaga a pasta instalada.
+
+**Windows 95/98/ME:** a Microsoft não distribui esses sistemas, então **o Desktop não traz nenhum**. Use um pacote `.jsdos` com o Windows já instalado
+e que você tenha licença para usar (por exemplo, um que você mesmo montou). Esse caminho só aceita `.jsdos`, não `.zip`. Ele foi construído de acordo com a
+documentação do js-dos, mas **não foi testado com uma imagem real do Windows 9x** (não havia uma disponível no desenvolvimento): o fluxo DOS foi testado de ponta a ponta nas duas engines.
+
+**Acessórios:** a aba *Acessórios do Desktop* mostra os aplicativos do próprio Desktop (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
+esconde do menu e dos ícones; nada é apagado e dá para marcar de novo.
+
+## Painel de Controle
+
+Reúne em seções, com busca: **Programas** (instalar, acessórios e os programas instalados, que abrem com um clique), **Sistema** (Meu Computador, arquivos, Terminal),
+**Contas e notificações**, **Câmeras e contatos**, **Rede e Internet** e, só para o administrador, **Configurações do painel da casa**, que abre a mesma página
+Config **aba por aba** numa janela (Servidor, Câmeras, Agendas e rotas, Painel, Livros, Menu, Integrações, Idioma, Compatibilidade, Ajuda).
+
 ## Calendário e avisos
 
 Cada usuário cadastra as **próprias agendas iCal** (Google Agenda → *Configurações da agenda* → *Endereço secreto no formato iCal*; também
@@ -104,9 +158,9 @@ Os **avisos** aparecem dentro do Desktop do usuário enquanto ele estiver aberto
 avisos do navegador. Por padrão avisa **10 minutos antes** e **na hora** do compromisso, e de manhã (8h) os de dia inteiro. Tudo se ajusta em
 *Calendário → Agendas e avisos* e fica salvo na conta (acompanha o usuário em qualquer aparelho). O mesmo aviso não se repete.
 
-## Documentos (.docx e .odt)
+## LiteOffice (.docx e .odt)
 
-O app **Documentos** abre e salva `.docx` (Word) e `.odt` (LibreOffice) nas pastas dos usuários (ou no Computador, para quem tem permissão).
+O **LiteOffice** é a opção leve do Desktop: poucos recursos de formatação, mas roda inteiro no navegador (nada pesa no servidor) e é totalmente integrado ao Explorer e às pastas dos usuários. Abre e salva `.docx` (Word) e `.odt` (LibreOffice) nas pastas dos usuários (ou no Computador, para quem tem permissão).
 Também abre ao clicar no arquivo no Explorer; *📘 Novo documento* cria um na pasta atual. *Salvar como…* converte entre os dois formatos.
 Funciona sem biblioteca externa (o hub não precisa de internet) e exige um navegador com `DecompressionStream('deflate-raw')` (Chrome/Edge 103+, Firefox 113+, Safari 16.4+).
 
@@ -129,6 +183,7 @@ uma cópia. Documentos protegidos por senha não abrem. Colar de outro lugar vem
   "protectSettings": false,  // alterações de Config/câmeras exigem sessão de administrador do Desktop
   "maxUploadMB": 2048,       // tamanho máximo de cada envio
   "dir": "desk",             // onde ficam as pastas dos usuários (relativo ao hub.config.json)
+  "noBrowser": false,        // true tira o Navegador e os downloads
   "disabled": false          // true desliga o Desktop inteiro (/api/desk/* some)
 }
 ```
@@ -149,10 +204,12 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | `GET /fs/list`, `GET /fs/read?mode=text\|view\|download`, `PUT /fs/file`, `POST /fs/mkdir`, `POST /fs/move`, `DELETE /fs` | todos (`space=home`); permitidos (`space=machine`) | Arquivos; `sudo=1` para root; leitura com `Range` |
 | `GET /shell/status`, `POST /shell/unlock`, `POST /shell/sudo`, `POST /shell/lock`, `POST /shell/run` | permitidos | Terminal e desbloqueios |
 | `GET /computer`, `GET /videos`, `GET /videos/file?name=` | todos | Meu Computador e biblioteca de vídeos |
+| `GET /browse?url=`, `POST /downloads`, `GET /downloads`, `DELETE /downloads/{id}` | todos (some com `noBrowser`) | Navegador interno e downloads para Meus arquivos/Downloads |
 | `GET/POST /calendars`, `PUT/DELETE /calendars/{id}`, `GET /calendars/feed`, `GET/PUT /prefs` | cada usuário, só os próprios | Agendas e preferências |
 
 ## Limitações
 
+- Programas Windows 9x e o js-dos: veja acima o que foi e o que não foi testado. O emulador pede um PC razoável; em TV ou celular não é a proposta.
 - A interface do Desktop está **só em português**. O painel de sempre segue traduzido (pt, en, es, zh).
 - O sudo só existe no Linux do servidor. No Windows de desenvolvimento o Terminal usa o PowerShell e o Explorer mostra as unidades (`/C:/...`).
 - Funciona em navegador de computador; não foi feito para TV nem celular.
@@ -168,5 +225,7 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | Meu Computador, vídeos, câmeras (admin) | `server/desk_misc.go`, `desk_computer_{linux,windows,other}.go` |
 | Agendas por usuário e preferências | `server/desk_calendar.go` |
 | Testes | `server/desk_test.go`, `server/desk_calendar_test.go` |
+| Navegador interno e downloads | `server/desk_browser.go`, `src/js/desktop/browser.js` |
+| Programas, emulador e Painel de Controle | `src/js/desktop/programs.js`, `panel.js`, `src/emulator.html`, `src/vendor/js-dos/` (GPL-2.0, sem alterações) |
 | Interface | `src/desktop.html`, `src/css/desktop.css`, `src/js/desktop/*.js` |
 | Conversão .docx/.odt e ZIP | `src/js/desktop/docfmt.js`, `zip.js` |

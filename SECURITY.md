@@ -23,6 +23,9 @@ a página Config e as APIs de sempre continuam abertas a quem alcança a porta, 
 - A senha inicial do `admin` é **sorteada** e aparece uma única vez no log; a troca é obrigatória. Senhas ficam com PBKDF2-SHA256 (600 mil iterações); o login tem bloqueio por tentativas.
 - As **agendas iCal** de cada usuário são segredos (quem tem a URL lê a agenda): ficam no banco, saem mascaradas pela API e só o dono as vê. O servidor só baixa de endereços
   públicos (não de rede interna nem de si mesmo), para o campo de URL não servir de sonda para a sua rede.
+- O **Navegador** busca as páginas pelo servidor e as entrega sem scripts (limpeza do HTML, política de segurança e iframe sem JavaScript). Só alcança **sites da internet**: endereços
+  da rede da casa, do próprio servidor e de nuvem (metadados) são recusados. Os downloads vão para a pasta do usuário e nada baixado é executado no servidor. `desk.noBrowser` desliga tudo isso.
+- Os **emuladores** (js-dos) rodam no navegador, num iframe isolado, sem rede (`noNetworking`) e sem a nuvem do js-dos. O Windows 95/98/ME é software proprietário e **não é distribuído**: use só imagens que você tenha licença para usar.
 - O editor de documentos e o visualizador nunca interpretam HTML, SVG ou scripts de arquivos: texto, imagem, PDF e vídeo são servidos com `nosniff` e política restritiva.
 
 ## Reportar uma vulnerabilidade
