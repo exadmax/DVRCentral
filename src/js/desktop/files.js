@@ -17,10 +17,11 @@
     if (IMG_EXT.indexOf(e) >= 0) return 'image';
     if (e === '.pdf') return 'pdf';
     if (e === '.docx' || e === '.odt') return 'doc';
+    if (e === '.jsdos') return 'program';
     if (VIDEO_EXT.indexOf(e) >= 0) return 'video';
     return 'other';
   };
-  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', video: '🎬', other: '📄' })[DK.kindOf(it)];
+  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', program: '🕹️', video: '🎬', other: '📄' })[DK.kindOf(it)];
 
   // Abre um arquivo no aplicativo certo. siblings = itens da mesma pasta (anterior/próxima nas imagens e no vídeo).
   DK.openFile = function (it, siblings) {
@@ -30,6 +31,7 @@
       case 'image': DK.imageApp({ item: it, siblings: siblings }); break;
       case 'pdf': DK.pdfApp({ item: it }); break;
       case 'doc': DK.docApp({ item: it }); break;
+      case 'program': DK.installProgramApp(it); break;
       case 'video': DK.videoApp({ item: it, siblings: siblings }); break;
       default: location.href = DK.fileUrl(it, 'download');
     }
@@ -51,7 +53,7 @@
       const up = el('button', { textContent: '⬆ Subir' });
       const nf = el('button', { textContent: '📁 Nova pasta' });
       const nt = el('button', { textContent: '📝 Novo texto' });
-      const nd = el('button', { textContent: '📘 Novo documento', title: 'Documento do Word (.docx) ou LibreOffice (.odt)' });
+      const nd = el('button', { textContent: '📘 Novo documento', title: 'Documento do LiteOffice: Word (.docx) ou LibreOffice (.odt)' });
       const upl = el('button', { textContent: '⬆ Enviar arquivos' });
       const file = el('input', { type: 'file', multiple: true }); file.style.display = 'none';
       const rf = el('button', { textContent: '⟳', title: 'Atualizar' });
@@ -112,7 +114,7 @@
       function draw() {
         flist.replaceChildren();
         const t = el('table'), tbody = el('tbody'); t.append(tbody); flist.append(t);
-        const shown = st.entries.filter(it => !o.pick || it.type === 'dir' || o.pick === 'any' || DK.kindOf(it) === o.pick);
+        const shown = st.entries.filter(it => !o.pick || it.type === 'dir' || o.pick === 'any' || DK.kindOf(it) === o.pick || (o.pick === 'program' && DK.extOf(it.name) === '.zip'));
         if (!shown.length) tbody.append(el('tr', {}, el('td', { className: 'meta', textContent: o.pick ? 'Nenhum arquivo deste tipo aqui.' : 'Pasta vazia. Arraste arquivos para cá.' })));
         shown.forEach(e => {
           const it = ref(e), k = DK.kindOf(it);

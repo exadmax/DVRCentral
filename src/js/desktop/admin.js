@@ -78,12 +78,14 @@
 
   // As configurações do painel (câmeras, agendas da casa, trânsito, menu, livros, desligar desktop/hub...) ficam na página Config.
   // Aqui ela abre numa janela, só para o administrador.
-  DK.configApp = function () {
-    DK.openWindow('config', 'Configurações', body => {
+  DK.configApp = function (o) {
+    const tab = (o && o.tab) || '';
+    DK.openWindow('config' + (tab ? ':' + tab : ''), 'Configurações' + (tab ? ' · ' + tab : ''), body => {
       body.className = 'body flush';
-      body.append(el('div', { className: 'tb' }, el('a', { href: 'config.html', target: '_blank', textContent: 'Abrir em nova aba ↗' }),
+      const url = 'config.html' + (tab ? '#' + tab : '');
+      body.append(el('div', { className: 'tb' }, el('a', { href: url, target: '_blank', textContent: 'Abrir em nova aba ↗' }),
         el('span', { className: 'sp' }), el('span', { className: 'meta', textContent: 'Só o administrador vê esta janela' })),
-        el('iframe', { className: 'fill', src: 'config.html', title: 'Configurações' }));
+        el('iframe', { className: 'fill', src: url, title: 'Configurações' }));
     }, 860, 600, { flush: true });
   };
 

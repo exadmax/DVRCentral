@@ -26,9 +26,9 @@
   const openLink = l => window.open(linkHref(l), '_blank', 'noopener');
 
   // ---------- menu Iniciar e ícones ----------
-  const MENU_ORDER = ['computer', 'explorer', 'docs', 'notepad', 'images', 'pdf', 'video', 'cameras', 'contacts', 'calendar', 'terminal', 'users', 'config', 'account'];
-  const ICON_ORDER = ['computer', 'explorer', 'docs', 'cameras', 'contacts', 'calendar', 'video', 'terminal'];
-  const visible = () => DK.apps.filter(a => !a.show || a.show(DK.me));
+  const MENU_ORDER = ['control', 'programs', 'computer', 'explorer', 'browser', 'docs', 'notepad', 'images', 'pdf', 'video', 'calculator', 'cameras', 'contacts', 'calendar', 'terminal', 'users', 'config', 'account'];
+  const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'cameras', 'contacts', 'calendar', 'video', 'terminal'];
+  const visible = () => DK.apps.filter(a => (!a.show || a.show(DK.me)) && (DK.prefs.hiddenApps || []).indexOf(a.id) < 0).concat(DK.programEntries ? DK.programEntries() : []);
   const byOrder = (list, order) => list.slice().sort((a, b) => { const x = order.indexOf(a.id), y = order.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
 
   function buildStartMenu() {
@@ -36,7 +36,9 @@
     m.replaceChildren(el('header', {}, el('img', { src: 'assets/img/logo-128.png', alt: '' }), 'Iniciar'));
     const add = (emoji, label, fn) => m.append(el('button', { onclick: () => { m.classList.add('hidden'); fn(); } }, el('span', { textContent: emoji }), label));
     const apps = byOrder(visible(), MENU_ORDER);
-    apps.filter(a => !a.group).forEach(a => add(a.icon, a.label, a.open));
+    apps.filter(a => !a.group && String(a.id).indexOf('prog:') !== 0).forEach(a => add(a.icon, a.label, a.open));
+    const progs = apps.filter(a => String(a.id).indexOf('prog:') === 0);
+    if (progs.length) { m.append(el('hr'), el('div', { className: 'meta', style: 'padding:6px 14px 2px', textContent: 'Meus programas (DOS e Windows 95/98)' })); progs.forEach(a => add(a.icon, a.label, a.open)); }
     if (DK.links.length) {
       m.append(el('hr'), el('div', { className: 'meta', style: 'padding:6px 14px 2px', textContent: 'Painel e serviços da casa (abrem em outra aba)' }));
       DK.links.forEach(l => add(LINK_ICONS[l.icon] || '🔗', l.label + (l.sub ? ' — ' + l.sub : ''), () => openLink(l)));
@@ -58,6 +60,7 @@
     $('icons').style.gridTemplateRows = 'repeat(' + rows + ', 88px)';
   }
   addEventListener('resize', layoutIcons);
+  DK.refreshShell = () => { if (DK.me && !DK.me.must_change) { buildIcons(); buildStartMenu(); } };
 
   $('start').onclick = e => { e.stopPropagation(); $('startmenu').classList.toggle('hidden'); };
   $('bell').onclick = e => { e.stopPropagation(); DK.toggleNotifs(); };
@@ -80,11 +83,12 @@
     tickClock(); buildIcons(); buildStartMenu();
     await DK.loadPrefs();
     await loadLinks();
+    if (DK.loadPrograms) await DK.loadPrograms();
     buildIcons(); buildStartMenu();
     DK.cal.startWatching();                    // avisos do calendário enquanto o Desktop estiver aberto
   }
   function showLogin(msg) {
-    DK.me = null; DK.prefs = {}; DK.notifs = [];
+    DK.me = null; DK.prefs = {}; DK.notifs = []; DK.programs = [];
     DK.cal.stopWatching();
     DK.closeAll();
     const n = $('notifs'); if (n) n.remove();

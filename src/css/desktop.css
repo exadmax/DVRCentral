@@ -218,3 +218,16 @@ iframe.fill { flex: 1; width: 100%; border: 0; min-height: 0; background: #fff; 
 .dpaper h1 { font-size: 26px; margin: .6em 0 .3em; } .dpaper h2 { font-size: 21px; margin: .6em 0 .3em; } .dpaper h3 { font-size: 17px; margin: .6em 0 .3em; }
 .dpaper p { margin: 0 0 .6em; } .dpaper table { border-collapse: collapse; margin: .5em 0; } .dpaper td { border: 1px solid #9aa4b2; padding: 4px 8px; min-width: 60px; }
 .dwarn { background: #fff7e0; border-bottom: 1px solid #f0d58a; padding: 5px 10px; font-size: 12px; }
+
+/* Navegador, programas e Painel de Controle */
+.bpanel { border-top: 1px solid var(--line); background: #fff; max-height: 40%; overflow: auto; padding: 8px 10px; display: grid; gap: 8px; }
+.djob { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; display: grid; gap: 4px; }
+.dosbox { flex: 1; min-height: 0; background: #000; position: relative; }
+.dosbox .jsdos-rso, .dosbox .jsdos-rso * { max-width: 100%; }
+.cpbox { flex: 1; min-height: 0; overflow: auto; padding: 10px 14px; display: grid; gap: 8px; align-content: start; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.tile { display: grid; grid-template-columns: 42px 1fr; grid-template-rows: auto auto; gap: 0 8px; text-align: left; padding: 8px 10px; border-radius: 8px; background: #fff; align-items: center; }
+.tile:hover { background: #eef3fb; border-color: #93b4f0; }
+.tile .ti { grid-row: span 2; font-size: 28px; text-align: center; }
+.tile b { font-weight: 600; font-size: 13px; }
+.tile .meta { font-size: 11px; }

@@ -1,5 +1,5 @@
 (function (DK) {
-  // Editor de Documentos (.docx e .odt): abre e salva nas pastas dos usuários (Meus arquivos) e, para quem tem permissão, no Computador.
+  // LiteOffice — editor de documentos (.docx e .odt), a opção leve e integrada ao Desktop (roda todo no navegador): abre e salva nas pastas dos usuários (Meus arquivos) e, para quem tem permissão, no Computador.
   // A edição usa um <div contenteditable>; a conversão de/para os pacotes fica em docfmt.js (sem bibliotecas externas).
   const el = DK.el;
 
@@ -62,7 +62,7 @@
     o = o || {};
     let item = o.item || null;
     const key = item ? 'doc:' + item.space + ':' + item.path : 'doc:new:' + DK.nextDocId();
-    DK.openWindow(key, item ? item.name : 'Documento sem título', (body, win) => {
+    DK.openWindow(key, 'LiteOffice — ' + (item ? item.name : 'Documento sem título'), (body, win) => {
       body.className = 'body flush';
       let dirty = false, dir = o.dir || null, lossy = [], lossyOk = false, saving = false, pendingSize = 12, range = null;
 
@@ -142,7 +142,7 @@
       function info() {
         const text = paper.innerText.trim(), words = text ? text.split(/\s+/).length : 0;
         status.textContent = words + ' palavra(s) · ' + (dirty ? 'modificado' : 'salvo') + (item && item.space === 'machine' ? ' · arquivo do computador' + (item.sudo ? ' (sudo)' : '') : '');
-        win.setTitle((dirty ? '● ' : '') + (item ? item.name : 'Documento sem título'));
+        win.setTitle((dirty ? '● ' : '') + 'LiteOffice — ' + (item ? item.name : 'Documento sem título'));
         fmtLbl.textContent = item ? (DK.extOf(item.name) === '.odt' ? 'OpenDocument (.odt)' : 'Word (.docx)') : 'novo documento';
       }
       function touched() { dirty = true; info(); }
@@ -221,5 +221,5 @@
     }, 860, 600, { flush: true });
   };
 
-  DK.register({ id: 'docs', icon: '📘', label: 'Documentos (.docx / .odt)', desktop: true, open: () => DK.docApp({ dir: { space: 'home', path: '/' } }) });
+  DK.register({ id: 'docs', icon: '📘', label: 'LiteOffice (Documentos)', desktop: true, open: () => DK.docApp({ dir: { space: 'home', path: '/' } }) });
 })(window.DK = window.DK || {});

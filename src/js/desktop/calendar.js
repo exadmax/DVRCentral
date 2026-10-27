@@ -83,7 +83,7 @@
     o = o || {};
     const win = DK.openWindow('calendar', 'Calendário', (body, win) => {
       body.className = 'body flush';
-      let view = 'month', cur = dayStart(o.day || new Date()), sel = dayStart(o.day || new Date());
+      let view = o.view || 'month', cur = dayStart(o.day || new Date()), sel = dayStart(o.day || new Date());
       const title = el('h3');
       const prev = el('button', { textContent: '◀' }), next = el('button', { textContent: '▶' }), today = el('button', { textContent: 'Hoje' });
       const bMonth = el('button', { textContent: 'Mês' }), bAgenda = el('button', { textContent: 'Próximos dias' });

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emulador · Central Diogo</title>
+  <link rel="stylesheet" href="vendor/js-dos/js-dos.css">
+  <style>html, body { margin: 0; height: 100%; background: #000; overflow: hidden; } #dos { width: 100%; height: 100%; } .err { color: #f88; font: 14px system-ui; padding: 16px; }</style>
+</head>
+<body>
+  <!-- Um programa por página: o js-dos guarda estado global e não reinicia limpo no mesmo documento. Aberta pelo Desktop num iframe,
+       com os parâmetros b (endereço do pacote .jsdos) e e (engine: dosboxX ou dosbox). -->
+  <div id="dos"></div>
+  <script src="vendor/js-dos/js-dos.js"></script>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search), box = document.getElementById('dos');
+      var bundle = q.get('b'), engine = q.get('e') === 'dosbox' ? 'dosbox' : 'dosboxX';
+      function fail(m) { box.innerHTML = '<div class="err"></div>'; box.firstChild.textContent = m; }
+      if (!bundle || !/^\/api\/desk\/fs\/read\?/.test(bundle)) return fail('Pacote inválido.');   // só pacotes lidos da pasta do usuário
+      if (!window.Dos) return fail('O js-dos não carregou.');
+      window.Dos(box, {
+        url: bundle, backend: engine, pathPrefix: new URL('vendor/js-dos/emulators/', location.href).href,
+        autoStart: true, noCloud: true, noNetworking: true, lang: 'pt-br'
+      });
+    })();
+  </script>
+</body>
+</html>
