@@ -28,7 +28,7 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 | **Vídeos** | `videos.html` + `js/pages/videos.js` | Vídeos | ✅ | Lista a pasta de vídeos; tocar no navegador, abrir no VLC, copiar link |
 | **Livros** | `livros.html` + `js/pages/livros.js` | Livros | ✅ | PDFs e EPUBs no servidor: envio pelo painel, categoria e dono, leitor de EPUB; pode ser desligada na Config |
 | **Config** | `config.html` + `js/pages/config.js` | Config | ✅ | CPU/memória do servidor, botões de energia e configuração das gravações |
-| **Diogows** | `desktop.html` + `js/desktop/*.js` | Diogows | ✅ | Área de trabalho com login e vários usuários: Explorer, LiteOffice (editores leves de .docx/.odt, .xlsx/.ods e .pptx/.odp, mais o LibreOffice completo em WebAssembly), visualizadores, player de vídeo, câmeras em janelas, contatos, calendário com avisos, navegador interno com downloads, programas DOS e Windows 95/98/ME (DOSBox-X e js-dos), Painel de Controle, Meu Computador e Terminal (veja [desktop.md](desktop.md)) |
+| **Diogows** | `desktop.html` + `js/desktop/*.js` | Diogows | ✅ | Área de trabalho com login e vários usuários: Explorer, LiteOffice (editores leves de .docx/.odt, .xlsx/.ods e .pptx/.odp, mais o LibreOffice completo em WebAssembly), visualizadores, player de vídeo, câmeras em janelas, contatos, calendário com avisos, navegador interno com downloads, programas DOS e sistemas virtuais Windows 3.x/95/98/ME com disco salvo no servidor (DOSBox-X e js-dos), Painel de Controle, Meu Computador e Terminal (veja [desktop.md](desktop.md)) |
 | Jogos (externo) | — | Jogos | ➖ | Abre o WebRCade (porta 8080) |
 | Música (externo) | — | Música | ➖ | Abre o Navidrome (porta 4533) |
 

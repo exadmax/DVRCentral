@@ -9,19 +9,46 @@
 </head>
 <body>
   <!-- Um programa por página: o js-dos guarda estado global e não reinicia limpo no mesmo documento. Aberta pelo Diogows num iframe,
-       com os parâmetros b (endereço do pacote .jsdos) e e (engine: dosboxX ou dosbox). -->
+       com os parâmetros b (endereço do pacote .jsdos), e (engine: dosboxX ou dosbox) e, só para sistemas virtuais, c (caminho, na pasta
+       do usuário, do arquivo onde o disco alterado do sistema é guardado). -->
   <div id="dos"></div>
   <script src="vendor/js-dos/js-dos.js"></script>
   <script>
     (function () {
       var q = new URLSearchParams(location.search), box = document.getElementById('dos');
-      var bundle = q.get('b'), engine = q.get('e') === 'dosbox' ? 'dosbox' : 'dosboxX';
+      var bundle = q.get('b'), engine = q.get('e') === 'dosbox' ? 'dosbox' : 'dosboxX', chg = q.get('c');
       function fail(m) { box.innerHTML = '<div class="err"></div>'; box.firstChild.textContent = m; }
       if (!bundle || !/^\/api\/desk\/fs\/read\?/.test(bundle)) return fail('Pacote inválido.');   // só pacotes lidos da pasta do usuário
+      if (chg && !/^\/Programas\/Sistemas\/[a-z0-9-]+\/[a-z0-9-]+\.changes$/.test(chg)) return fail('Disco salvo inválido.');
       if (!window.Dos) return fail('O js-dos não carregou.');
-      window.Dos(box, {
+
+      // Sistema virtual: o js-dos entrega o disco alterado inteiro (um zip) e pede de volta na próxima abertura. Guardamos no servidor,
+      // compactado (o disco quase todo é espaço vazio), por meio do gancho fsChanges do próprio js-dos.
+      function pipe(buf, stream) { return new Response(new Blob([buf]).stream().pipeThrough(stream)).arrayBuffer().then(function (b) { return new Uint8Array(b); }); }
+      var url = '/api/desk/fs/read?space=home&mode=download&path=' + encodeURIComponent(chg || '');
+      var fsChanges = !chg ? undefined : {
+        local: false,
+        pull: function () {
+          return fetch(url, { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
+            if (r.status === 404) return null;                                  // primeira vez: ainda não há disco salvo
+            if (!r.ok) throw new Error('não consegui ler o disco salvo (erro ' + r.status + ')');
+            return r.arrayBuffer();
+          }).then(function (buf) {
+            if (!buf) return null;
+            var b = new Uint8Array(buf);
+            return b[0] === 0x1f && b[1] === 0x8b ? pipe(b, new DecompressionStream('gzip')) : b;
+          }).catch(function (e) { fail('Disco salvo: ' + e.message); throw e; });   // não segue com o disco original para não sobrescrever o salvo
+        },
+        push: function (_u, data) {
+          var packed = window.CompressionStream ? pipe(data, new CompressionStream('gzip')) : Promise.resolve(data);
+          return packed.then(function (body) {
+            return fetch('/api/desk/fs/file?space=home&overwrite=1&path=' + encodeURIComponent(chg), { method: 'PUT', headers: { 'X-Desk': '1' }, credentials: 'same-origin', body: body });
+          }).then(function (r) { if (!r.ok) throw new Error('erro ' + r.status); });
+        }
+      };
+      window.__dos = window.Dos(box, {
         url: bundle, backend: engine, pathPrefix: new URL('vendor/js-dos/emulators/', location.href).href,
-        autoStart: true, noCloud: true, noNetworking: true, lang: 'pt-br'
+        autoStart: true, noCloud: true, noNetworking: true, lang: 'pt', fsChanges: fsChanges
       });
     })();
   </script>

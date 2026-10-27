@@ -71,8 +71,8 @@ bloqueiam por 5 minutos.
 | **Zip Manager** | todos | Abre, cria e altera arquivos **.zip** no navegador: lista o conteúdo, extrai tudo ou só o escolhido, adiciona arquivos e pastas (do aparelho, do Explorer ou arrastando), remove e salva. No Explorer: clique num `.zip` abre o Zip Manager; botão direito → **Extrair aqui** e **Compactar em ZIP** (arquivo ou pasta) (abaixo) |
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
-| **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas Windows 95/98 e DOS instalados** |
-| **Instalar Programas e Acessórios** | todos | Instala programas DOS e Windows 95/98/ME na sua pasta e escolhe a engine; também liga ou desliga os acessórios do Diogows (abaixo) |
+| **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas DOS e os sistemas virtuais (Windows) instalados** |
+| **Instalar Programas e Acessórios** | todos | Instala programas DOS, sistemas virtuais (Windows 3.x, 95, 98, ME) e programas dentro deles na sua pasta; também liga ou desliga os acessórios do Diogows (abaixo) |
 | **Navegador** | todos | Abre páginas pelo servidor e **baixa arquivos para Meus arquivos/Downloads** (abaixo) |
 | **Calculadora** | todos | Acessório simples |
 | **Câmeras** | todos veem; só o admin altera | Cada câmera abre numa **janela separada** (ou todas, ou em mosaico); a aba *Gerenciar* edita as câmeras (só admin) |
@@ -139,31 +139,59 @@ Limites, sem rodeios:
 - Cada download vai para a pasta do próprio usuário e é registrado no log (usuário e site). Nada baixado é executado no servidor.
 - Para desligar tudo isto: `"desk": {"noBrowser": true}`.
 
-## Instalar Programas e Acessórios (DOS e Windows 95/98/ME)
+## Instalar Programas e Acessórios (DOS e sistemas virtuais)
 
 Os programas rodam **no seu navegador**, dentro do **js-dos**, que traz as engines **DOSBox** e **DOSBox-X** em WebAssembly (já dentro do hub, em
 `src/vendor/js-dos`, sem internet e sem instalar nada). Cada programa abre num iframe próprio (`emulator.html`), então fechar a janela encerra o emulador.
 
-**Escolha da engine**, cada uma com seus limites:
+**Escolha da engine** (só para programas DOS), cada uma com seus limites:
 
 | Engine | Quando usar | Limitações |
 |---|---|---|
-| **DOSBox-X** (padrão) | Programas DOS exigentes e **Windows 95/98/ME** | A mais pesada: baixa ~8 MB, usa mais CPU e memória, pode ficar lenta em PCs fracos. Windows 9x leva um bom tempo para iniciar |
-| **js-dos (DOSBox)** | Jogos e programas DOS comuns | Leve e rápida, mas **não roda Windows 9x** e tem menos recursos de compatibilidade (alguns modos de vídeo e dispositivos avançados ficam de fora) |
+| **DOSBox-X** (padrão) | Programas DOS exigentes e os **sistemas virtuais** (Windows) | A mais pesada: baixa ~8 MB, usa mais CPU e memória, pode ficar lenta em PCs fracos |
+| **js-dos (DOSBox)** | Jogos e programas DOS comuns | Leve e rápida, mas tem menos recursos de compatibilidade (alguns modos de vídeo e dispositivos avançados ficam de fora) |
 
-(Na prática as duas são o js-dos: ele é o player e escolhe entre os dois motores. Windows 9x só existe no DOSBox-X.)
+(Na prática as duas são o js-dos: ele é o player e escolhe entre os dois motores. Os sistemas virtuais só existem no DOSBox-X.)
 
-**Como instalar:**
+### Programas DOS
 
 1. Traga o programa: baixe pelo **Navegador** (vai para *Downloads*) ou envie do seu computador.
-2. Abra **Instalar Programas e Acessórios → Instalar programa**, escolha o arquivo e o tipo (DOS ou Windows 95/98/ME).
+2. Abra **Instalar Programas e Acessórios → Instalar programa**, escolha **DOS** e o arquivo.
 3. Um **.zip** com os arquivos de um programa DOS: o instalador lista os `.exe/.com/.bat` e você escolhe o que abre ao iniciar; ele monta o pacote
    em *Meus arquivos/Programas*. Um **.jsdos** pronto é registrado como está.
 4. O programa entra no menu Iniciar (seção *Meus programas*), no Painel de Controle e, se quiser, na área de trabalho. *Desinstalar* apaga a pasta instalada.
 
-**Windows 95/98/ME:** a Microsoft não distribui esses sistemas, então **o Diogows não traz nenhum**. Use um pacote `.jsdos` com o Windows já instalado
-e que você tenha licença para usar (por exemplo, um que você mesmo montou). Esse caminho só aceita `.jsdos`, não `.zip`. Ele foi construído de acordo com a
-documentação do js-dos, mas **não foi testado com uma imagem real do Windows 9x** (não havia uma disponível no desenvolvimento): o fluxo DOS foi testado de ponta a ponta nas duas engines.
+Programas de Windows (por exemplo um instalador com `SETUP.EXE` e arquivos terminados em `_`, comprimidos no formato Microsoft) **não rodam em DOS puro**:
+abrir o `.exe` num pacote DOS dá tela preta ou o aviso "This program requires Microsoft Windows". Para eles, use um sistema virtual (abaixo).
+
+### Sistemas virtuais (Windows 3.x, 95, 98 e ME)
+
+Um sistema virtual é um Windows que roda no navegador e **guarda o que você faz nele no servidor**, na sua pasta. A Microsoft não distribui o Windows, então
+**o Diogows não traz nenhum**: use um pacote `.jsdos` com o Windows já instalado e que você tenha licença para usar (o formato esperado é o dos pacotes
+`system-win311-v1.jsdos`, `system-win95-v1.jsdos` e `system-win98-v1.jsdos` do js-dos: um disco `.qcow2` e um `dosbox.conf`).
+
+1. Na aba **Sistemas virtuais**, escolha o `.jsdos`, a versão e o nome, e clique em *Adicionar sistema*. O hub **prepara** o pacote em
+   `Programas/Sistemas/<nome>/`: o disco `.qcow2` é renomeado para `.disk` (o js-dos só libera o salvamento quando o `dosbox.conf` não cita `.qcow2`) e o
+   `dosbox.conf` passa a **iniciar o Windows direto** (`boot c:`), sem o prompt do DOS. O disco é copiado sem recomprimir (o Win98, de 235 MB, leva cerca de meio segundo).
+2. **Iniciar** abre o Windows numa janela. A barra da janela tem *Tela cheia*, *Reiniciar* e *Salvar agora*.
+3. **Salvamento:** o que o Windows grava no disco é guardado em `Programas/Sistemas/<nome>/<nome>.changes`, compactado (gzip), e volta na próxima abertura.
+   Salva ao clicar em *Salvar agora* (ou no botão de salvar do js-dos) e **ao fechar a janela** (a janela só fecha depois de salvar; se falhar, ela pergunta
+   antes de fechar). Cada salvamento envia o **disco inteiro** (compactado: o Win3.11, de 21 MB, vira cerca de 11 MB). Sair da conta ou fechar o navegador à força
+   **não salva**. *Zerar disco* apaga o `.changes` e volta o sistema ao estado original.
+4. **Programa dentro do sistema:** em *Instalar programa*, escolha **Dentro de um sistema virtual**, o sistema e o `.zip` do programa. O hub monta um
+   **disquete virtual de 1,44 MB (FAT12)** com os arquivos do zip (uma pasta única no topo é removida, como num disquete de instalação) e o liga como **A:**
+   do sistema. Abra o sistema e rode `A:\SETUP.EXE` (Windows 3.x: Arquivo → Executar; 95/98: Iniciar → Executar). O que for instalado fica no disco
+   salvo do sistema. *Ejetar* (na aba Sistemas virtuais) tira o disquete; instalar outro programa troca o disquete.
+5. O atalho do programa instalado **abre o sistema**; abrir o programa sozinho dentro do Windows ainda não é feito (use o ícone que o instalador criou).
+
+**Limites conhecidos:**
+- O disquete comporta programas de até **1,4 MB** (descompactados); programas maiores são recusados com uma mensagem. Um disco rígido extra ainda não existe.
+- O salvamento envia o disco inteiro: com o Win98 (235 MB) cada salvamento é pesado, mesmo compactado.
+- Os pacotes originais ficam em *Programas/Instaladores* (a tela oferece apagá-los depois de preparar, para não duplicar o espaço).
+- O js-dos mostra o aviso "Salvo na nuvem" ao salvar: aqui "nuvem" é o seu servidor.
+- Testado de ponta a ponta com o **Windows 3.11**: adicionar o sistema, instalar o disquete, ver o `A:` com os 36 arquivos do Indiana Jones, salvar, fechar,
+  reabrir e a alteração continuar lá. Nos testes do servidor, o preparo foi conferido com os pacotes reais do **Win3.11, Win95 e Win98**; o Win95 e o Win98
+  **não foram abertos** no navegador.
 
 **Acessórios:** a aba *Acessórios do Diogows* mostra os aplicativos do próprio Diogows (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
 esconde do menu e dos ícones; nada é apagado e dá para marcar de novo.

@@ -1,6 +1,6 @@
 (function (DK) {
   // Painel de Controle: um lugar só para as configurações do Diogows e do painel da casa (a página Config, aba por aba), as contas,
-  // as câmeras, o calendário, a rede e os programas Windows 95/98 e DOS instalados, que podem ser executados direto daqui.
+  // as câmeras, o calendário, a rede e os programas DOS e sistemas virtuais (Windows) instalados, que podem ser executados direto daqui.
   const el = DK.el;
 
   const CONFIG_TABS = [['servidor', '🖧', 'Servidor', 'Uso do servidor e botões de energia'], ['cameras', '📷', 'Câmeras e gravações', 'Gravação, retenção e Google Drive'],
@@ -12,11 +12,13 @@
     const me = DK.me, admin = me.is_admin;
     const S = [];
     S.push({ title: 'Programas', items: [
-      { icon: '🧩', label: 'Instalar Programas e Acessórios', sub: 'DOS, Windows 95/98/ME e acessórios', open: () => DK.programsApp() },
+      { icon: '🧩', label: 'Instalar Programas e Acessórios', sub: 'DOS, sistemas virtuais (Windows) e acessórios', open: () => DK.programsApp() },
+      { icon: '🖥️', label: 'Sistemas virtuais', sub: 'Windows 3.x, 95, 98 e ME no navegador', open: () => DK.programsApp({ tab: 'systems' }) },
       { icon: '➕', label: 'Instalar programa', sub: 'A partir de .zip ou .jsdos', open: () => DK.programsApp({ tab: 'install' }) },
       { icon: '🧰', label: 'Acessórios do Diogows', sub: 'Mostrar ou esconder aplicativos', open: () => DK.programsApp({ tab: 'acc' }) }] });
-    if (DK.programs.length) S.push({ title: 'Programas instalados (clique para executar)', items: DK.programs.map(p => (
-      { icon: p.kind === 'win9x' ? '🪟' : '🕹️', label: p.name, sub: (p.kind === 'win9x' ? 'Windows 95/98/ME' : 'DOS') + ' · ' + (p.engine === 'dosbox' ? 'js-dos' : 'DOSBox-X'), open: () => DK.runProgram(p) })) });
+    if (DK.programs.length || DK.systems.length) S.push({ title: 'Programas instalados (clique para executar)', items: DK.systems.map(s => (
+      { icon: '🖥️', label: s.name, sub: 'Sistema virtual · DOSBox-X', open: () => DK.runSystem(s) })).concat(DK.programs.map(p => (
+      { icon: p.kind === 'dos' ? '🕹️' : '🪟', label: p.name, sub: p.kind === 'vm' ? 'Dentro de ' + ((DK.systems.find(s => s.id === p.os) || {}).name || 'um sistema removido') : (p.kind === 'dos' ? 'DOS' : 'Windows') + ' · ' + (p.engine === 'dosbox' ? 'js-dos' : 'DOSBox-X'), open: () => DK.runProgram(p) }))) });
     S.push({ title: 'Sistema e manutenção', items: [
       { icon: '🖥️', label: 'Meu Computador', sub: 'CPU, memória, discos e rede', open: DK.computerApp },
       { icon: '🗂️', label: 'Meus arquivos', sub: 'Explorer', open: () => DK.explorerApp({}) }] });

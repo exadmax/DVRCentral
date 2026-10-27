@@ -34,7 +34,7 @@
     { id: 'office', icon: '📝', label: 'Escritório', match: a => ['docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts'].indexOf(a.id) >= 0 },
     { id: 'media', icon: '🎞️', label: 'Imagens, vídeo e câmeras', match: a => ['images', 'video', 'cameras'].indexOf(a.id) >= 0 },
     { id: 'net', icon: '🌐', label: 'Internet e comunicação', match: a => ['browser', 'messages'].indexOf(a.id) >= 0 },
-    { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS e Windows 95/98)', match: a => String(a.id).indexOf('prog:') === 0 },
+    { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS e sistemas virtuais)', match: a => String(a.id).indexOf('prog:') === 0 },
     { id: 'house', icon: '🏠', label: 'Painel e serviços da casa', match: a => String(a.id).indexOf('link:') === 0 },
     { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: a => ['users', 'config', 'account'].indexOf(a.id) >= 0 },
   ];
@@ -139,7 +139,7 @@
     DK.cal.startWatching();                    // avisos do calendário enquanto o Diogows estiver aberto
   }
   function showLogin(msg) {
-    DK.me = null; DK.prefs = {}; if (DK.applyLook) DK.applyLook(); DK.notifs = []; DK.programs = [];
+    DK.me = null; DK.prefs = {}; if (DK.applyLook) DK.applyLook(); DK.notifs = []; DK.programs = []; DK.systems = [];
     DK.cal.stopWatching(); DK.chat.stop();
     DK.closeAll();
     const n = $('notifs'); if (n) n.remove();

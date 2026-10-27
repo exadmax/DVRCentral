@@ -511,6 +511,7 @@ func (d *deskAPI) register(mux *http.ServeMux) {
 	d.registerCalendar(mux)
 	d.registerChat(mux)
 	d.registerBrowser(mux)
+	d.registerVM(mux)
 }
 
 type deskMe struct {
