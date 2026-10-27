@@ -2,10 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Desktop · Central Diogo</title>
   <link rel="icon" href="assets/img/logo-192.png">
   <link rel="stylesheet" href="css/desktop.css">
+  <script src="js/desktop/layout.js"></script>
 </head>
 <body>
   <div id="login">
@@ -15,6 +16,7 @@
       <input id="lp" type="password" placeholder="Senha" autocomplete="current-password" required>
       <div class="err" id="le"></div>
       <button class="pri">Entrar</button>
+      <button type="button" id="layLogin" class="hidden"></button>
       <a href="index.html" class="meta">← Voltar ao painel da casa</a>
     </form>
   </div>
@@ -60,14 +62,21 @@
   <script src="js/desktop/computer.js"></script>
   <script src="js/desktop/cameras.js"></script>
   <script src="js/desktop/contacts.js"></script>
+  <script src="js/desktop/messages.js"></script>
   <script src="js/desktop/calendar.js"></script>
   <script src="js/desktop/zip.js"></script>
   <script src="js/desktop/docfmt.js"></script>
   <script src="js/desktop/docs.js"></script>
+  <script src="js/desktop/formula.js"></script>
+  <script src="js/desktop/sheetfmt.js"></script>
+  <script src="js/desktop/sheets.js"></script>
+  <script src="js/desktop/slidefmt.js"></script>
+  <script src="js/desktop/slides.js"></script>
   <script src="js/desktop/browser.js"></script>
   <script src="js/desktop/programs.js"></script>
   <script src="js/desktop/panel.js"></script>
   <script src="js/desktop/admin.js"></script>
+  <script src="js/desktop/shell.js"></script>
   <script src="js/desktop/boot.js"></script>
 </body>
 </html>

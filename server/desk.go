@@ -509,6 +509,7 @@ func (d *deskAPI) register(mux *http.ServeMux) {
 	d.registerShell(mux)
 	d.registerMisc(mux)
 	d.registerCalendar(mux)
+	d.registerChat(mux)
 	d.registerBrowser(mux)
 }
 
@@ -755,6 +756,7 @@ func (d *deskAPI) handleDeleteUser(w http.ResponseWriter, r *http.Request, admin
 			return
 		}
 	}
+	d.chatPurgeUser(r.Context(), id)
 	if err := d.st.deskDeleteUser(r.Context(), id); err != nil {
 		deskErr(w, http.StatusInternalServerError, "falha removendo o usuário")
 		return

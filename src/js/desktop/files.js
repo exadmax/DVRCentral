@@ -17,11 +17,13 @@
     if (IMG_EXT.indexOf(e) >= 0) return 'image';
     if (e === '.pdf') return 'pdf';
     if (e === '.docx' || e === '.odt') return 'doc';
+    if (e === '.xlsx' || e === '.ods') return 'sheet';
+    if (e === '.pptx' || e === '.odp') return 'slide';
     if (e === '.jsdos') return 'program';
     if (VIDEO_EXT.indexOf(e) >= 0) return 'video';
     return 'other';
   };
-  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', program: '🕹️', video: '🎬', other: '📄' })[DK.kindOf(it)];
+  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', sheet: '📗', slide: '📙', program: '🕹️', video: '🎬', other: '📄' })[DK.kindOf(it)];
 
   // Abre um arquivo no aplicativo certo. siblings = itens da mesma pasta (anterior/próxima nas imagens e no vídeo).
   DK.openFile = function (it, siblings) {
@@ -31,6 +33,8 @@
       case 'image': DK.imageApp({ item: it, siblings: siblings }); break;
       case 'pdf': DK.pdfApp({ item: it }); break;
       case 'doc': DK.docApp({ item: it }); break;
+      case 'sheet': DK.sheetApp({ item: it }); break;
+      case 'slide': DK.slideApp({ item: it }); break;
       case 'program': DK.installProgramApp(it); break;
       case 'video': DK.videoApp({ item: it, siblings: siblings }); break;
       default: location.href = DK.fileUrl(it, 'download');
@@ -54,13 +58,17 @@
       const nf = el('button', { textContent: '📁 Nova pasta' });
       const nt = el('button', { textContent: '📝 Novo texto' });
       const nd = el('button', { textContent: '📘 Novo documento', title: 'Documento do LiteOffice: Word (.docx) ou LibreOffice (.odt)' });
+      const ns = el('button', { textContent: '📗 Nova planilha', title: 'Planilha do LiteOffice: Excel (.xlsx) ou LibreOffice (.ods)' });
+      const np = el('button', { textContent: '📙 Nova apresentação', title: 'Apresentação do LiteOffice: PowerPoint (.pptx) ou LibreOffice (.odp)' });
       const upl = el('button', { textContent: '⬆ Enviar arquivos' });
       const file = el('input', { type: 'file', multiple: true }); file.style.display = 'none';
       const rf = el('button', { textContent: '⟳', title: 'Atualizar' });
       const sp = el('button', { textContent: '💻 Computador', title: 'Arquivos do servidor' });
       const sudo = el('button', { textContent: '🔓 sudo', title: 'Navegar e alterar como root (pede a senha de um administrador)' });
       if (!canMachine()) { sp.classList.add('hidden'); sudo.classList.add('hidden'); }
-      const tb = el('div', { className: 'tb' }, up, nf, nt, nd, upl, el('span', { className: 'sp' }), sudo, sp, rf);
+      const choose = el('button', { className: 'pri', textContent: '✔ Escolher esta pasta' });
+      if (!o.pickDir) choose.classList.add('hidden');
+      const tb = el('div', { className: 'tb' }, up, choose, nf, nt, nd, ns, np, upl, el('span', { className: 'sp' }), sudo, sp, rf);
       body.append(tb, crumbs, flist, status, file);
 
       const machine = () => st.space === 'machine';
@@ -75,7 +83,7 @@
         sudo.classList.toggle('sudo-on', st.sudo);
         sudo.textContent = st.sudo ? '🔒 sair do sudo' : '🔓 sudo';
         tb.classList.toggle('sudo-on', st.sudo);
-        [nf, nt, nd, upl].forEach(b => b.classList.toggle('hidden', !!o.pick));
+        [nf, nt, nd, ns, np, upl].forEach(b => b.classList.toggle('hidden', !!o.pick));
         win.setTitle((o.title || 'Explorer') + (machine() ? ' — Computador' + (st.sudo ? ' (sudo)' : '') : ''));
       }
 
@@ -114,12 +122,12 @@
       function draw() {
         flist.replaceChildren();
         const t = el('table'), tbody = el('tbody'); t.append(tbody); flist.append(t);
-        const shown = st.entries.filter(it => !o.pick || it.type === 'dir' || o.pick === 'any' || DK.kindOf(it) === o.pick || (o.pick === 'program' && DK.extOf(it.name) === '.zip'));
+        const shown = st.entries.filter(it => !o.pick || it.type === 'dir' || o.pick === 'any' || DK.kindOf(it) === o.pick || (o.pick === 'sheet' && /\.(csv|tsv)$/i.test(it.name)) || (o.pick === 'program' && DK.extOf(it.name) === '.zip'));
         if (!shown.length) tbody.append(el('tr', {}, el('td', { className: 'meta', textContent: o.pick ? 'Nenhum arquivo deste tipo aqui.' : 'Pasta vazia. Arraste arquivos para cá.' })));
         shown.forEach(e => {
           const it = ref(e), k = DK.kindOf(it);
           const tr = el('tr', { className: 'f', draggable: true });
-          tr.ondragstart = ev => ev.dataTransfer.setData('text/x-desk', JSON.stringify({ space: st.space, sudo: st.sudo, path: e.path }));
+          tr.ondragstart = ev => ev.dataTransfer.setData('text/x-desk', JSON.stringify({ space: st.space, sudo: st.sudo, path: e.path, name: e.name, type: e.type }));
           if (k === 'folder') dropTarget(tr, e.path);
           const open = () => {
             if (k === 'folder') go(e.path);
@@ -129,17 +137,26 @@
           tr.append(el('td', { className: 'n', textContent: DK.iconOf(it) + ' ' + e.name, onclick: open, title: 'Clique para abrir' }),
             el('td', { className: 'meta', textContent: k === 'folder' ? '' : DK.fmtSize(e.size) }),
             el('td', { className: 'meta', textContent: DK.fmtDate(e.mtime) }));
+          const rename = () => { const n = prompt('Novo nome:', e.name); if (n && n !== e.name) move(e.path, DK.joinPath(st.path, n)); };
+          const del = async () => {
+            if (!confirm('Apagar “' + e.name + '”' + (k === 'folder' ? ' e tudo que há dentro' : '') + '?' + (st.sudo ? '\n\nVocê está em modo sudo (root).' : ''))) return;
+            try { await guard(() => DK.api('DELETE', '/fs' + q('&path=' + encodeURIComponent(e.path)))); load(); } catch (x) { fail(x); }
+          };
+          tr._ctx = () => o.pick ? [{ icon: '▶️', label: k === 'folder' ? 'Abrir pasta' : 'Escolher', fn: open }] : [
+            { icon: '▶️', label: 'Abrir', fn: open },
+            { icon: '📌', label: 'Adicionar à Área de Trabalho', fn: () => DK.deskAddFile(it) },
+            '-',
+            { icon: '✏️', label: 'Renomear', fn: rename },
+            e.type === 'file' ? { icon: '⬇️', label: 'Baixar', fn: () => { location.href = DK.fileUrl(it, 'download'); } } : null,
+            { icon: '📋', label: 'Copiar caminho', fn: () => DK.copyText(e.path) },
+            '-',
+            { icon: '🗑️', label: 'Apagar', fn: del, danger: true },
+          ];
           const a = el('td', { className: 'a' });
           if (!o.pick) {
-            a.append(el('button', { textContent: 'Renomear', onclick: async () => {
-              const n = prompt('Novo nome:', e.name); if (!n || n === e.name) return;
-              move(e.path, DK.joinPath(st.path, n));
-            } }));
+            a.append(el('button', { textContent: 'Renomear', onclick: rename }));
             if (e.type === 'file') a.append(' ', el('a', { href: DK.fileUrl(it, 'download'), textContent: 'Baixar', download: e.name, style: 'font-size:12px' }));
-            a.append(' ', el('button', { className: 'del', textContent: 'Apagar', onclick: async () => {
-              if (!confirm('Apagar “' + e.name + '”' + (k === 'folder' ? ' e tudo que há dentro' : '') + '?' + (st.sudo ? '\n\nVocê está em modo sudo (root).' : ''))) return;
-              try { await guard(() => DK.api('DELETE', '/fs' + q('&path=' + encodeURIComponent(e.path)))); load(); } catch (x) { fail(x); }
-            } }));
+            a.append(' ', el('button', { className: 'del', textContent: 'Apagar', onclick: del }));
           }
           tr.append(a); tbody.append(tr);
         });
@@ -195,11 +212,23 @@
       };
       nt.onclick = () => DK.notepadApp({ dir: { space: st.space, sudo: st.sudo, path: st.path }, onSaved: load });
       nd.onclick = () => DK.docApp({ dir: { space: st.space, sudo: st.sudo, path: st.path }, onSaved: load });
+      ns.onclick = () => DK.sheetApp({ dir: { space: st.space, sudo: st.sudo, path: st.path }, onSaved: load });
+      np.onclick = () => DK.slideApp({ dir: { space: st.space, sudo: st.sudo, path: st.path }, onSaved: load });
       upl.onclick = () => file.click();
       file.onchange = () => { upload([].slice.call(file.files)); file.value = ''; };
       flist.ondragover = e => { if (e.dataTransfer.types.indexOf('Files') >= 0) { e.preventDefault(); flist.classList.add('on'); } };
       flist.ondragleave = () => flist.classList.remove('dragover'), flist.ondragleave = () => flist.classList.remove('on');
       flist.ondrop = e => { flist.classList.remove('on'); if (!o.pick && e.dataTransfer.files.length) { e.preventDefault(); upload([].slice.call(e.dataTransfer.files)); } };
+      choose.onclick = () => { DK.closeWin(win, true); o.onPick({ space: st.space, sudo: false, path: st.path, name: st.path === '/' ? (machine() ? 'Computador' : 'Meus arquivos') : DK.baseName(st.path), type: 'dir' }); };
+      flist._ctx = () => o.pick ? [{ icon: '⬆️', label: 'Subir', fn: up.onclick }, { icon: '🔄', label: 'Atualizar', fn: load }] : [
+        { icon: '📁', label: 'Nova pasta', fn: nf.onclick },
+        { icon: '📝', label: 'Novo texto', fn: nt.onclick },
+        { icon: '📘', label: 'Novo documento', fn: nd.onclick },
+        { icon: '⬆️', label: 'Enviar arquivos…', fn: upl.onclick },
+        '-',
+        { icon: '⬆', label: 'Subir uma pasta', fn: up.onclick },
+        { icon: '🔄', label: 'Atualizar', fn: load },
+      ];
       win._refresh = load;
       load();
     }, 680, 470, { flush: true });

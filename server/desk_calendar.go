@@ -40,7 +40,7 @@ const (
 	deskMaxCalendars = 12
 	deskCalTTL       = 5 * time.Minute
 	deskCalMaxBytes  = 8 << 20
-	deskMaxPrefs     = 8192
+	deskMaxPrefs     = 32768
 )
 
 var deskColorRe = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)

@@ -73,6 +73,8 @@ var migrations = []string{
 	deskMigration,
 	// Desktop: agendas iCal por usuário e preferências (desk_calendar.go).
 	deskCalendarMigration,
+	// Desktop: mensagens entre usuários (desk_chat.go).
+	deskChatMigration,
 }
 
 type store struct {

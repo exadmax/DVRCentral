@@ -20,6 +20,7 @@
     S.push({ title: 'Sistema e manutenção', items: [
       { icon: '🖥️', label: 'Meu Computador', sub: 'CPU, memória, discos e rede', open: DK.computerApp },
       { icon: '🗂️', label: 'Meus arquivos', sub: 'Explorer', open: () => DK.explorerApp({}) }] });
+    if (DK.layout.canToggle()) S[S.length - 1].items.push({ icon: DK.layout.isPc() ? '📱' : '🖥️', label: DK.layout.isPc() ? 'Layout adaptativo' : 'Layout PC puro', sub: DK.layout.isPc() ? 'Voltar à interface para celular' : 'Mostrar a tela completa do computador', open: () => DK.layout.toggle() });
     if (me.shell && (admin || me.can_explorer)) S[S.length - 1].items.push({ icon: '💻', label: 'Arquivos do computador', sub: 'Explorer no servidor (com sudo)', open: () => DK.explorerApp({ space: 'machine', path: '/' }) });
     if (me.shell && (admin || me.can_terminal)) S[S.length - 1].items.push({ icon: '⌨️', label: 'Terminal', sub: 'Comandos no servidor (com sudo)', open: DK.terminalApp });
     S.push({ title: 'Contas e notificações', items: [
