@@ -39,7 +39,7 @@ jobs:
       - name: Reunir arquivos e checksums
         run: |
           mkdir out
-          cp server/dist/centraldiogo.tgz server/dist/hub-linux-* out/
+          cp server/dist/centraldiogo.tgz server/dist/centraldiogo-windows.zip server/dist/hub-linux-* out/
           cd out && sha256sum * > SHA256SUMS && cat SHA256SUMS
 
       - name: Criar a release

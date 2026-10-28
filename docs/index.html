@@ -184,6 +184,7 @@
       <li><a href="#telas">Telas</a></li>
       <li><a href="#como">Como funciona</a></li>
       <li><a href="#config">Configuração</a></li>
+      <li><a href="#baixar">Baixar</a></li>
       <li><a href="#comecar">Começar</a></li>
       <li><a href="apresentacao.html">Vídeo</a></li>
     </ul>
@@ -401,12 +402,37 @@
     </div>
   </section>
 
+  <!-- BAIXAR -->
+  <section id="baixar">
+    <div class="wrap">
+      <span class="eyebrow">Baixar</span>
+      <h2 class="sec-h">Escolha o seu sistema</h2>
+      <p class="sec-p">Pacotes prontos, sem compilar nada. Os arquivos ficam nas <a href="https://github.com/exadmax/DVRCentral/releases">Releases do GitHub</a> e os links abaixo sempre apontam para a versão mais recente.</p>
+      <div class="grid start">
+        <article class="card reveal">
+          <h3>Windows</h3>
+          <p>Instalador em janela, sem terminal. Ele pergunta se este PC será o <b>servidor da casa</b> (liga com o Windows e atende a rede) ou de <b>uso pessoal</b> (só neste computador). Windows 10 ou 11, 64 bits.</p>
+          <p style="margin:16px 0"><a class="btn pri" href="https://github.com/exadmax/DVRCentral/releases/latest/download/centraldiogo-windows.zip">Baixar para Windows (.zip)</a></p>
+          <p style="color:var(--dim)">Extraia o .zip e dê dois cliques em <code>Instalar.cmd</code>. Para atualizar, repita com a versão nova: seus dados são mantidos. Se o Windows avisar sobre "editor desconhecido", escolha <b>Mais informações &rarr; Executar assim mesmo</b>.</p>
+        </article>
+        <article class="card reveal">
+          <h3>Linux</h3>
+          <p>Pacote para Debian e derivados, com os binários para <code>amd64</code>, <code>arm64</code>, <code>arm</code> e <code>386</code>. Instala como serviço do systemd em <code>/opt/centraldiogo</code>.</p>
+          <p style="margin:16px 0"><a class="btn pri" href="https://github.com/exadmax/DVRCentral/releases/latest/download/centraldiogo.tgz">Baixar para Linux (.tgz)</a></p>
+          <div class="code"><button class="copy" type="button">Copiar</button><pre>tar xzf centraldiogo.tgz
+sudo bash install.sh</pre></div>
+        </article>
+      </div>
+      <p style="margin-top:22px;color:var(--dim)">Outras versões e as notas de cada uma: <a href="https://github.com/exadmax/DVRCentral/releases">todas as releases</a>. Para conferir o arquivo baixado, use o <a href="https://github.com/exadmax/DVRCentral/releases/latest/download/SHA256SUMS">SHA256SUMS</a>.</p>
+    </div>
+  </section>
+
   <!-- COMEÇAR -->
   <section id="comecar">
     <div class="wrap">
       <span class="eyebrow">Começar</span>
       <h2 class="sec-h">Rodando em poucos minutos</h2>
-      <p class="sec-p">Você precisa do Go 1.26 ou mais novo. Sem arquivo de configuração o hub sobe com os padrões e você configura tudo pela tela.</p>
+      <p class="sec-p">Prefere compilar? Você precisa do Go 1.26 ou mais novo. Sem arquivo de configuração o hub sobe com os padrões e você configura tudo pela tela.</p>
       <div class="grid start steps">
         <article class="card step reveal">
           <h3>Teste no seu computador</h3>
@@ -425,8 +451,31 @@ go run .</pre></div>
 sudo bash install.sh      # instala em /opt/centraldiogo</pre></div>
           <p style="margin-top:14px">Depois, abra o endereço do servidor no navegador da TV.</p>
         </article>
+        <article class="card step reveal">
+          <h3>Instale no Windows</h3>
+          <p>Sem terminal: o instalador abre uma janela e faz as perguntas. Precisa do Windows 10 ou 11, 64 bits.</p>
+          <ol style="margin:0 0 0 18px;padding:0;color:var(--dim)">
+            <li>Baixe o <code>centraldiogo-windows.zip</code> na seção <a href="#baixar">Baixar</a>.</li>
+            <li>Clique com o botão direito &rarr; <b>Extrair tudo</b>. Não rode de dentro do .zip.</li>
+            <li>Dê dois cliques em <code>Instalar.cmd</code>.</li>
+            <li>Escolha <b>Servidor da casa</b> (liga com o Windows e atende a rede; pede permissão de administrador) ou <b>Meu computador</b> (só neste PC, sem abrir nada na rede).</li>
+            <li>Clique em <b>Instalar</b>. A janela mostra a senha inicial do <code>admin</code> do Diogows: <b>anote</b>, ela não aparece de novo.</li>
+            <li>Clique em <b>Abrir o Central Diogo</b>.</li>
+          </ol>
+          <p style="margin-top:14px">Dados em <code>%ProgramData%\CentralDiogo</code> (servidor) ou <code>%LocalAppData%\CentralDiogo</code> (pessoal). Para atualizar, extraia a versão nova e abra o <code>Instalar.cmd</code> de novo: o banco, a configuração e os livros são mantidos. Para remover, use <b>Configurações &rarr; Aplicativos &rarr; Central Diogo</b>. Se o Windows avisar sobre "editor desconhecido", escolha <b>Mais informações &rarr; Executar assim mesmo</b>.</p>
+          <p style="margin-top:10px;color:var(--dim)">No Windows, os botões da Config que param o desktop e o hub e o Terminal com sudo não funcionam (são do Linux).</p>
+        </article>
+        <article class="card step reveal">
+          <h3>Gere uma release (quem mantém o projeto)</h3>
+          <p>As versões seguem <b>vMAIOR.MENOR.PATCH</b> (ex.: <code>v1.0.0</code>; teste com <code>v1.0.0-rc.1</code>). Quem publica é o GitHub Actions: basta criar a tag na <code>main</code>.</p>
+          <div class="code"><button class="copy" type="button">Copiar</button><pre>git switch main &amp;&amp; git pull
+git tag -a v1.0.0 -m "Central Diogo 1.0.0"
+git push origin v1.0.0</pre></div>
+          <p style="margin-top:14px">O workflow confere que a tag está na <code>main</code>, roda os testes, compila o hub, monta o <code>centraldiogo.tgz</code> (Linux) e o <code>centraldiogo-windows.zip</code>, gera o <code>SHA256SUMS</code> e cria a release com as notas. Acompanhe na aba <b>Actions</b> e confira em <b>Releases</b>. Se errar, publique o próximo PATCH: tag publicada não se move nem se apaga. Pacote local para testes: <code>cd server &amp;&amp; ./package.sh v1.0.0</code>.</p>
+          <p style="margin-top:10px;color:var(--dim)">Uma vez: em <b>Settings &rarr; Actions &rarr; General &rarr; Workflow permissions</b>, marque <i>Read and write permissions</i>. Detalhes em <a href="https://github.com/exadmax/DVRCentral/blob/main/docs/versionamento.md">docs/versionamento.md</a>.</p>
+        </article>
       </div>
-      <p style="margin-top:22px;color:var(--dim)">Quer o <b>Diogows</b>? Abra <code>/desktop.html</code>. Na primeira vez, o usuário <code>admin</code> recebe uma senha inicial sorteada, mostrada <b>uma única vez no log do hub</b> (<code>journalctl -u centraldiogo-hub | grep desktop</code>), e a troca é obrigatória.</p>
+      <p style="margin-top:22px;color:var(--dim)">Quer o <b>Diogows</b>? Abra <code>/desktop.html</code>. Na primeira vez, o usuário <code>admin</code> recebe uma senha inicial sorteada, mostrada <b>uma única vez no log do hub</b> (<code>journalctl -u centraldiogo-hub | grep desktop</code>; no instalador do Windows, ela aparece na própria janela), e a troca é obrigatória.</p>
       <p style="margin-top:12px;color:var(--dim)">Mais detalhes na <a href="https://github.com/exadmax/DVRCentral#readme">documentação</a>, no <a href="https://github.com/exadmax/DVRCentral/blob/main/docs/desktop.md">guia do Diogows</a> e no <a href="https://github.com/exadmax/DVRCentral/blob/main/docs/funcionalidades.md">mapa de funcionalidades</a>.</p>
     </div>
   </section>

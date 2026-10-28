@@ -109,6 +109,7 @@ func main() {
 	cfgPath := flag.String("config", "hub.config.json", "caminho do arquivo de configuração")
 	xboxLogin := flag.Bool("xbox-login", false, "autoriza a conta Xbox (uma vez) e sai")
 	flag.Parse()
+	initLogFile(filepath.Dir(*cfgPath))
 	cfg := loadConfig(*cfgPath)
 	// Câmeras, agendas, rotas e menu editados na página Config ficam em hub.settings.json e valem mais que o hub.config.json.
 	settingsPath := filepath.Join(filepath.Dir(*cfgPath), "hub.settings.json")

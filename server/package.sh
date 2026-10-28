@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Gera dist/centraldiogo.tgz com tudo que o Linux precisa (roda no seu PC).
+# Gera dist/centraldiogo.tgz (Linux) e dist/centraldiogo-windows.zip (Windows) com tudo que cada sistema precisa (roda no seu PC).
 # Uso: ./package.sh [vX.Y.Z]   (com a versão, o pacote vira uma release: o install.sh grava essa versão em VERSION)
 set -e
 VER="${1#v}"
@@ -15,4 +15,13 @@ sed -e 's#"listen": *"[^"]*"#"listen": ":80"#' -e 's#"staticDir": *"[^"]*"#"stat
 [ -n "$VER" ] && echo "$VER" > $P/RELEASE
 tar -C ../src -czf $P/www.tgz .
 tar -C $P -czf dist/centraldiogo.tgz .
-ls -lh dist/centraldiogo.tgz
+
+# Windows: zip com o instalador em janela (windows/), o hub, o painel em ./www e a configuração de exemplo
+W=dist/winpkg; rm -rf $W; mkdir -p $W/www
+cp dist/hub-windows-amd64.exe windows/install.ps1 windows/Instalar.cmd windows/LEIA-ME.txt hub.config.example.json $W/
+[ -n "$VER" ] && echo "$VER" > $W/RELEASE
+tar -C ../src -cf - . | tar -C $W/www -xf -
+PY=python3; command -v $PY >/dev/null || PY=python
+rm -f dist/centraldiogo-windows.zip
+(cd $W && $PY -m zipfile -c ../centraldiogo-windows.zip *)
+ls -lh dist/centraldiogo.tgz dist/centraldiogo-windows.zip

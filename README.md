@@ -69,6 +69,12 @@ TV / celular / PC ─►  navegador  ─►  http://192.168.0.10/  ─►  Hub G
 | `docs/` | Documentação por área e design de referência (`docs/design/`) |
 | `scripts/` | Índice de build e empacotamento ([`scripts/README.md`](scripts/README.md)) e o verificador de traduções (`check-i18n.js`) |
 
+## Baixar e instalar
+Pacotes prontos nas **[Releases](https://github.com/exadmax/DVRCentral/releases/latest)** (a página de apresentação tem a [guia de download](https://exadmax.github.io/DVRCentral/#baixar)):
+- **Windows** (`centraldiogo-windows.zip`): extraia e abra o `Instalar.cmd`. Uma **janela** pergunta se este PC será o *servidor da casa* (tarefa do sistema, sobe com o Windows, atende a rede) ou de *uso pessoal* (só `localhost`, sem administrador). A senha inicial do `admin` do Diogows aparece nessa janela. Dados em `%ProgramData%\CentralDiogo` (servidor) ou `%LocalAppData%\CentralDiogo` (pessoal), mantidos ao atualizar. Desinstale em Aplicativos do Windows.
+- **Linux** (`centraldiogo.tgz`): `tar xzf centraldiogo.tgz && sudo bash install.sh`.
+Limite no Windows: os botões da Config que param o desktop e o hub (`systemctl`) e o Terminal com sudo são só do Linux.
+
 ## Começando
 
 ### Só o painel (dados de exemplo)

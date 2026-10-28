@@ -23,7 +23,7 @@ git tag -a v1.0.0 -m "Central Diogo 1.0.0"
 git push origin v1.0.0
 ```
 O workflow `.github/workflows/release.yml` confere que a tag está na `main`, roda os testes, compila os 4 binários Linux,
-monta o `centraldiogo.tgz`, gera o `SHA256SUMS` e cria a release com as notas geradas pelo GitHub.
+monta o `centraldiogo.tgz` (Linux) e o `centraldiogo-windows.zip` (instalador em janela), gera o `SHA256SUMS` e cria a release com as notas geradas pelo GitHub.
 
 ## Versão instalada no servidor
 - **Pacote de release** (`./package.sh vX.Y.Z`): leva um arquivo `RELEASE`, e o `install.sh` grava essa versão em `/opt/centraldiogo/VERSION`.
