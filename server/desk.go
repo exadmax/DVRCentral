@@ -34,13 +34,14 @@ import (
 
 // DeskConfig é o bloco "desk" do hub.config.json. Tudo é opcional; sem o bloco o desktop fica ligado e o terminal desligado.
 type DeskConfig struct {
-	Disabled        bool   `json:"disabled"`        // true desliga o desktop inteiro (/api/desk/* responde 404)
-	Dir             string `json:"dir"`             // pasta das pastas dos usuários (padrão: "desk" ao lado do hub.config.json)
-	Shell           bool   `json:"shell"`           // liga o Terminal e os arquivos do computador (padrão desligado; veja SECURITY.md)
-	ShellAnyNetwork bool   `json:"shellAnyNetwork"` // permite o terminal por HTTP puro vindo de fora das redes privadas (não recomendado)
-	ProtectSettings bool   `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Diogows
-	NoBrowser       bool   `json:"noBrowser"`       // true tira o navegador interno e os downloads
-	MaxUploadMB     int    `json:"maxUploadMB"`     // tamanho máximo de um envio (padrão 2048)
+	Disabled        bool       `json:"disabled"`        // true desliga o desktop inteiro (/api/desk/* responde 404)
+	Dir             string     `json:"dir"`             // pasta das pastas dos usuários (padrão: "desk" ao lado do hub.config.json)
+	Shell           bool       `json:"shell"`           // liga o Terminal e os arquivos do computador (padrão desligado; veja SECURITY.md)
+	ShellAnyNetwork bool       `json:"shellAnyNetwork"` // permite o terminal por HTTP puro vindo de fora das redes privadas (não recomendado)
+	ProtectSettings bool       `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Diogows
+	NoBrowser       bool       `json:"noBrowser"`       // true tira o navegador interno e os downloads
+	MaxUploadMB     int        `json:"maxUploadMB"`     // tamanho máximo de um envio (padrão 2048)
+	Mail            MailConfig `json:"mail"`            // cliente de e-mail: contas OAuth, rede e liga/desliga (desk_mail.go)
 }
 
 const (
@@ -86,6 +87,7 @@ type deskAPI struct {
 	dl        dlManager
 	calClient *http.Client // baixa as agendas iCal (só endereços públicos; os testes trocam por um cliente comum)
 	calCache  deskCalCache
+	mail      *deskMailState // E-mail (desk_mail.go)
 }
 
 func newDesk(cfg Config, st *store, sm *settingsMgr, sys *sysMon, cfgDir string) *deskAPI {
@@ -196,7 +198,7 @@ func (s *store) deskSetPerms(ctx context.Context, id int64, terminal, explorer b
 }
 
 func (s *store) deskDeleteUser(ctx context.Context, id int64) error {
-	for _, t := range []string{"desk_sessions", "desk_calendars", "desk_prefs"} { // tudo que é do usuário vai junto
+	for _, t := range []string{"desk_sessions", "desk_calendars", "desk_prefs", "desk_mail_accounts", "desk_mail_apps", "desk_profiles"} { // tudo que é do usuário vai junto
 		if _, err := s.db.ExecContext(ctx, `DELETE FROM `+t+` WHERE user_id = ?`, id); err != nil {
 			return err
 		}
@@ -511,17 +513,21 @@ func (d *deskAPI) register(mux *http.ServeMux) {
 	d.registerCalendar(mux)
 	d.registerChat(mux)
 	d.registerBrowser(mux)
+	d.registerMail(mux)
+	d.registerProfile(mux)
+	d.registerWebIcon(mux)
 	d.registerVM(mux)
 }
 
 type deskMe struct {
 	*DeskUser
-	Shell   bool `json:"shell"`   // Terminal e arquivos do computador ligados neste servidor
-	Browser bool `json:"browser"` // navegador interno e downloads disponíveis
+	Shell   bool        `json:"shell"`   // Terminal e arquivos do computador ligados neste servidor
+	Browser bool        `json:"browser"` // navegador interno e downloads disponíveis
+	Profile deskProfile `json:"profile"` // nome, foto e assinatura (desk_profile.go)
 }
 
-func (d *deskAPI) meOf(u *DeskUser) deskMe {
-	return deskMe{DeskUser: u, Shell: d.cfg.Shell, Browser: !d.cfg.NoBrowser}
+func (d *deskAPI) meOf(ctx context.Context, u *DeskUser) deskMe {
+	return deskMe{DeskUser: u, Shell: d.cfg.Shell, Browser: !d.cfg.NoBrowser, Profile: d.st.deskProfile(ctx, u)}
 }
 
 func (d *deskAPI) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -563,7 +569,7 @@ func (d *deskAPI) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	d.st.deskPurgeSessions(r.Context(), time.Now().Unix())
 	log.Printf("desktop: login user=%s ip=%s", u.Username, r.RemoteAddr)
-	writeStatus(w, http.StatusOK, d.meOf(u))
+	writeStatus(w, http.StatusOK, d.meOf(r.Context(), u))
 }
 
 func (d *deskAPI) handleLogout(w http.ResponseWriter, r *http.Request, u *DeskUser) {
@@ -574,7 +580,7 @@ func (d *deskAPI) handleLogout(w http.ResponseWriter, r *http.Request, u *DeskUs
 }
 
 func (d *deskAPI) handleMe(w http.ResponseWriter, r *http.Request, u *DeskUser) {
-	writeStatus(w, http.StatusOK, d.meOf(u))
+	writeStatus(w, http.StatusOK, d.meOf(r.Context(), u))
 }
 
 func (d *deskAPI) handlePassword(w http.ResponseWriter, r *http.Request, u *DeskUser) {

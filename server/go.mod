@@ -5,6 +5,9 @@ go 1.26.0
 require (
 	github.com/bluenviron/gortsplib/v5 v5.6.6
 	github.com/bluenviron/mediacommon/v2 v2.9.5
+	github.com/emersion/go-imap/v2 v2.0.0-beta.8
+	github.com/emersion/go-message v0.18.2
+	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/pion/rtp v1.10.5
 	golang.org/x/net v0.59.0
 	modernc.org/sqlite v1.60.1

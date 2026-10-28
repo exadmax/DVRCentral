@@ -68,6 +68,8 @@ type chatPeer struct {
 	Unread   int    `json:"unread"`
 	LastAt   int64  `json:"last_at"`
 	Preview  string `json:"preview,omitempty"` // última mensagem não lida (para o aviso)
+	Display  string `json:"display_name"`      // nome e sobrenome, ou o nome de usuário
+	PhotoVer int64  `json:"photo_ver"`         // 0 = sem foto
 }
 
 func (d *deskAPI) chatDir() string { return filepath.Join(d.dir, "_chat") }
@@ -117,11 +119,13 @@ func (s *store) chatPeers(ctx context.Context, me int64) ([]chatPeer, error) {
 	if err != nil {
 		return nil, err
 	}
+	profs, _ := s.deskProfiles(ctx) // sem perfil o nome de exibição é o de usuário
 	peers := map[int64]*chatPeer{}
 	out := []chatPeer{}
 	for _, u := range users {
 		if u.ID != me && !u.IsAdmin { // administradores não recebem mensagens
-			out = append(out, chatPeer{ID: u.ID, Username: u.Username})
+			p := profs[u.ID]
+			out = append(out, chatPeer{ID: u.ID, Username: u.Username, Display: profileName(p.FirstName, p.LastName, u.Username), PhotoVer: p.PhotoVer})
 		}
 	}
 	for i := range out {

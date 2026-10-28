@@ -75,12 +75,18 @@ var migrations = []string{
 	deskCalendarMigration,
 	// Diogows: mensagens entre usuários (desk_chat.go).
 	deskChatMigration,
+	// Diogows: contas de e-mail por usuário (desk_mail.go).
+	deskMailMigration,
+	// Diogows: nome, foto e assinatura dos usuários (desk_profile.go).
+	deskProfileMigration,
+	// Diogows: aplicativo OAuth de e-mail por usuário (desk_mail.go).
+	deskMailAppsMigration,
 }
 
 type store struct {
 	db      *sql.DB
 	locais  func() []string // ids dos locais do estoque em uso (nil = os padrão)
-	origins []string // origens extras com permissão de gravar (além do próprio endereço do hub)
+	origins []string        // origens extras com permissão de gravar (além do próprio endereço do hub)
 }
 
 func openStore(path string, origins []string) (*store, error) {
