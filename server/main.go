@@ -212,7 +212,7 @@ func main() {
 		go gm.refresh()
 		writeJSON(w, map[string]interface{}{"ok": true, "gamertag": a.gtg})
 	})
-	mux.Handle("/", withOfficeIsolation(http.FileServer(http.Dir(cfg.StaticDir))))
+	mux.Handle("/", withOfficeIsolation(newStaticHandler(cfg.StaticDir, func() string { v, _ := readVersion(verDir); return v })))
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,

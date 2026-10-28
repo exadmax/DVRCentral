@@ -389,3 +389,7 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | LiteOffice Planilhas: motor de fórmulas, .xlsx/.ods e editor | `src/js/desktop/formula.js`, `sheetfmt.js`, `sheets.js` |
 | LiteOffice Apresentações: .pptx/.odp e editor | `src/js/desktop/slidefmt.js`, `slides.js` |
 | LiteOffice Completo (LibreOffice em WebAssembly) | `src/office.html`, `src/js/office/*.js`, `src/js/desktop/office.js`, `server/office.go`, `src/vendor/zetajs/` (MIT, sem alterações) |
+| Carga sob demanda: editores, e-mail, jogos, Paint, navegador, player e zip só são baixados na primeira abertura | `src/js/desktop/lazy.js` (grupos de scripts, pontes `DK.docApp` etc. e o registro desses aplicativos no menu; esses scripts não se registram mais sozinhos) |
+| Entrega do painel: gzip em memória e cache de um ano nos endereços `?v=VERSÃO` (só com `VERSION` instalada; `config/` e `vendor/` ficam de fora). Atenção: com a mesma versão o navegador não baixa de novo um arquivo alterado; toda instalação muda a `VERSION` | `server/static.go`, `static_test.go` |
+| Banco sem fila: sessão do Diogows em memória por 1 min (derrubada na hora por logout, troca de senha, permissões e remoção) e pool de leitura (`store.rdb`, até 3 conexões só de leitura) ao lado da conexão única de gravação | `server/desk_sesscache.go`, `db.go`, `desk.go`, `desk_sesscache_test.go` |
+| Consulta do chat adaptativa: 3 s com a conversa aberta, 8 s com a janela fechada, 20 s com a aba em segundo plano, e na hora ao voltar | `src/js/desktop/messages.js` |

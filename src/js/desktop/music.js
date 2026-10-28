@@ -5,6 +5,7 @@
   const DIR = '/Músicas';
   const AUDIO = /\.(mp3|m4a|ogg|wav|flac)$/i;            // os tipos que o servidor entrega como áudio
   const MAX_TRACKS = 3000, MAX_DEPTH = 3;
+  const FEED_FIRST = 4, FEED_STEP = 2, FEED_EVERY_MS = 2500, FEED_HIDDEN_MS = 5000;   // lista entregue ao Webamp em lotes (ver feed)
   const home = p => ({ space: 'home', path: p });
   const track = (path, name) => ({ url: location.origin + DK.fileUrl(home(path), 'view'), defaultName: name.replace(/\.[^.]+$/, '') });
   const mkdir = p => DK.api('POST', '/fs/mkdir', { space: 'home', path: p }).catch(() => { /* já existe */ });
@@ -51,7 +52,21 @@
       const watch = new MutationObserver(() => { document.body.classList.toggle('webampoff', win.classList.contains('min')); });
       watch.observe(win, { attributes: true, attributeFilter: ['class'] });
 
-      function stop() { try { if (webamp) webamp.dispose(); } catch (e) { /* já encerrado */ } webamp = null; }
+      // O Webamp baixa cada arquivo para descobrir a duração; com a lista inteira de uma vez eram 6 a 10 MP3 em paralelo no disco do servidor a cada
+      // abertura. A primeira leva vai já, o resto entra aos poucos (e só com a aba visível).
+      let feeder = null;
+      function feed(rest) {
+        clearTimeout(feeder);
+        const step = () => {
+          feeder = null;
+          if (gone || !webamp || !rest.length) return;
+          if (document.hidden) { feeder = setTimeout(step, FEED_HIDDEN_MS); return; }
+          try { webamp.appendTracks(rest.splice(0, FEED_STEP)); } catch (e) { return; }
+          if (rest.length) feeder = setTimeout(step, FEED_EVERY_MS);
+        };
+        if (rest.length) feeder = setTimeout(step, FEED_EVERY_MS);
+      }
+      function stop() { clearTimeout(feeder); feeder = null; try { if (webamp) webamp.dispose(); } catch (e) { /* já encerrado */ } webamp = null; }
       async function load() {
         info.textContent = 'Lendo a pasta Músicas…';
         await mkdir(DIR);
@@ -66,7 +81,7 @@
         // as janelas do Webamp começam no canto direito da área de trabalho (ou à esquerda, em tela estreita)
         const left = Math.max(0, innerWidth - 290), top = 16;
         const opt = {
-          initialTracks: tracks, enableHotkeys: false,      // sem atalhos globais: as teclas continuam valendo para os outros aplicativos
+          initialTracks: tracks.slice(0, FEED_FIRST), enableHotkeys: false,      // sem atalhos globais: as teclas continuam valendo para os outros aplicativos
           windowLayout: {
             main: { position: { top: top, left: left }, shadeMode: false, closed: false },
             equalizer: { position: { top: top + 116, left: left }, shadeMode: false, closed: false },
@@ -77,7 +92,8 @@
         const w = new Webamp(opt); webamp = w;
         w.onClose(() => DK.closeWin(win, true));
         w.onTrackDidChange(t => win.setTitle(t ? (t.metaData && t.metaData.artist ? t.metaData.artist + ' - ' : '') + (t.metaData && t.metaData.title || t.defaultName || '') + ' · Player de Música' : 'Player de Música'));
-        try { await w.renderWhenReady(box); } catch (e) { info.textContent = 'Não foi possível iniciar o player: ' + (e && e.message || e); }
+        try { await w.renderWhenReady(box); } catch (e) { info.textContent = 'Não foi possível iniciar o player: ' + (e && e.message || e); return; }
+        if (webamp === w) feed(tracks.slice(FEED_FIRST));
       }
 
       bReload.onclick = load;
@@ -112,5 +128,4 @@
     }, 340, 150);
   };
 
-  DK.register({ id: 'music', icon: '🎵', label: 'Player de Música', open: DK.musicApp });
 })(window.DK = window.DK || {});

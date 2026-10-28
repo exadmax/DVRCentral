@@ -357,7 +357,4 @@
     }, 760, 640);
   };
 
-  DK.register({ id: 'minesweeper', icon: '💣', label: 'Campo Minado', open: DK.minesweeperApp });
-  DK.register({ id: 'solitaire', icon: '🃏', label: 'Paciência', open: DK.solitaireApp });
-  DK.register({ id: 'freecell', icon: '♣️', label: 'FreeCell', open: DK.freecellApp });
 })(window.DK = window.DK || {});

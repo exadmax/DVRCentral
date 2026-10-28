@@ -57,7 +57,7 @@
         } catch (e) { msg.textContent = e.message; }
       }
       rf.onclick = load; load();
-      const t = setInterval(load, 10000);
+      const t = setInterval(() => { if (!document.hidden) load(); }, 10000);   // aba em segundo plano: não consulta
       win._onClose = () => clearInterval(t);
     }, 620, 540);
   };

@@ -547,5 +547,4 @@
     }, 1040, 680, { flush: true });
   };
 
-  DK.register({ id: 'slides', icon: '📙', label: 'LiteOffice Apresentações (.pptx / .odp)', desktop: true, open: () => DK.slideApp({ dir: { space: 'home', path: '/' } }) });
 })(window.DK = window.DK || {});

@@ -193,15 +193,18 @@ func (s *store) deskListUsers(ctx context.Context) ([]DeskUser, error) {
 
 func (s *store) deskSetPassword(ctx context.Context, id int64, hash string, mustChange bool) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE desk_users SET pass_hash = ?, must_change = ? WHERE id = ?`, hash, b2i(mustChange), id)
+	s.sess.dropUser(id, "") // o usuário em cache guarda o hash antigo e o must_change
 	return err
 }
 
 func (s *store) deskSetPerms(ctx context.Context, id int64, terminal, explorer bool) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE desk_users SET can_terminal = ?, can_explorer = ? WHERE id = ?`, b2i(terminal), b2i(explorer), id)
+	s.sess.dropUser(id, "")
 	return err
 }
 
 func (s *store) deskDeleteUser(ctx context.Context, id int64) error {
+	defer s.sess.dropUser(id, "")
 	for _, t := range []string{"desk_sessions", "desk_calendars", "desk_prefs", "desk_mail_accounts", "desk_mail_apps", "desk_profiles"} { // tudo que é do usuário vai junto
 		if _, err := s.db.ExecContext(ctx, `DELETE FROM `+t+` WHERE user_id = ?`, id); err != nil {
 			return err
@@ -216,19 +219,40 @@ func (s *store) deskCreateSession(ctx context.Context, hash string, userID, exp 
 	return err
 }
 
+// withExp acrescenta o fim da sessão às colunas do usuário (scanDeskUser lê só as dele).
+type withExp struct {
+	row interface{ Scan(...any) error }
+	exp *int64
+}
+
+func (w withExp) Scan(dest ...any) error { return w.row.Scan(append(dest, w.exp)...) }
+
+// deskUserBySession devolve o usuário da sessão. Fica em memória por sessCacheTTL (ver desk_sesscache.go); no banco, usa uma conexão de leitura.
 func (s *store) deskUserBySession(ctx context.Context, hash string, now int64) (*DeskUser, error) {
-	return scanDeskUser(s.db.QueryRowContext(ctx,
-		`SELECT u.id, u.username, u.pass_hash, u.is_admin, u.can_terminal, u.can_explorer, u.must_change, u.created_at
-		 FROM desk_sessions s JOIN desk_users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?`, hash, now))
+	if u, ok := s.sess.get(hash, now); ok {
+		return u, nil
+	}
+	gen := s.sess.generation()
+	var exp int64
+	u, err := scanDeskUser(withExp{s.rdb.QueryRowContext(ctx,
+		`SELECT u.id, u.username, u.pass_hash, u.is_admin, u.can_terminal, u.can_explorer, u.must_change, u.created_at, s.expires_at
+		 FROM desk_sessions s JOIN desk_users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?`, hash, now), &exp})
+	if err != nil {
+		return nil, err
+	}
+	s.sess.put(hash, u, exp, gen)
+	return u, nil
 }
 
 func (s *store) deskDeleteSession(ctx context.Context, hash string) {
 	_, _ = s.db.ExecContext(ctx, `DELETE FROM desk_sessions WHERE token_hash = ?`, hash)
+	s.sess.drop(hash)
 }
 
 // deskDeleteUserSessions encerra as sessões de um usuário, menos keepHash (vazio = todas). Usado ao trocar a senha.
 func (s *store) deskDeleteUserSessions(ctx context.Context, userID int64, keepHash string) {
 	_, _ = s.db.ExecContext(ctx, `DELETE FROM desk_sessions WHERE user_id = ? AND token_hash <> ?`, userID, keepHash)
+	s.sess.dropUser(userID, keepHash)
 }
 
 func (s *store) deskPurgeSessions(ctx context.Context, now int64) {

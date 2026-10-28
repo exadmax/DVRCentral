@@ -146,5 +146,4 @@
     return win;
   };
 
-  DK.register({ id: 'browser', icon: '🌐', label: 'Navegador', desktop: true, show: me => me.browser, open: () => DK.browserApp() });
 })(window.DK = window.DK || {});

@@ -208,7 +208,7 @@
     });
 
     load();
-    const tick = setInterval(() => { if (!armed && !(document.activeElement && document.activeElement.tagName === 'SELECT')) load(); }, 5000);
+    const tick = setInterval(() => { if (!document.hidden && !armed && !(document.activeElement && document.activeElement.tagName === 'SELECT')) load(); }, 5000);
   }
 
   CD.pages = CD.pages || {};

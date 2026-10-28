@@ -37,7 +37,7 @@ func newDK(t *testing.T, cfg DeskConfig) *dkEnv {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { st.db.Close() })
+	t.Cleanup(func() { st.Close() })
 	vids := filepath.Join(tmp, "videos")
 	os.MkdirAll(vids, 0o755)
 	d := newDesk(Config{Desk: cfg, Videos: VideosConfig{Dir: vids}}, st, nil, nil, tmp)

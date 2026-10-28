@@ -226,12 +226,12 @@ func TestMigrationKeepsItems(t *testing.T) {
 	s.db.Exec(`CREATE TABLE itens (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, quantidade REAL, peso_kg REAL, validade TEXT,
 		local TEXT NOT NULL CHECK (local IN ('freezer','geladeira','dispensa')), criado_em TEXT NOT NULL DEFAULT 'x', atualizado_em TEXT NOT NULL DEFAULT 'x')`)
 	s.db.Exec("INSERT INTO itens (nome, quantidade, local) VALUES ('Leite', 2, 'geladeira'), ('Frango', 1, 'freezer')")
-	s.db.Close()
+	s.Close()
 	s, err = openStore(path, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer s.db.Close()
+	defer s.Close()
 	var n int
 	s.db.QueryRow("SELECT COUNT(*) FROM itens").Scan(&n)
 	if _, err := s.db.Exec("INSERT INTO itens (nome, quantidade, local) VALUES ('Tinta', 1, 'garagem')"); err != nil || n != 2 {

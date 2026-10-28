@@ -84,23 +84,47 @@ var migrations = []string{
 }
 
 type store struct {
-	db      *sql.DB
+	db      *sql.DB // única conexão, para gravar (e para o que precisa ler o que acabou de gravar numa transação)
+	rdb     *sql.DB // até readConns conexões só de leitura: no modo WAL elas não esperam a gravação (nem a gravação espera por elas)
+	sess    sessCache
 	locais  func() []string // ids dos locais do estoque em uso (nil = os padrão)
 	origins []string        // origens extras com permissão de gravar (além do próprio endereço do hub)
 }
+
+const readConns = 3
 
 func openStore(path string, origins []string) (*store, error) {
 	db, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)")
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxOpenConns(1) // uso doméstico: uma conexão basta, serializa as gravações e poupa memória
-	s := &store{db: db, origins: origins}
+	db.SetMaxOpenConns(1) // uso doméstico: uma conexão basta para gravar, serializa as gravações e poupa memória
+	s := &store{db: db, rdb: db, origins: origins}
 	if err := s.migrate(); err != nil {
 		db.Close()
 		return nil, err
 	}
+	if path != "" && !strings.Contains(path, ":memory:") { // banco em memória é por conexão: nele a leitura usa a mesma conexão
+		rdb, err := sql.Open("sqlite", path+"?_pragma=busy_timeout(5000)&_pragma=query_only(1)")
+		if err != nil {
+			db.Close()
+			return nil, err
+		}
+		rdb.SetMaxOpenConns(readConns)
+		s.rdb = rdb
+	}
 	return s, nil
+}
+
+// Close encerra as conexões de gravação e de leitura.
+func (s *store) Close() error {
+	err := s.db.Close()
+	if s.rdb != s.db {
+		if e := s.rdb.Close(); err == nil {
+			err = e
+		}
+	}
+	return err
 }
 
 func (s *store) migrate() error {

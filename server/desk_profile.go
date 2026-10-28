@@ -55,7 +55,7 @@ func profileName(first, last, username string) string {
 func (s *store) deskProfile(ctx context.Context, u *DeskUser) deskProfile {
 	p := deskProfile{DisplayName: u.Username}
 	var sign int
-	err := s.db.QueryRowContext(ctx, `SELECT first_name, last_name, sign_email, signature, CASE WHEN photo IS NULL OR length(photo) = 0 THEN 0 ELSE photo_ver END FROM desk_profiles WHERE user_id = ?`, u.ID).
+	err := s.rdb.QueryRowContext(ctx, `SELECT first_name, last_name, sign_email, signature, CASE WHEN photo IS NULL OR length(photo) = 0 THEN 0 ELSE photo_ver END FROM desk_profiles WHERE user_id = ?`, u.ID).
 		Scan(&p.FirstName, &p.LastName, &sign, &p.Signature, &p.PhotoVer)
 	if err == nil {
 		p.SignEmail = sign == 1
@@ -66,7 +66,7 @@ func (s *store) deskProfile(ctx context.Context, u *DeskUser) deskProfile {
 
 // deskProfiles devolve nome de exibição e versão da foto de todos (para a lista de conversas).
 func (s *store) deskProfiles(ctx context.Context) (map[int64]deskProfile, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT user_id, first_name, last_name, CASE WHEN photo IS NULL OR length(photo) = 0 THEN 0 ELSE photo_ver END FROM desk_profiles`)
+	rows, err := s.rdb.QueryContext(ctx, `SELECT user_id, first_name, last_name, CASE WHEN photo IS NULL OR length(photo) = 0 THEN 0 ELSE photo_ver END FROM desk_profiles`)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (d *deskAPI) avatarGet(w http.ResponseWriter, r *http.Request, u *DeskUser)
 		return
 	}
 	var b []byte
-	err := d.st.db.QueryRowContext(r.Context(), `SELECT photo FROM desk_profiles WHERE user_id = ?`, id).Scan(&b)
+	err := d.st.rdb.QueryRowContext(r.Context(), `SELECT photo FROM desk_profiles WHERE user_id = ?`, id).Scan(&b)
 	if errors.Is(err, sql.ErrNoRows) || len(b) == 0 {
 		deskErr(w, http.StatusNotFound, "sem foto")
 		return

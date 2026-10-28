@@ -351,5 +351,4 @@
     }, 780, 500);
   };
 
-  DK.register({ id: 'zip', icon: '🗜️', label: 'Zip Manager (.zip)', desktop: true, open: () => DK.zipApp({ dir: { space: 'home', path: '/' } }) });
 })(window.DK = window.DK || {});

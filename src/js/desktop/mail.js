@@ -405,5 +405,4 @@
     }, 560, 520);
   };
 
-  DK.register({ id: 'mail', icon: '✉️', label: 'E-mail', desktop: true, open: DK.mailApp });
 })(window.DK = window.DK || {});

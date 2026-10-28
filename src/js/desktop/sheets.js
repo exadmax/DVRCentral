@@ -971,5 +971,4 @@
     }, 980, 640, { flush: true });
   };
 
-  DK.register({ id: 'sheets', icon: '📗', label: 'LiteOffice Planilhas (.xlsx / .ods)', desktop: true, open: () => DK.sheetApp({ dir: { space: 'home', path: '/' } }) });
 })(window.DK = window.DK || {});

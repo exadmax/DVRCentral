@@ -221,5 +221,4 @@
     }, 860, 600, { flush: true });
   };
 
-  DK.register({ id: 'docs', icon: '📘', label: 'LiteOffice Documentos (.docx / .odt)', desktop: true, open: () => DK.docApp({ dir: { space: 'home', path: '/' } }) });
 })(window.DK = window.DK || {});

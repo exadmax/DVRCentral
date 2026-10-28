@@ -104,5 +104,4 @@
     }, 940, 660, { flush: true });
   };
 
-  DK.register({ id: 'paint', icon: '🎨', label: 'Paint', desktop: true, open: () => DK.paintApp() });
 })(window.DK = window.DK || {});

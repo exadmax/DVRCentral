@@ -3,8 +3,8 @@
   // estiver aberto, consulta o servidor a cada poucos segundos: atualiza a conversa aberta e avisa (sino, aviso na tela e som) das
   // mensagens novas de quem não está na conversa aberta.
   const el = DK.el;
-  const KEY = 'messages', POLL_MS = 3000;
-  const chat = DK.chat = { peers: [], timer: 0, busy: false, open: null };
+  const KEY = 'messages', POLL_MS = 3000, POLL_IDLE_MS = 8000, POLL_HIDDEN_MS = 20000;
+  const chat = DK.chat = { peers: [], timer: 0, busy: false, open: null, on: false };
 
   const url = (m, mode) => '/api/desk/chat/file?id=' + m.id + (mode ? '&mode=' + mode : '');
   const hhmm = t => new Date(t * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -54,12 +54,23 @@
     } catch (e) { /* sem rede ou sessão expirada: o próximo ciclo tenta de novo */ }
     chat.busy = false;
   }
-  chat.start = function () { chat.stop(); tick(); chat.timer = setInterval(tick, POLL_MS); };
-  chat.stop = function () { clearInterval(chat.timer); chat.timer = 0; chat.peers = []; chat.open = null; };
+  // O intervalo depende de quem está olhando: conversa aberta e visível, rápido; com a janela fechada ou minimizada, mais devagar; aba em segundo
+  // plano, bem devagar (os avisos continuam chegando). Ao voltar para a aba, consulta na hora. Só há um temporizador por vez.
+  const delay = () => (document.hidden ? POLL_HIDDEN_MS : windowVisible() ? POLL_MS : POLL_IDLE_MS);
+  function loop() {
+    clearTimeout(chat.timer);
+    chat.timer = setTimeout(async () => { await tick(); if (chat.on) loop(); }, delay());
+  }
+  // consulta já e rearma o temporizador com o intervalo de agora (voltou para a aba, abriu a janela de mensagens)
+  chat.poke = function () { if (chat.on) { clearTimeout(chat.timer); tick().then(() => { if (chat.on) loop(); }); } };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) chat.poke(); });
+  chat.start = function () { chat.stop(); chat.on = true; chat.poke(); };
+  chat.stop = function () { chat.on = false; clearTimeout(chat.timer); chat.timer = 0; chat.peers = []; chat.open = null; };
 
   // ---------- janela ----------
   DK.messagesApp = function (openWith) {
     const existing = DK.wins[KEY];
+    setTimeout(chat.poke, 0);                    // janela aberta (ou trazida de volta): passa para o ritmo rápido já
     DK.openWindow(KEY, 'Mensagens', (body, win) => {
       body.className = 'body flush';
       let cur = null, lastId = 0, readUpto = 0, msgs = [], sending = false;   // lastId: último id trazido pelo servidor (as minhas ficam de fora)

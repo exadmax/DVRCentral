@@ -106,7 +106,7 @@ func (s *store) chatInsert(ctx context.Context, m chatMsg, fileName string, file
 }
 
 func (s *store) chatGet(ctx context.Context, id int64) (chatMsg, error) {
-	m, err := scanChatMsg(s.db.QueryRowContext(ctx, `SELECT `+chatCols+` FROM desk_messages WHERE id = ?`, id))
+	m, err := scanChatMsg(s.rdb.QueryRowContext(ctx, `SELECT `+chatCols+` FROM desk_messages WHERE id = ?`, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return m, errDeskNotFound
 	}
@@ -131,7 +131,7 @@ func (s *store) chatPeers(ctx context.Context, me int64) ([]chatPeer, error) {
 	for i := range out {
 		peers[out[i].ID] = &out[i]
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT CASE WHEN from_id = ? THEN to_id ELSE from_id END, MAX(created_at) FROM desk_messages
+	rows, err := s.rdb.QueryContext(ctx, `SELECT CASE WHEN from_id = ? THEN to_id ELSE from_id END, MAX(created_at) FROM desk_messages
 		WHERE from_id = ? OR to_id = ? GROUP BY 1`, me, me, me)
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func (s *store) chatPeers(ctx context.Context, me int64) ([]chatPeer, error) {
 		}
 	}
 	rows.Close()
-	rows, err = s.db.QueryContext(ctx, `SELECT m.from_id, c.n, m.body, m.file_name FROM desk_messages m
+	rows, err = s.rdb.QueryContext(ctx, `SELECT m.from_id, c.n, m.body, m.file_name FROM desk_messages m
 		JOIN (SELECT from_id, COUNT(*) n, MAX(id) mid FROM desk_messages WHERE to_id = ? AND read_at = 0 GROUP BY from_id) c ON c.mid = m.id`, me)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (s *store) chatPeers(ctx context.Context, me int64) ([]chatPeer, error) {
 
 // chatPurgeUser apaga as mensagens (e os anexos) de um usuário removido.
 func (d *deskAPI) chatPurgeUser(ctx context.Context, id int64) {
-	rows, err := d.st.db.QueryContext(ctx, `SELECT file_key FROM desk_messages WHERE (from_id = ? OR to_id = ?) AND file_key <> ''`, id, id)
+	rows, err := d.st.rdb.QueryContext(ctx, `SELECT file_key FROM desk_messages WHERE (from_id = ? OR to_id = ?) AND file_key <> ''`, id, id)
 	if err != nil {
 		return
 	}
@@ -245,7 +245,7 @@ func (d *deskAPI) chatMessages(w http.ResponseWriter, r *http.Request, u *DeskUs
 	}
 	after, _ := strconv.ParseInt(r.URL.Query().Get("after"), 10, 64)
 	ctx := r.Context()
-	rows, err := d.st.db.QueryContext(ctx, `SELECT `+chatCols+` FROM (SELECT `+chatCols+` FROM desk_messages
+	rows, err := d.st.rdb.QueryContext(ctx, `SELECT `+chatCols+` FROM (SELECT `+chatCols+` FROM desk_messages
 		WHERE ((from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?)) AND id > ? ORDER BY id DESC LIMIT ?) ORDER BY id`,
 		u.ID, p.ID, p.ID, u.ID, after, deskChatPage)
 	if err != nil {
@@ -265,7 +265,7 @@ func (d *deskAPI) chatMessages(w http.ResponseWriter, r *http.Request, u *DeskUs
 	rows.Close()
 	_, _ = d.st.db.ExecContext(ctx, `UPDATE desk_messages SET read_at = ? WHERE to_id = ? AND from_id = ? AND read_at = 0`, time.Now().Unix(), u.ID, p.ID)
 	var upto int64
-	_ = d.st.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(id), 0) FROM desk_messages WHERE from_id = ? AND to_id = ? AND read_at > 0`, u.ID, p.ID).Scan(&upto)
+	_ = d.st.rdb.QueryRowContext(ctx, `SELECT COALESCE(MAX(id), 0) FROM desk_messages WHERE from_id = ? AND to_id = ? AND read_at > 0`, u.ID, p.ID).Scan(&upto)
 	writeStatus(w, http.StatusOK, map[string]any{"messages": msgs, "read_upto": upto})
 }
 

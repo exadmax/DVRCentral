@@ -16,7 +16,7 @@ func newTestAPI(t *testing.T, origins ...string) (*store, http.Handler) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { s.db.Close() })
+	t.Cleanup(func() { s.Close() })
 	mux := http.NewServeMux()
 	s.register(mux)
 	return s, mux
@@ -286,14 +286,14 @@ func TestPersisteEntreAberturas(t *testing.T) {
 	if code, _ := do(t, mux, "POST", "/api/contatos", `{"nome":"Zé","tipoServico":"Chaveiro","contato":"1144445555"}`); code != 201 {
 		t.Fatalf("criar: %d", code)
 	}
-	s.db.Close()
+	s.Close()
 
 	// reabrir roda as migrações de novo sem perder nem duplicar nada
 	s2, err := openStore(path, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer s2.db.Close()
+	defer s2.Close()
 	mux2 := http.NewServeMux()
 	s2.register(mux2)
 	code, v := do(t, mux2, "GET", "/api/contatos", "")

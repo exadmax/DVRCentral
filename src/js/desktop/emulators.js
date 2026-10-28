@@ -107,5 +107,4 @@
     return SYSTEMS.find(s => new RegExp('\\.(' + s.ext.replace('|bin', '').replace('bin|', '') + ')$', 'i').test(name)) || null;
   };
 
-  DK.register({ id: 'emulators', icon: '🎮', label: 'Emuladores (consoles)', desktop: false, open: DK.emulatorsApp });
 })(window.DK = window.DK || {});

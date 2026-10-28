@@ -55,7 +55,7 @@ type deskCal struct {
 }
 
 func (s *store) deskCalendars(ctx context.Context, userID int64) ([]deskCal, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, name, color, url, enabled FROM desk_calendars WHERE user_id = ? ORDER BY id`, userID)
+	rows, err := s.rdb.QueryContext(ctx, `SELECT id, name, color, url, enabled FROM desk_calendars WHERE user_id = ? ORDER BY id`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (s *store) deskCalendars(ctx context.Context, userID int64) ([]deskCal, err
 func (s *store) deskCalendar(ctx context.Context, userID, id int64) (*deskCal, error) {
 	var c deskCal
 	var en int
-	err := s.db.QueryRowContext(ctx, `SELECT id, name, color, url, enabled FROM desk_calendars WHERE id = ? AND user_id = ?`, id, userID).
+	err := s.rdb.QueryRowContext(ctx, `SELECT id, name, color, url, enabled FROM desk_calendars WHERE id = ? AND user_id = ?`, id, userID).
 		Scan(&c.ID, &c.Name, &c.Color, &c.url, &en)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, errDeskNotFound
@@ -378,7 +378,7 @@ func (d *deskAPI) calFeed(w http.ResponseWriter, r *http.Request, u *DeskUser) {
 // Um objeto JSON opaco (até 8 KB): quem sabe o que cada campo significa é a tela (avisos do calendário, agendas da casa...).
 func (d *deskAPI) prefsGet(w http.ResponseWriter, r *http.Request, u *DeskUser) {
 	var data string
-	err := d.st.db.QueryRowContext(r.Context(), `SELECT data FROM desk_prefs WHERE user_id = ?`, u.ID).Scan(&data)
+	err := d.st.rdb.QueryRowContext(r.Context(), `SELECT data FROM desk_prefs WHERE user_id = ?`, u.ID).Scan(&data)
 	if errors.Is(err, sql.ErrNoRows) {
 		data = "{}"
 	} else if err != nil {
