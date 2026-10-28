@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Roda NO Linux, com sudo:  sudo bash install.sh
 # Instala o hub em /opt/centraldiogo, libera a porta 80 e ativa o serviço.
-# Cada instalação concluída soma 1 ao terceiro número da versão (arquivo VERSION: 1.0.1 -> 1.0.2).
+# Pacote de release (tem o arquivo RELEASE, gravado por package.sh a partir da tag vX.Y.Z): a instalação grava essa versão em VERSION.
+# Pacote sem RELEASE (montado do código, sem tag): cada instalação concluída soma 1 ao terceiro número (VERSION: 1.0.1 -> 1.0.2).
 # Só consultar a versão instalada, sem sudo e sem alterar nada:  bash install.sh --check
 # Terminal e arquivos do computador no Diogows (opcional; veja SECURITY.md):
 #   sudo bash install.sh --desk-shell        permite ao serviço usar sudo (sudoers NOPASSWD + NoNewPrivileges=false)
@@ -14,15 +15,22 @@ D=/opt/centraldiogo
 # Para subir o MAIOR ou o MENOR, edite o VERSION à mão (ex.: 1.1.0); as instalações seguintes continuam somando no terceiro.
 OLD=1.0.0
 [ -f "$D/VERSION" ] && OLD="$(tr -d '[:space:]' < "$D/VERSION")"
-if ! echo "$OLD" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+if ! echo "$OLD" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
   echo "!! $D/VERSION inválido: '$OLD' (esperado algo como 1.0.1). Corrija o arquivo e rode de novo."; exit 1
 fi
-NEW="${OLD%.*}.$((10#${OLD##*.} + 1))"
+BASE="${OLD%%-*}"   # sem o sufixo de pré-lançamento (-rc.1)
+NEW="${BASE%.*}.$((10#${BASE##*.} + 1))"
+# Versão da release empacotada (ver docs/versionamento.md): manda no número instalado.
+if [ -f RELEASE ]; then
+  REL="$(tr -d '[:space:]' < RELEASE)"
+  echo "$REL" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$' || { echo "!! RELEASE inválido: '$REL'"; exit 1; }
+  NEW="$REL"
+fi
 
 if [ "$1" = "--check" ]; then
   if [ -f "$D/VERSION" ]; then echo "versão instalada: V$OLD (desde $(date -r "$D/VERSION" '+%F %T'))"
   else echo "versão instalada: nenhuma registrada ainda"; fi
-  echo "a próxima instalação será: V$NEW"
+  if [ -f RELEASE ]; then echo "este pacote instala: V$NEW"; else echo "a próxima instalação será: V$NEW"; fi
   exit 0
 fi
 

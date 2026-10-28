@@ -163,6 +163,8 @@ sudo systemctl start centraldiogo-hub
 ```
 
 ## Versão instalada
+- As versões publicadas seguem SemVer (`vMAIOR.MENOR.PATCH`) e saem como **Releases** do GitHub, com o pacote e os binários prontos. Política em **[docs/versionamento.md](docs/versionamento.md)**.
+  Num pacote de release, o `install.sh` grava no servidor a versão da própria release; o contador abaixo vale só para pacotes montados do código.
 - O servidor guarda a versão no arquivo `VERSION` (`/opt/centraldiogo/VERSION`), formato `MAIOR.MENOR.PATCH`, por exemplo `1.0.1`.
 - Cada `sudo bash install.sh` **concluído** soma 1 ao terceiro número e registra a linha em `install.log`. Instalação que falha no meio
   não muda a versão. Sem o arquivo, a primeira instalação vira `V1.0.1`. Para subir o primeiro ou o segundo número, edite o `VERSION` à mão.
