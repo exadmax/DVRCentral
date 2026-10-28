@@ -46,7 +46,7 @@
       peers.forEach(p => {
         const seen = chat.open && chat.open.peer === p.id && windowVisible();
         if (p.unread > (before[p.id] || 0) && !seen) {
-          DK.notify({ title: '💬 ' + p.username, text: p.preview + (p.unread > 1 ? '  (+' + (p.unread - 1) + ')' : ''), color: '#25a55f', onclick: () => DK.messagesApp(p.id) });
+          DK.notify({ title: '💬 ' + (p.display_name || p.username), text: p.preview + (p.unread > 1 ? '  (+' + (p.unread - 1) + ')' : ''), color: '#25a55f', onclick: () => DK.messagesApp(p.id) });
         }
       });
       chat.peers = peers;
@@ -79,7 +79,7 @@
         side.replaceChildren(el('div', { className: 'meta', style: 'padding:8px 10px', textContent: 'Usuários' }));
         if (!chat.peers.length) side.append(el('div', { className: 'meta', style: 'padding:8px 10px', textContent: 'Não há outros usuários. O administrador cria contas em Usuários.' }));
         chat.peers.slice().sort((a, b) => (b.unread > 0) - (a.unread > 0) || b.last_at - a.last_at || a.username.localeCompare(b.username)).forEach(p => {
-          const b = el('button', { className: 'peer' + (cur && cur.id === p.id ? ' on' : ''), onclick: () => select(p) }, el('span', { className: 'av', textContent: p.username.charAt(0).toUpperCase() }), el('span', { className: 'pn', textContent: p.username }));
+          const b = el('button', { className: 'peer' + (cur && cur.id === p.id ? ' on' : ''), onclick: () => select(p) }, DK.avatar(p.id, p.display_name || p.username, p.photo_ver, 28), el('span', { className: 'pn', textContent: p.display_name || p.username, title: '@' + p.username }));
           if (p.unread) b.append(el('b', { className: 'badge', textContent: p.unread }));
           side.append(b);
         });
@@ -149,7 +149,7 @@
 
       async function select(p) {
         cur = p; lastId = 0; readUpto = 0; msgs = [];
-        head.textContent = '💬 ' + p.username;
+        head.replaceChildren(DK.avatar(p.id, p.display_name || p.username, p.photo_ver, 26), ' ' + (p.display_name || p.username), el('span', { className: 'meta', textContent: p.display_name && p.display_name !== p.username ? '  @' + p.username : '' }));
         input.classList.remove('hidden');
         list.replaceChildren();
         drawPeers();

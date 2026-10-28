@@ -397,3 +397,94 @@ html.mob .chat-side .peer { justify-content: center; padding: 8px 4px; position:
 html.mob .chat-side .badge { position: absolute; top: 2px; right: 2px; }
 html.mob .bub { max-width: 90%; }
 html.mob .card { padding: 18px; }
+
+/* ---------- Jogos (js/desktop/games.js) ---------- */
+.minewrap { flex: 1; min-height: 0; overflow: auto; display: grid; place-items: start center; padding: 10px; background: #c9ced6; }
+.minebox { background: #d6dae1; border: 2px solid #8a929e; border-radius: 6px; padding: 8px; display: grid; gap: 8px; justify-items: center; }
+.mhead { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; box-sizing: border-box; padding: 4px 8px; background: #bfc4cc; border-radius: 4px; }
+.mcount { font: bold 22px/1 ui-monospace, Consolas, monospace; color: #ff3030; background: #1a0000; padding: 3px 7px; border-radius: 3px; letter-spacing: 1px; }
+.mface { font-size: 24px; line-height: 1; padding: 2px 8px; }
+.mines { display: grid; gap: 1px; background: #8a929e; border: 2px solid #8a929e; }
+.mc { width: 26px; height: 26px; padding: 0; margin: 0; border-radius: 0; border: 0; background: #e8ebf0; box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #9aa2ae; font: bold 15px/1 ui-monospace, Consolas, monospace; cursor: pointer; touch-action: manipulation; }
+.mc.open { background: #cfd4dc; box-shadow: none; cursor: default; }
+.mc.boom { background: #ff6b6b; }
+.mc[data-n="1"] { color: #1d4ed8; } .mc[data-n="2"] { color: #15803d; } .mc[data-n="3"] { color: #dc2626; } .mc[data-n="4"] { color: #1e1b8a; }
+.mc[data-n="5"] { color: #991b1b; } .mc[data-n="6"] { color: #0e7490; } .mc[data-n="7"] { color: #111; } .mc[data-n="8"] { color: #6b7280; }
+.cardtable { --cw: 64px; --ch: 90px; flex: 1; min-height: 0; overflow: auto; position: relative; padding: 12px; background: #0b6b3a; user-select: none; -webkit-user-select: none; }
+.prow { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px; }
+.psp { flex: 1; min-width: 4px; }
+.ppile { position: relative; flex: 0 0 auto; width: var(--cw); min-height: var(--ch); box-sizing: border-box; border: 2px dashed rgba(255, 255, 255, .28); border-radius: 7px; }
+.ppile .plabel { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .35); font-size: 26px; pointer-events: none; }
+.pcard { position: absolute; left: -2px; width: var(--cw); height: var(--ch); box-sizing: border-box; background: #fff; border: 1px solid #7d8590; border-radius: 7px; color: #111; font: bold 14px/1 system-ui, sans-serif; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, .35); }
+.pcard.red { color: #c0211f; }
+.pcard.back { background: repeating-linear-gradient(45deg, #1d4f91 0 6px, #2a63ae 6px 12px); border-color: #fff; }
+.pcard.sel { outline: 3px solid #ffd400; outline-offset: -1px; z-index: 5; }
+.pcard .tl { position: absolute; top: 4px; left: 5px; }
+.pcard .br { position: absolute; bottom: 4px; right: 5px; transform: rotate(180deg); }
+.pcard .mid { position: absolute; inset: 0; display: grid; place-items: center; font-size: 30px; }
+.cwin { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, .55); color: #fff; font-size: 34px; font-weight: bold; pointer-events: none; }
+@media (pointer: coarse) { .mc { width: 32px; height: 32px; } .cardtable { --cw: 56px; --ch: 80px; } }
+
+/* ---------- E-mail (js/desktop/mail.js) ---------- */
+.mailapp { flex: 1; min-height: 0; display: grid; grid-template-columns: 190px 330px 1fr; background: var(--panel, #fff); }
+.mailapp > div { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line, #d8dde6); }
+.mailapp > div:last-child { border-right: 0; }
+.mfold { padding: 8px; gap: 6px; overflow: auto; background: #f4f6fa; }
+.mfold .row { display: flex; gap: 4px; } .mfold .row select { flex: 1; min-width: 0; }
+.mf { display: flex; justify-content: space-between; align-items: center; gap: 6px; text-align: left; border: 0; background: transparent; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.mf:hover { background: #e6ebf3; } .mf.on { background: #dbe7fb; font-weight: 600; }
+.badge { background: #2f6fdb; color: #fff; border-radius: 10px; padding: 0 7px; font-size: 11px; }
+.mscroll { flex: 1; min-height: 0; overflow: auto; }
+.mlist.busy .mscroll { opacity: .5; }
+.mrow { display: grid; grid-template-columns: 22px 1fr auto; gap: 6px; align-items: start; padding: 8px 10px; border-bottom: 1px solid var(--line, #e3e7ee); cursor: pointer; }
+.mrow:hover { background: #f4f7fc; } .mrow.on { background: #dbe7fb; }
+.mrow.unseen .mfrom, .mrow.unseen .msubj { font-weight: 700; }
+.mmain { min-width: 0; } .mfrom, .msubj { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .msubj { color: #555; font-size: 13px; }
+.mdate { font-size: 12px; color: #777; white-space: nowrap; }
+.mstar { cursor: pointer; color: #aaa; font-size: 16px; line-height: 1; } .mstar.on { color: #e5a400; }
+.mpager { justify-content: space-between; border-top: 1px solid var(--line, #d8dde6); border-bottom: 0; }
+.mempty { padding: 28px 16px; text-align: center; color: #777; display: grid; gap: 10px; justify-items: center; }
+.mhd { padding: 10px 14px; border-bottom: 1px solid var(--line, #e3e7ee); display: grid; gap: 2px; } .msb { font-size: 17px; font-weight: 600; }
+.mframe { flex: 1; min-height: 0; width: 100%; border: 0; background: #fff; }
+.mtext { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 12px 14px; white-space: pre-wrap; word-wrap: break-word; font: 14px/1.45 system-ui, sans-serif; }
+.matt { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 14px; }
+.chip { background: #eef2f8; border: 1px solid #d3dbe8; border-radius: 12px; padding: 2px 10px; font-size: 12px; text-decoration: none; color: inherit; }
+.mact select { max-width: 120px; }
+.mbk { display: none; }
+.mailapp.narrow { grid-template-columns: 1fr; }
+.mailapp.narrow > div { display: none; border-right: 0; }
+.mailapp.narrow[data-pane="folders"] > .mfold, .mailapp.narrow[data-pane="list"] > .mlist, .mailapp.narrow[data-pane="read"] > .mread { display: flex; }
+.mailapp.narrow .mbk { display: inline-block; }
+.mcomp { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 10px; overflow: auto; }
+.mcomp label { display: grid; grid-template-columns: 64px 1fr; gap: 6px; align-items: center; } .mcomp .row label { flex: 1; }
+.mbody { flex: 1; min-height: 160px; resize: none; font: 14px/1.45 system-ui, sans-serif; }
+
+/* ---------- Menu Iniciar: mais usados, expandir tudo e categoria nos resultados da busca ---------- */
+#startmenu .scat.fav { cursor: default; border-top: 0; }
+#startmenu .sitem small { margin-left: auto; padding-left: 10px; font-size: 11px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+#startmenu .sall { display: block; width: 100%; text-align: right; border: 0; background: transparent; color: var(--mute); font-size: 11px; padding: 3px 12px; cursor: pointer; }
+#startmenu .sall:hover { color: inherit; }
+#startmenu div.scat { display: flex; gap: 10px; align-items: center; padding: 8px 14px; }
+.mailapp.empty { grid-template-columns: 1fr; } .mailapp.empty > .mfold, .mailapp.empty > .mread { display: none; }
+
+/* ---------- Perfil: foto/iniciais ---------- */
+.avatar { display: inline-grid; place-items: center; flex: none; border-radius: 50%; color: #fff; font-weight: 600; overflow: hidden; vertical-align: middle; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chat-head { display: flex; align-items: center; gap: 4px; }
+.avwrap { flex: none; display: inline-flex; }
+.iconimg { display: inline-grid; place-items: center; }
+#startmenu button .iconimg { width: 22px; }
+.icon .iconimg img { width: 40px !important; height: 40px !important; }
+
+/* ---------- Emuladores (js/desktop/emulators.js) ---------- */
+.emulist { flex: 1; min-height: 0; overflow: auto; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; align-content: start; }
+.emulist .empty { grid-column: 1 / -1; color: var(--mute); padding: 24px 8px; text-align: center; line-height: 1.5; }
+.emugame { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 8px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; text-align: center; }
+.emugame:hover, .emugame:focus-visible { border-color: #3b82f6; background: #eff6ff; }
+.emuico { font-size: 28px; line-height: 1; }
+.emunm { font-size: 13px; word-break: break-word; }
+
+/* ---------- Player de Música: o Webamp solto sobre a área de trabalho (js/desktop/music.js) ---------- */
+/* o Webamp se coloca no body; fica acima das janelas do Diogows e abaixo da barra de tarefas e do menu Iniciar */
+#webamp { z-index: 7000 !important; }
+body.webampoff #webamp { display: none !important; }

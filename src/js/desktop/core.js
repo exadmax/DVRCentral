@@ -15,6 +15,32 @@
   };
   DK.esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   DK.fmtSize = n => (n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : n < 1073741824 ? (n / 1048576).toFixed(1) + ' MB' : (n / 1073741824).toFixed(1) + ' GB');
+  // Nome de exibição e foto (perfil em Minha conta). Sem nome o Diogows usa o nome de usuário; sem foto, as iniciais numa bolinha colorida.
+  DK.displayName = () => (DK.me && DK.me.profile && DK.me.profile.display_name) || (DK.me ? DK.me.username : '');
+  DK.avatar = function (id, name, ver, size) {
+    size = size || 28;
+    const hue = [...String(name)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+    const box = DK.el('span', { className: 'avatar', title: name, textContent: String(name).trim().charAt(0).toUpperCase() || '?' });
+    box.style.cssText = 'width:' + size + 'px;height:' + size + 'px;font-size:' + Math.round(size * 0.45) + 'px;background:hsl(' + hue + ' 45% 42%)';
+    if (ver) {
+      const img = new Image();
+      img.alt = ''; img.draggable = false;
+      img.onload = () => { box.textContent = ''; box.append(img); };       // só troca as iniciais quando a foto de fato chegou
+      img.src = '/api/desk/avatar/' + id + '?v=' + ver;
+    }
+    return box;
+  };
+  // Ícone de um item do menu: emoji, ou um PNG em data: (o ícone próprio de um Programa Web). Só aceita esse formato exato de data:.
+  const ICON_IMG = /^data:image\/png;base64,[A-Za-z0-9+\/=]{20,60000}$/;
+  DK.isIconImg = s => typeof s === 'string' && ICON_IMG.test(s);
+  DK.iconNode = function (icon, size) {
+    if (DK.isIconImg(icon)) {
+      const i = DK.el('img', { src: icon, alt: '', draggable: false });
+      i.style.cssText = 'width:' + (size || 20) + 'px;height:' + (size || 20) + 'px;object-fit:contain;vertical-align:middle';
+      return DK.el('span', { className: 'iconimg' }, i);
+    }
+    return DK.el('span', { textContent: icon });
+  };
   DK.fmtDate = t => (t ? new Date(t * 1000).toLocaleString('pt-BR') : '');
   DK.extOf = name => (String(name).match(/\.[^.\/]+$/) || [''])[0].toLowerCase();
   DK.baseName = p => String(p).replace(/\/+$/, '').split('/').pop() || '/';

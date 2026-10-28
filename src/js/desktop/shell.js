@@ -18,7 +18,7 @@
   function fill(box, list) {
     clean(list).forEach(it => {
       if (it === '-') { box.append(el('hr')); return; }
-      const ic = el('span', { textContent: it.icon || '' });
+      const ic = DK.isIconImg(it.icon) ? DK.iconNode(it.icon, 16) : el('span', { textContent: it.icon || '' });
       if (it.sub) {
         const wrap = el('div', { className: 'csub hidden' });
         const b = el('button', { onclick: e => { e.stopPropagation(); wrap.classList.toggle('hidden'); b.classList.toggle('open'); } }, ic, it.label, el('i', { textContent: '›' }));

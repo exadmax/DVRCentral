@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emulador de jogos · Central Diogo</title>
+  <style>html, body { margin: 0; height: 100%; background: #000; overflow: hidden; } #game { width: 100%; height: 100%; } .msg { color: #cbd5e1; font: 14px system-ui; padding: 16px; } .err { color: #f88; }</style>
+</head>
+<body>
+  <!-- Um jogo por página (o EmulatorJS guarda estado global). Aberta pelo app Emuladores do Diogows (js/desktop/emulators.js) num iframe, com os
+       parâmetros core (o núcleo do EmulatorJS), g (endereço da ROM, só da pasta do usuário) e n (nome do arquivo, para o EmulatorJS saber o tipo).
+       O EmulatorJS (https://github.com/EmulatorJS/EmulatorJS, GPL-3.0) vem de uma cópia em vendor/emulatorjs/data/ se ela existir; senão, do CDN
+       oficial (precisa de internet). Os núcleos são os do RetroArch em WebAssembly. -->
+  <div id="game"><div class="msg">Carregando o emulador…</div></div>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search), box = document.getElementById('game');
+      var core = q.get('core') || '', rom = q.get('g') || '', name = (q.get('n') || '').replace(/[\/\\]/g, '_');
+      var CORES = { segaMD: 1, segaMS: 1, snes: 1, gb: 1, gba: 1, atari2600: 1 };
+      function fail(m) { box.innerHTML = '<div class="msg err"></div>'; box.firstChild.textContent = m; }
+      if (!CORES[core]) return fail('Sistema inválido.');
+      if (!/^\/api\/desk\/fs\/read\?/.test(rom) || !name) return fail('ROM inválida.');   // só ROMs lidas da pasta do usuário
+
+      var LOCAL = 'vendor/emulatorjs/data/', CDN = 'https://cdn.emulatorjs.org/stable/data/';
+      function start(base, remote) {
+        window.EJS_player = '#game';
+        window.EJS_core = core;
+        window.EJS_gameUrl = rom + '&n=' + encodeURIComponent(name);     // o fim do endereço leva o nome do arquivo (a extensão diz o tipo da ROM)
+        window.EJS_gameName = name.replace(/\.[^.]+$/, '');
+        window.EJS_pathtodata = new URL(base, location.href).href;
+        window.EJS_language = 'pt-BR';
+        window.EJS_startOnLoaded = true;
+        window.EJS_threads = false;                                       // sem threads: a página não é isolada entre origens
+        var s = document.createElement('script');
+        s.src = base + 'loader.js';
+        s.onerror = function () { fail(remote ? 'Não consegui carregar o emulador do CDN (cdn.emulatorjs.org). Sem internet? Coloque uma cópia do EmulatorJS em vendor/emulatorjs/data/ (veja docs/emuladores.md).' : 'O emulador local não carregou.'); };
+        document.body.appendChild(s);
+      }
+      // cópia local, se houver (um arquivo inexistente volta como página, não como JavaScript)
+      fetch(LOCAL + 'loader.js', { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+        start(r.ok && /javascript/i.test(r.headers.get('content-type') || '') ? LOCAL : CDN, !(r.ok && /javascript/i.test(r.headers.get('content-type') || '')));
+      }, function () { start(CDN, true); });
+    })();
+  </script>
+</body>
+</html>

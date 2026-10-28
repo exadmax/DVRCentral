@@ -151,6 +151,7 @@
             { icon: '▶️', label: 'Abrir', fn: open },
             DK.kindOf(it) === 'zip' ? { icon: '📤', label: 'Extrair aqui', fn: () => DK.zipExtractHere(it) } : null,
             k !== 'folder' && DK.kindOf(it) === 'zip' ? null : { icon: '🗜️', label: 'Compactar em ZIP', fn: () => DK.zipCompress(it) },
+            DK.kindOf(it) === 'image' ? { icon: '🎨', label: 'Editar no Paint', fn: () => DK.paintApp({ item: it }) } : null,
             DK.isOfficeFile(it) ? { icon: '🏢', label: 'Abrir no Office completo', fn: () => DK.officeApp({ item: it }) } : null,
             { icon: '📌', label: 'Adicionar à Área de Trabalho', fn: () => DK.deskAddFile(it) },
             '-',

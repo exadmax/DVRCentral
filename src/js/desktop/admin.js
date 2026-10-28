@@ -61,6 +61,47 @@
 
   DK.accountApp = function () {
     DK.openWindow('account', 'Minha conta', body => {
+      // ----- perfil: nome, foto e assinatura (tudo opcional) -----
+      const P = DK.me.profile || {};
+      const first = el('input', { placeholder: 'Nome', maxLength: 40, value: P.first_name || '' });
+      const last = el('input', { placeholder: 'Sobrenome', maxLength: 40, value: P.last_name || '' });
+      const sign = el('input', { type: 'checkbox', checked: !!P.sign_email });
+      const sig = el('textarea', { rows: 3, maxLength: 500, placeholder: 'Assinatura (se ficar vazia, vale o seu nome completo)' });
+      sig.value = P.signature || '';
+      const av = el('span', { className: 'avwrap' });
+      const pmsg = el('div', { className: 'err' });
+      const showAv = () => av.replaceChildren(DK.avatar(DK.me.id, (first.value + ' ' + last.value).trim() || DK.me.username, (DK.me.profile || {}).photo_ver, 72));
+      const setProfile = p => { DK.me.profile = p; showAv(); DK.$('who').textContent = DK.displayName() + (DK.me.is_admin ? ' (admin)' : ''); if (DK.refreshShell) DK.refreshShell(); };
+      // a foto é reduzida aqui (quadrado de 256 px, JPEG): o servidor só guarda algumas dezenas de KB
+      async function shrink(file) {
+        const bmp = await createImageBitmap(file);
+        const s = Math.min(bmp.width, bmp.height), cv = el('canvas', { width: 256, height: 256 });
+        cv.getContext('2d').drawImage(bmp, (bmp.width - s) / 2, (bmp.height - s) / 2, s, s, 0, 0, 256, 256);
+        return new Promise((ok, no) => cv.toBlob(b => (b ? ok(b) : no(new Error('não consegui reduzir a imagem'))), 'image/jpeg', 0.88));
+      }
+      const fileIn = el('input', { type: 'file', accept: 'image/*' }); fileIn.style.display = 'none';
+      fileIn.onchange = async () => {
+        const f = fileIn.files[0]; fileIn.value = '';
+        if (!f) return;
+        pmsg.className = 'err'; pmsg.textContent = '';
+        try { setProfile(await DK.api('PUT', '/profile/photo', await shrink(f), true)); } catch (e) { pmsg.textContent = e.message; }
+      };
+      const bPhoto = el('button', { textContent: '📷 Escolher foto…', onclick: () => fileIn.click() });
+      const bNoPhoto = el('button', { textContent: 'Remover foto', onclick: async () => { try { setProfile(await DK.api('DELETE', '/profile/photo')); } catch (e) { pmsg.textContent = e.message; } } });
+      const bSave = el('button', { className: 'pri', textContent: 'Salvar perfil' });
+      bSave.onclick = async () => {
+        try {
+          setProfile(await DK.api('PUT', '/profile', { first_name: first.value, last_name: last.value, sign_email: sign.checked, signature: sig.value }));
+          pmsg.className = 'ok'; pmsg.textContent = 'Perfil salvo.';
+        } catch (e) { pmsg.className = 'err'; pmsg.textContent = e.message; }
+      };
+      showAv();
+      body.append(el('b', { textContent: 'Perfil (opcional)' }),
+        el('div', { className: 'row' }, av, el('div', { style: 'display:grid;gap:6px;flex:1' }, first, last)),
+        el('div', { className: 'row' }, bPhoto, bNoPhoto, fileIn),
+        el('label', { className: 'row' }, sign, ' Usar meu nome nos e-mails (remetente e assinatura)'), sig,
+        el('div', { className: 'meta', textContent: 'O nome e a foto aparecem para os outros usuários em Mensagens. Sem nome, vale o nome de usuário (' + DK.me.username + ').' }),
+        el('div', { className: 'row' }, bSave), pmsg, el('hr'), el('b', { textContent: 'Senha' }));
       const c = el('input', { type: 'password', placeholder: 'Senha atual', autocomplete: 'current-password' });
       const n = el('input', { type: 'password', placeholder: 'Nova senha (mín. 8)', autocomplete: 'new-password' });
       const b = el('button', { className: 'pri', textContent: 'Trocar senha' });
@@ -73,7 +114,7 @@
         try { await DK.api('POST', '/password', { current: c.value, new: n.value }); c.value = n.value = ''; msg.className = 'ok'; msg.textContent = 'Senha alterada.'; }
         catch (e) { msg.className = 'err'; msg.textContent = e.message; }
       };
-    }, 380, 320);
+    }, 420, 640);
   };
 
   // As configurações do painel (câmeras, agendas da casa, trânsito, menu, livros, desligar desktop/hub...) ficam na página Config.

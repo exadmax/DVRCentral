@@ -17,14 +17,51 @@
     dosboxX: { label: 'DOSBox-X', note: 'Mais compatível: roda programas DOS exigentes e é a engine dos sistemas virtuais (Windows). É a mais pesada (carrega ~8 MB, usa mais CPU e memória e pode ficar lenta em PCs fracos).' },
     dosbox: { label: 'js-dos (DOSBox)', note: 'Leve e rápida, ideal para jogos e programas DOS comuns. Tem menos recursos de compatibilidade (alguns modos de vídeo e dispositivos avançados do DOSBox-X ficam de fora).' }
   };
-  const KINDS = { dos: 'DOS', vm: 'Dentro de um sistema virtual', win3x: 'Windows 3.x (pacote pronto)', win9x: 'Windows 95/98/ME (pacote pronto)' };   // win3x e win9x: instalados por versões anteriores
+  const KINDS = { dos: 'DOS', vm: 'Dentro de um sistema virtual', web: 'Programa Web', win3x: 'Windows 3.x (pacote pronto)', win9x: 'Windows 95/98/ME (pacote pronto)' };   // win3x e win9x: instalados por versões anteriores
   const SYSKINDS = { win3x: 'Windows 3.x', win95: 'Windows 95', win98: 'Windows 98', winme: 'Windows ME' };
+  const WEB_ICONS = ['🌐', '🎮', '🎵', '🎬', '📺', '📷', '📚', '🧊', '🏠', '📰', '✉️', '🗺️', '📊', '🛒', '☁️', '🧠', '💬'];
+  const WEB_MODES = { window: 'Janela interna do Diogows', popup: 'Janela própria do navegador (compacta, sem abas)', tab: 'Fora do app (outra aba do navegador)' };
+  // Atalhos prontos. Sites que proíbem ser exibidos dentro de outra página (WhatsApp Web, por exemplo, manda frame-ancestors só para o próprio
+  // domínio) não funcionam na janela interna: para eles o modo certo é a janela própria do navegador.
+  const WEB_PRESETS = [
+    { name: 'WhatsApp Web', url: 'https://web.whatsapp.com/', icon: '💬', mode: 'popup' },
+    { name: 'Telegram Web', url: 'https://web.telegram.org/', icon: '💬', mode: 'popup' },
+    { name: 'Gmail', url: 'https://mail.google.com/', icon: '✉️', mode: 'popup' },
+    { name: 'Outlook', url: 'https://outlook.live.com/mail/', icon: '✉️', mode: 'popup' }
+  ];
+  // O endereço guardado pode ter {host} (o endereço pelo qual o Diogows foi aberto), útil para serviços da própria máquina em outra porta:
+  // {host}:8080/jogos/. Só http e https; "/caminho" vale para o próprio hub. Devolve null se não for um endereço aceitável.
+  function webUrl(raw) {
+    let u = String(raw || '').trim().replace(/\{host\}/g, location.protocol + '//' + location.hostname);
+    if (!u) return null;
+    if (u[0] !== '/' && !/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u;
+    try { const x = new URL(u, location.origin); return /^https?:$/.test(x.protocol) ? x.href : null; } catch (e) { return null; }
+  }
   const home = p => ({ space: 'home', path: p });
   const slug = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'programa';
   const sysDir = s => SYS + '/' + s.id, sysBundle = s => sysDir(s) + '/' + s.id + '.jsdos', sysChanges = s => sysDir(s) + '/' + s.id + '.changes';
   const sysOf = p => DK.systems.find(s => s.id === p.os);
   const unique = (id, list) => { while (list.some(x => x.id === id)) id += '-2'; return id; };
   const guessSysKind = n => /(^|[^0-9])3[._-]?(1|11|x)|win3/i.test(n) ? 'win3x' : /98/.test(n) ? 'win98' : /95/.test(n) ? 'win95' : /(^|[^a-z])me([^a-z]|$)/i.test(n) ? 'winme' : 'win95';
+
+  // Categoria no menu Iniciar: uma das existentes ou uma nova, criada aqui mesmo. get() devolve o id (e cria a nova, se for o caso).
+  function categoryPicker(current) {
+    const sel = el('select', {});
+    const fill = v => { sel.replaceChildren(...DK.menuCategories().map(c => el('option', { value: c.id, textContent: c.icon + ' ' + c.label })), el('option', { value: '__new', textContent: '➕ Nova categoria…' })); sel.value = v; if (sel.value !== v) sel.value = 'progs'; };
+    const nm = el('input', { placeholder: 'Nome da nova categoria', maxLength: 30 }), ic = el('input', { placeholder: '📁', maxLength: 4, value: '📁', style: 'width:64px', title: 'Um emoji para a categoria' });
+    const row = el('div', { className: 'row hidden' }, nm, ic);
+    sel.onchange = () => { row.classList.toggle('hidden', sel.value !== '__new'); if (sel.value === '__new') nm.focus(); };
+    fill(current || 'progs');
+    return { node: el('div', { style: 'display:grid;gap:6px' }, el('label', {}, 'Categoria no menu Iniciar', sel), row), get: () => (sel.value === '__new' ? DK.addMenuCategory(nm.value, ic.value) : sel.value) };
+  }
+  // seletor simples para trocar a categoria de algo já instalado
+  function categorySelect(item) {
+    const cats = DK.menuCategories();
+    const sel = el('select', { title: 'Categoria no menu Iniciar' }, ...cats.map(c => el('option', { value: c.id, textContent: c.icon + ' ' + c.label })));
+    sel.value = cats.some(c => c.id === item.category) ? item.category : 'progs';
+    sel.onchange = async () => { item.category = sel.value; await savePrograms(); };
+    return sel;
+  }
 
   // ---------- registro (um JSON na pasta do usuário) ----------
   const mkdir = p => DK.api('POST', '/fs/mkdir', { space: 'home', path: p }).catch(() => { /* já existe */ });
@@ -40,13 +77,49 @@
     if (DK.refreshShell) DK.refreshShell();
   }
   // Entradas para o menu Iniciar e a área de trabalho
-  DK.programEntries = () => DK.systems.map(s => ({ id: 'prog:sys-' + s.id, icon: '🖥️', label: s.name, desktop: !!s.desktop, open: () => DK.runSystem(s) }))
-    .concat(DK.programs.map(p => ({ id: 'prog:' + p.id, icon: p.kind === 'dos' ? '🕹️' : '🪟', label: p.name, desktop: !!p.desktop, open: () => DK.runProgram(p) })));
+  DK.programEntries = () => DK.systems.map(s => ({ id: 'prog:sys-' + s.id, icon: '🖥️', label: s.name, cat: s.category, desktop: !!s.desktop, open: () => DK.runSystem(s) }))
+    .concat(DK.programs.map(p => ({ id: 'prog:' + p.id, icon: p.kind === 'web' ? (p.icon || '🌐') : p.kind === 'dos' ? '🕹️' : '🪟', label: p.name, cat: p.category, desktop: !!p.desktop, open: () => DK.runProgram(p) })));
 
   // ---------- executar ----------
   // Cada programa roda num iframe com emulator.html: o js-dos guarda estado global e só inicia limpo num documento novo. Fechar a janela
   // destrói o iframe (e o emulador junto); "Reiniciar" recarrega o iframe.
+  // Programa Web: uma página aberta numa janela do Diogows (iframe) ou fora do app, em outra aba. Sites que proíbem ser exibidos dentro de
+  // outra página ficam em branco na janela: o botão ↗ abre o mesmo endereço numa aba. Página https não pode embutir http (o navegador bloqueia),
+  // então nesse caso abre sempre em outra aba.
+  DK.runWeb = function (p) {
+    const url = webUrl(p.url);
+    if (!url) { DK.toast('O endereço de “' + p.name + '” não é válido.'); return; }
+    const mixed = location.protocol === 'https:' && /^http:/i.test(url);
+    if (p.mode === 'popup') {      // janela só do site, sem abas nem barra de endereço, do tamanho de um aplicativo
+      const w = Math.min(1180, screen.availWidth - 40), h = Math.min(800, screen.availHeight - 60);
+      const pop = window.open(url, '_blank', 'popup=yes,noopener,noreferrer,width=' + w + ',height=' + h + ',left=' + Math.round((screen.availWidth - w) / 2) + ',top=' + Math.round((screen.availHeight - h) / 2));
+      if (!pop && !/Firefox/.test(navigator.userAgent)) DK.toast('O navegador bloqueou a janela; libere pop-ups para este endereço.');   // noopener devolve null mesmo quando abriu: só avisa onde isso não ocorre
+      return;
+    }
+    if (p.mode === 'tab' || mixed) {
+      window.open(url, '_blank', 'noopener');
+      if (mixed && p.mode !== 'tab') DK.toast('Este endereço é http e o Diogows está em https: abri em outra aba.');
+      return;
+    }
+    DK.openWindow('prog:' + p.id, p.name, (body, win) => {
+      body.className = 'body flush';
+      const reload = el('button', { textContent: '↻ Recarregar' }), full = el('button', { textContent: '⛶ Tela cheia' });
+      const out = el('button', { textContent: '↗ Abrir em outra aba', title: 'Se a página ficar em branco, o site não permite ser aberto dentro de outra página' });
+      const tb = el('div', { className: 'tb' }, reload, full, out, el('span', { className: 'sp' }), el('span', { className: 'meta', textContent: new URL(url).host }));
+      const frame = el('iframe', { className: 'fill dosframe', title: p.name });
+      frame.setAttribute('allow', 'fullscreen; autoplay; gamepad; clipboard-write');
+      frame.setAttribute('allowfullscreen', '');
+      body.append(tb, frame);
+      reload.onclick = () => { frame.src = 'about:blank'; setTimeout(() => { frame.src = url; }, 0); };
+      full.onclick = () => { if (frame.requestFullscreen) frame.requestFullscreen(); };
+      out.onclick = () => window.open(url, '_blank', 'noopener');
+      win._onClose = () => { frame.src = 'about:blank'; };
+      frame.src = url;
+    }, 900, 640, { flush: true });
+  };
+
   DK.runProgram = function (p) {
+    if (p.kind === 'web') return DK.runWeb(p);
     if (p.kind === 'vm') {
       const s = sysOf(p);
       if (!s) { DK.toast('O sistema virtual de “' + p.name + '” foi removido.'); return; }
@@ -164,18 +237,25 @@
           const sc = el('input', { type: 'checkbox', checked: !!p.desktop, title: 'Atalho na área de trabalho' });
           sc.onchange = async () => { p.desktop = sc.checked; await savePrograms(); };
           const s = p.kind === 'vm' ? sysOf(p) : null;
-          tb.append(el('tr', {}, el('td', { textContent: (p.kind === 'dos' ? '🕹️ ' : '🪟 ') + p.name }),
-            el('td', { className: 'meta', textContent: p.kind === 'vm' ? 'Dentro de ' + (s ? s.name : '(sistema removido)') : KINDS[p.kind] }),
-            el('td', { className: 'meta', textContent: p.kind === 'vm' ? '—' : (ENGINES[p.engine] || ENGINES.dosboxX).label }), el('td', {}, sc),
-            el('td', { className: 'row' }, el('button', { className: 'pri', textContent: '▶ Executar', onclick: () => DK.runProgram(p) }),
+          let third = el('td', { className: 'meta', textContent: p.kind === 'vm' ? '—' : (ENGINES[p.engine] || ENGINES.dosboxX).label });
+          if (p.kind === 'web') {
+            const m = el('select', {}, ...Object.keys(WEB_MODES).map(k => el('option', { value: k, textContent: WEB_MODES[k] })));
+            m.value = p.mode === 'tab' ? 'tab' : 'window';
+            m.onchange = async () => { p.mode = m.value; await savePrograms(); };
+            third = el('td', {}, m);
+          }
+          tb.append(el('tr', {}, el('td', {}, DK.iconNode(p.kind === 'web' ? (p.icon || '🌐') : p.kind === 'dos' ? '🕹️' : '🪟'), ' ' + p.name),
+            el('td', { className: 'meta', textContent: p.kind === 'vm' ? 'Dentro de ' + (s ? s.name : '(sistema removido)') : p.kind === 'web' ? 'Programa Web · ' + (p.url || '') : KINDS[p.kind] }),
+            third, el('td', {}, categorySelect(p)), el('td', {}, sc),
+            el('td', { className: 'row' }, el('button', { className: 'pri', textContent: p.kind === 'web' ? '▶ Abrir' : '▶ Executar', onclick: () => DK.runProgram(p) }),
               el('button', { className: 'del', textContent: 'Desinstalar', onclick: () => uninstall(p) }))));
         });
-        if (DK.programs.length) main.append(el('table', {}, el('thead', {}, el('tr', {}, ...['Programa', 'Tipo', 'Engine', 'Atalho', ''].map(t => el('th', { textContent: t })))), tb));
+        if (DK.programs.length) main.append(el('table', {}, el('thead', {}, el('tr', {}, ...['Programa', 'Tipo', 'Engine / abre em', 'Categoria', 'Atalho', ''].map(t => el('th', { textContent: t })))), tb));
         main.append(el('div', { className: 'meta', textContent: 'Os programas ficam na sua pasta (Meus arquivos/Programas) e só você os vê.' }));
       }
       async function uninstall(p) {
         const own = p.bundle && p.bundle.indexOf(DIR + '/' + p.id + '/') === 0;
-        if (!confirm('Desinstalar “' + p.name + '”?' + (p.kind === 'vm' ? '\nSó o atalho é removido; o que foi instalado dentro do sistema virtual continua lá.' : own ? '\nOs arquivos instalados serão apagados.' : '\nO arquivo original não será apagado.'))) return;
+        if (!confirm('Desinstalar “' + p.name + '”?' + (p.kind === 'web' ? '\nSó o atalho é removido; o site não é afetado.' : p.kind === 'vm' ?'\nSó o atalho é removido; o que foi instalado dentro do sistema virtual continua lá.' : own ? '\nOs arquivos instalados serão apagados.' : '\nO arquivo original não será apagado.'))) return;
         if (DK.wins['prog:' + p.id]) DK.closeWin(DK.wins['prog:' + p.id], true);
         if (own) await DK.api('DELETE', '/fs?space=home&path=' + encodeURIComponent(DIR + '/' + p.id)).catch(() => { /* já removido */ });
         DK.programs = DK.programs.filter(x => x.id !== p.id);
@@ -197,12 +277,12 @@
           sc.onchange = async () => { s.desktop = sc.checked; await savePrograms(); };
           const disk = el('td', { className: 'row' }, el('span', { className: 'meta', textContent: s.disk || '—' }));
           if (s.disk) disk.append(el('button', { textContent: 'Ejetar', title: 'Tira o disquete (A:) do sistema', onclick: () => eject(s) }));
-          tb.append(el('tr', {}, el('td', { textContent: '🖥️ ' + s.name }), el('td', { className: 'meta', textContent: SYSKINDS[s.kind] || 'Windows' }), size, disk, el('td', {}, sc),
+          tb.append(el('tr', {}, el('td', { textContent: '🖥️ ' + s.name }), el('td', { className: 'meta', textContent: SYSKINDS[s.kind] || 'Windows' }), size, disk, el('td', {}, categorySelect(s)), el('td', {}, sc),
             el('td', { className: 'row' }, el('button', { className: 'pri', textContent: '▶ Iniciar', onclick: () => DK.runSystem(s) }),
               el('button', { textContent: 'Zerar disco', title: 'Apaga o que foi salvo e volta ao sistema como veio', onclick: () => resetDisk(s) }),
               el('button', { className: 'del', textContent: 'Remover', onclick: () => removeSystem(s) }))));
         });
-        if (DK.systems.length) main.append(el('table', {}, el('thead', {}, el('tr', {}, ...['Sistema', 'Tipo', 'Disco salvo', 'Disquete (A:)', 'Atalho', ''].map(t => el('th', { textContent: t })))), tb));
+        if (DK.systems.length) main.append(el('table', {}, el('thead', {}, el('tr', {}, ...['Sistema', 'Tipo', 'Disco salvo', 'Disquete (A:)', 'Categoria', 'Atalho', ''].map(t => el('th', { textContent: t })))), tb));
 
         // adicionar
         let src = null;
@@ -210,6 +290,7 @@
         const kindSel = el('select', {}, ...Object.keys(SYSKINDS).map(k => el('option', { value: k, textContent: SYSKINDS[k] })));
         const fileLbl = el('span', { className: 'meta', textContent: 'nenhum arquivo escolhido' });
         const name = el('input', { placeholder: 'Nome do sistema (ex.: Windows 3.11)', maxLength: 60 });
+        const catPickS = categoryPicker('progs');
         const desk = el('input', { type: 'checkbox', checked: true });
         const delOrig = el('input', { type: 'checkbox' });
         const go = el('button', { className: 'pri', textContent: 'Adicionar sistema' });
@@ -231,7 +312,7 @@
             ok.textContent = 'Preparando o sistema… (pode levar alguns segundos)';
             await mkdir(DIR); await mkdir(SYS);
             await DK.api('POST', '/vm/prepare', { src: src.path, id: id });
-            DK.systems.push({ id: id, name: nm, kind: kindSel.value, desktop: desk.checked });
+            DK.systems.push({ id: id, name: nm, kind: kindSel.value, category: catPickS.get(), desktop: desk.checked });
             await savePrograms();
             if (delOrig.checked) await DK.api('DELETE', '/fs?space=home&path=' + encodeURIComponent(src.path)).catch(() => { /* fica o original */ });
             ok.textContent = '';
@@ -242,7 +323,7 @@
         main.append(el('hr'), el('b', { textContent: 'Adicionar um sistema virtual' }),
           el('div', { className: 'dwarn', innerHTML: 'A Microsoft não distribui o Windows, então o Diogows não traz nenhum. Use um pacote <code>.jsdos</code> com o Windows (3.x, 95, 98 ou ME) já instalado e que você tenha licença para usar. O Windows leva um tempo para iniciar e exige um PC com folga de memória. Cada salvamento envia o disco inteiro (compactado) ao servidor.' }),
           el('label', {}, 'Versão do Windows', kindSel), el('div', { className: 'row' }, pick, up, fileLbl, upIn), el('label', {}, 'Nome', name),
-          el('label', { className: 'row' }, desk, ' Criar atalho na área de trabalho'),
+          catPickS.node, el('label', { className: 'row' }, desk, ' Criar atalho na área de trabalho'),
           el('label', { className: 'row' }, delOrig, ' Apagar o pacote original depois (o sistema preparado fica em Programas/Sistemas e economiza espaço)'),
           el('div', { className: 'row' }, go), ok, err);
       }
@@ -269,8 +350,56 @@
       function drawInstall() {
         let src = o.file || null, kind = 'dos', zipFiles = null;
         const err = el('div', { className: 'err' }), ok = el('div', { className: 'ok' });
-        const kindSel = el('select', {}, ...['dos', 'vm'].map(k => el('option', { value: k, textContent: KINDS[k] })));
+        const kindSel = el('select', {}, ...['dos', 'vm', 'web'].map(k => el('option', { value: k, textContent: KINDS[k] })));
         const fileLbl = el('span', { className: 'meta', textContent: src ? src.name : 'nenhum arquivo escolhido' });
+        // Programa Web: endereço, ícone e onde abre
+        let webIcon = WEB_ICONS[0], siteIcon = null;
+        const urlIn = el('input', { placeholder: 'Endereço (ex.: https://exemplo.com ou {host}:8080/jogos/)', maxLength: 500 });
+        const iconRow = el('div', { className: 'row', style: 'flex-wrap:wrap;gap:4px' });
+        const iconStatus = el('div', { className: 'meta' });
+        const drawIcons = () => iconRow.replaceChildren(...(siteIcon ? [siteIcon] : []).concat(WEB_ICONS).map(ic => {
+          const b = el('button', { title: ic === siteIcon ? 'Ícone do próprio site' : ic, className: ic === webIcon ? 'pri' : '', style: 'font-size:18px;padding:2px 8px;min-width:34px' }, DK.iconNode(ic, 22));
+          b.onclick = () => { webIcon = ic; drawIcons(); };
+          return b;
+        }));
+        // Procura o ícone do site (o servidor busca: o navegador não lê ícones de outros sites) e o reduz para 64 px; sem ícone, fica a escolha de emoji.
+        let iconSeq = 0;
+        async function detectIcon() {
+          const seq = ++iconSeq, u = webUrl(urlIn.value);
+          if (siteIcon && webIcon === siteIcon) webIcon = WEB_ICONS[0];
+          siteIcon = null; drawIcons();
+          if (!u) { iconStatus.textContent = ''; return; }
+          iconStatus.textContent = 'Procurando o ícone do site…';
+          try {
+            const r = await fetch('/api/desk/webicon?url=' + encodeURIComponent(u), { credentials: 'same-origin' });
+            if (!r.ok) throw new Error('sem ícone');
+            const img = new Image(), blobUrl = URL.createObjectURL(await r.blob());
+            img.src = blobUrl;
+            await img.decode();
+            const cv = el('canvas', { width: 64, height: 64 }), k = Math.min(64 / (img.naturalWidth || 64), 64 / (img.naturalHeight || 64));
+            const w = (img.naturalWidth || 64) * k, h = (img.naturalHeight || 64) * k;
+            cv.getContext('2d').drawImage(img, (64 - w) / 2, (64 - h) / 2, w, h);
+            URL.revokeObjectURL(blobUrl);
+            const data = cv.toDataURL('image/png');
+            if (seq !== iconSeq) return;
+            if (!DK.isIconImg(data)) throw new Error('ícone grande demais');
+            siteIcon = webIcon = data; iconStatus.textContent = 'Usando o ícone do próprio site (clique em outro para trocar).';
+          } catch (e) { if (seq === iconSeq) iconStatus.textContent = 'O site não tem um ícone próprio que eu consiga usar: escolha um abaixo.'; }
+          if (seq === iconSeq) drawIcons();
+        }
+        urlIn.onchange = detectIcon;
+        drawIcons();
+        const modeSel = el('select', {}, ...Object.keys(WEB_MODES).map(k => el('option', { value: k, textContent: WEB_MODES[k] })));
+        const presets = el('div', { className: 'row', style: 'flex-wrap:wrap;gap:4px' }, ...WEB_PRESETS.map(pr => el('button', { textContent: pr.icon + ' ' + pr.name, title: 'Preenche o endereço, o ícone e o modo', onclick: () => {
+          urlIn.value = pr.url; name.value = pr.name; webIcon = pr.icon; modeSel.value = pr.mode; drawIcons(); detectIcon();
+        } })));
+        const webRows = el('div', { className: 'hidden', style: 'display:grid;gap:10px' },
+          el('div', {}, el('div', { className: 'meta', textContent: 'Atalhos prontos' }), presets),
+          el('label', {}, 'Endereço da página', urlIn),
+          el('div', { className: 'meta', textContent: 'Aceita http e https. Use {host} para o endereço pelo qual você abriu o Diogows (bom para serviços desta máquina em outra porta, como {host}:4533). Um endereço que começa com / é do próprio servidor.' }),
+          el('div', {}, el('div', { className: 'meta', textContent: 'Ícone' }), iconStatus, iconRow),
+          el('label', {}, 'Abrir em', modeSel),
+          el('div', { className: 'meta', textContent: 'Na janela interna, alguns sites não deixam ser exibidos dentro de outra página e aparecem em branco: use o botão “↗ Abrir em outra aba” ou escolha “Fora do app”.' }));
         const exeSel = el('select', {}); const exeRow = el('label', { className: 'hidden' }, 'Programa a executar ao abrir', exeSel);
         const name = el('input', { placeholder: 'Nome do programa', maxLength: 60 });
         const sysSel = el('select', {}, ...DK.systems.map(s => el('option', { value: s.id, textContent: s.name })));
@@ -279,11 +408,15 @@
         const engRow = el('label', {}, 'Engine de emulação', engSel);
         const engNote = el('div', { className: 'dwarn' });
         const vmNote = el('div', { className: 'dwarn hidden', innerHTML: '<b>Dentro de um sistema virtual:</b> o <code>.zip</code> vira um <b>disquete (A:)</b> ligado ao sistema. Abra o sistema, rode <code>A:\\SETUP.EXE</code> (no Windows 3.x: Arquivo → Executar; no 95/98: Iniciar → Executar) e instale. O que for instalado fica no disco salvo do sistema (clique em “Salvar agora” ou feche a janela). Cabe um programa de até <b>1,4 MB</b> (programas maiores ainda não são suportados). O atalho criado aqui abre o sistema.' });
+        const catPick = categoryPicker('progs');
         const desk = el('input', { type: 'checkbox', checked: true });
         const go = el('button', { className: 'pri', textContent: 'Instalar' });
 
         function refreshKind() {
           kind = kindSel.value;
+          const web = kind === 'web';
+          webRows.classList.toggle('hidden', !web); fileRow.classList.toggle('hidden', web); tipRow.classList.toggle('hidden', web);
+          if (web) { exeRow.classList.add('hidden'); sysRow.classList.add('hidden'); vmNote.classList.add('hidden'); engRow.classList.add('hidden'); engNote.classList.add('hidden'); if (err.textContent.indexOf('sistema virtual') >= 0) err.textContent = ''; return; }
           exeRow.classList.toggle('hidden', !(kind === 'dos' && zipFiles));
           sysRow.classList.toggle('hidden', kind !== 'vm'); vmNote.classList.toggle('hidden', kind !== 'vm');
           engRow.classList.toggle('hidden', kind !== 'dos'); engNote.classList.toggle('hidden', kind !== 'dos');
@@ -312,12 +445,23 @@
           refreshKind();
         }
         const [pick, up, upIn] = filePicker('.zip,.jsdos', 'Escolher .jsdos ou .zip', chosen, err, ok);
+        const fileRow = el('div', { className: 'row' }, pick, up, fileLbl, upIn);
+        const tipRow = el('div', { className: 'meta', textContent: 'Dica: baixe o programa pelo Navegador (vai para Meus arquivos/Downloads) e escolha aqui. Para DOS aceita um .zip com os arquivos do programa ou um pacote .jsdos pronto. Para Windows (3.x, 95, 98, ME), adicione primeiro o sistema na aba “Sistemas virtuais”.' });
         kindSel.onchange = refreshKind; engSel.onchange = refreshKind;
 
         go.onclick = async () => {
           err.textContent = ''; ok.textContent = '';
           const nm = name.value.trim();
           try {
+            if (kind === 'web') {
+              if (!nm) throw new Error('Dê um nome ao programa.');
+              if (!webUrl(urlIn.value)) throw new Error('Endereço inválido. Use um endereço http ou https (ex.: https://exemplo.com).');
+              DK.programs.push({ id: unique(slug(nm), DK.programs), name: nm, kind: 'web', url: urlIn.value.trim(), icon: webIcon, mode: modeSel.value, category: catPick.get(), desktop: desk.checked });
+              await savePrograms();
+              tab = 'list'; draw();
+              DK.toast('“' + nm + '” adicionado. Está no menu Iniciar' + (desk.checked ? ' e na área de trabalho' : '') + '.');
+              return;
+            }
             if (!src) throw new Error('Escolha o arquivo do programa.');
             if (!nm) throw new Error('Dê um nome ao programa.');
             const isJsdos = /\.jsdos$/i.test(src.name);
@@ -330,7 +474,7 @@
               ok.textContent = 'Montando o disquete…';
               const r = await DK.api('POST', '/vm/attach', { id: s.id, zip: src.path });
               s.disk = nm;
-              DK.programs.push({ id: id, name: nm, kind: 'vm', os: s.id, desktop: desk.checked });
+              DK.programs.push({ id: id, name: nm, kind: 'vm', os: s.id, category: catPick.get(), desktop: desk.checked });
               await savePrograms();
               ok.textContent = ''; o.file = null; tab = 'list'; draw();
               if (DK.wins['prog:sys-' + s.id]) DK.toast('Disquete ligado (' + r.files + ' arquivos). Reinicie o sistema aberto para ele aparecer como A:.');
@@ -350,7 +494,7 @@
               ok.textContent = 'Gravando em Meus arquivos/Programas…';
               await DK.api('PUT', '/fs/file?space=home&overwrite=1&path=' + encodeURIComponent(bundle), blob, true);
             }
-            DK.programs.push({ id: id, name: nm, kind: 'dos', engine: engSel.value, bundle: bundle, desktop: desk.checked });
+            DK.programs.push({ id: id, name: nm, kind: 'dos', engine: engSel.value, bundle: bundle, category: catPick.get(), desktop: desk.checked });
             await savePrograms();
             ok.textContent = '';
             o.file = null; tab = 'list'; draw();
@@ -359,10 +503,9 @@
         };
 
         main.append(
-          el('label', {}, 'Onde instalar', kindSel), sysRow,
-          el('div', { className: 'row' }, pick, up, fileLbl, upIn),
-          el('div', { className: 'meta', textContent: 'Dica: baixe o programa pelo Navegador (vai para Meus arquivos/Downloads) e escolha aqui. Para DOS aceita um .zip com os arquivos do programa ou um pacote .jsdos pronto. Para Windows (3.x, 95, 98, ME), adicione primeiro o sistema na aba “Sistemas virtuais”.' }),
-          exeRow, el('label', {}, 'Nome', name), engRow, engNote, vmNote,
+          el('label', {}, 'Onde instalar', kindSel), sysRow, webRows,
+          fileRow, tipRow,
+          exeRow, el('label', {}, 'Nome', name), engRow, engNote, vmNote, catPick.node,
           el('label', { className: 'row' }, desk, ' Criar atalho na área de trabalho'), el('div', { className: 'row' }, go), ok, err);
         refreshKind();
         if (src) chosen(src);
@@ -380,7 +523,7 @@
             if (c.checked) set.delete(a.id); else set.add(a.id);
             DK.prefs.hiddenApps = [...set]; DK.savePrefs(); if (DK.refreshShell) DK.refreshShell();
           };
-          main.append(el('label', { className: 'row' }, c, el('span', { textContent: a.icon + ' ' + a.label })));
+          main.append(el('label', { className: 'row' }, c, el('span', {}, DK.iconNode(a.icon, 16), ' ' + a.label)));
         });
       }
       draw();

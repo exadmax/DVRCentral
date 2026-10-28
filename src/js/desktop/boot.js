@@ -26,21 +26,64 @@
   const openLink = l => window.open(linkHref(l), '_blank', 'noopener');
 
   // ---------- menu Iniciar e ícones ----------
-  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'zip', 'terminal', 'docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts', 'images', 'video', 'cameras', 'browser', 'messages', 'users', 'config', 'account'];
-  const ICON_ORDER = ['computer', 'control', 'explorer', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
-  // Categorias do menu Iniciar. Um aplicativo cai na primeira categoria que o reconhece (por id); o que sobrar vai para "Outros".
+  // Ordem dos itens dentro de cada categoria (o que não está na lista vai para o fim, em ordem alfabética). A ordem das categorias é a de CATS.
+  const MENU_ORDER = ['explorer', 'computer', 'control', 'programs', 'zip', 'terminal',
+    'mail', 'messages', 'calendar', 'contacts',
+    'docs', 'sheets', 'slides', 'officefull', 'pdf', 'notepad', 'calculator',
+    'browser',
+    'images', 'paint', 'video', 'music', 'cameras',
+    'solitaire', 'freecell', 'minesweeper', 'emulators',
+    'users', 'config', 'account'];
+  const ICON_ORDER = ['computer', 'control', 'explorer', 'mail', 'paint', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
+  // Categorias do menu Iniciar, da mais usada à menos. Um aplicativo cai na primeira categoria que o reconhece (por id); o que sobrar vai para "Outros".
+  const inIds = ids => a => ids.indexOf(a.id) >= 0;
   const CATS = [
-    { id: 'files', icon: '🗂️', label: 'Arquivos e sistema', match: a => ['explorer', 'computer', 'control', 'programs', 'zip', 'terminal'].indexOf(a.id) >= 0 },
-    { id: 'office', icon: '📝', label: 'Escritório', match: a => ['docs', 'sheets', 'slides', 'officefull', 'notepad', 'pdf', 'calculator', 'calendar', 'contacts'].indexOf(a.id) >= 0 },
-    { id: 'media', icon: '🎞️', label: 'Imagens, vídeo e câmeras', match: a => ['images', 'video', 'cameras'].indexOf(a.id) >= 0 },
-    { id: 'net', icon: '🌐', label: 'Internet e comunicação', match: a => ['browser', 'messages'].indexOf(a.id) >= 0 },
-    { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS e sistemas virtuais)', match: a => String(a.id).indexOf('prog:') === 0 },
+    { id: 'files', icon: '🗂️', label: 'Arquivos e sistema', match: inIds(['explorer', 'computer', 'control', 'programs', 'zip', 'terminal']) },
+    { id: 'comm', icon: '✉️', label: 'Comunicação', match: inIds(['mail', 'messages', 'calendar', 'contacts']) },
+    { id: 'office', icon: '📝', label: 'Escritório', match: inIds(['docs', 'sheets', 'slides', 'officefull', 'pdf', 'notepad', 'calculator']) },
+    { id: 'net', icon: '🌐', label: 'Internet', match: inIds(['browser']) },
+    { id: 'media', icon: '🎞️', label: 'Imagem, vídeo e música', match: inIds(['images', 'paint', 'video', 'music', 'cameras']) },
+    { id: 'games', icon: '🎮', label: 'Jogos', match: inIds(['solitaire', 'freecell', 'minesweeper', 'emulators']) },
+    { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS, Windows e web)', match: a => String(a.id).indexOf('prog:') === 0 },
     { id: 'house', icon: '🏠', label: 'Painel e serviços da casa', match: a => String(a.id).indexOf('link:') === 0 },
-    { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: a => ['users', 'config', 'account'].indexOf(a.id) >= 0 },
+    { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: inIds(['users', 'config', 'account']) },
   ];
+  const DEFAULT_OPEN = ['files', 'comm', 'office'];
+  // Lista de categorias do menu. all=false devolve só as que servem para guardar programas instalados (sem "Painel da casa" nem "Administração").
+  function menuCategories(all) {
+    const custom = (Array.isArray(DK.prefs.startCats) ? DK.prefs.startCats : []).filter(c => c && c.id && c.label).map(c => ({ id: c.id, icon: c.icon || '📁', label: c.label, custom: true, match: () => false }));
+    const list = [];
+    CATS.forEach(c => { list.push(c); if (c.id === 'games') list.push(...custom); });
+    return all ? list : list.filter(c => c.id !== 'house' && c.id !== 'admin');
+  }
+  DK.menuCategories = () => menuCategories(false);
+  // Cria uma categoria nova do menu Iniciar (fica nas preferências da conta). Devolve o id.
+  DK.addMenuCategory = function (label, icon) {
+    label = String(label || '').trim().slice(0, 30);
+    if (!label) throw new Error('Dê um nome à categoria.');
+    const list = Array.isArray(DK.prefs.startCats) ? DK.prefs.startCats : (DK.prefs.startCats = []);
+    const dup = menuCategories(true).find(c => c.label.toLowerCase() === label.toLowerCase());
+    if (dup) return dup.id;                       // mesmo nome: reaproveita
+    if (list.length >= 12) throw new Error('No máximo 12 categorias criadas por você.');
+    const id = 'c-' + Math.random().toString(36).slice(2, 8);
+    list.push({ id: id, label: label, icon: String(icon || '').trim().slice(0, 4) || '📁' });
+    const open = Array.isArray(DK.prefs.startOpen) ? DK.prefs.startOpen : DEFAULT_OPEN.slice();
+    DK.prefs.startOpen = open.concat(id);        // a categoria nova já aparece aberta
+    DK.savePrefs();
+    return id;
+  };
   const linkApps = () => DK.links.map(l => ({ id: 'link:' + l.label, icon: LINK_ICONS[l.icon] || '🔗', label: l.label + (l.sub ? ' — ' + l.sub : ''), short: l.label, desktop: isExternal(l), open: () => openLink(l) }));
   const visible = () => DK.apps.filter(a => (!a.show || a.show(DK.me)) && (DK.prefs.hiddenApps || []).indexOf(a.id) < 0).concat(DK.programEntries ? DK.programEntries() : []).concat(linkApps());
-  const byOrder = (list, order) => list.slice().sort((a, b) => { const x = order.indexOf(a.id), y = order.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
+  const byOrder = (list, order) => list.slice().sort((a, b) => { const x = order.indexOf(a.id), y = order.indexOf(b.id); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y) || String(a.label).localeCompare(String(b.label), 'pt'); });
+  // Quantas vezes cada item foi aberto pelo menu (nas preferências da conta): os mais abertos sobem para "Mais usados".
+  const FAV_MIN = 3, FAV_MAX = 5;
+  function countUse(a) {
+    const u = DK.prefs.appUse = DK.prefs.appUse || {};
+    u[a.id] = (u[a.id] || 0) + 1;
+    const ids = Object.keys(u);
+    if (ids.length > 60) ids.sort((x, y) => u[x] - u[y]).slice(0, ids.length - 60).forEach(k => { delete u[k]; });   // as preferências têm limite de tamanho
+    DK.savePrefs();
+  }
   const coarse = matchMedia('(pointer: coarse)').matches;
   const hideMenu = () => $('startmenu').classList.add('hidden');
 
@@ -52,31 +95,48 @@
     const foot = [home];
     if (DK.layout.canToggle()) foot.push(el('button', { className: 'shome', onclick: () => { hideMenu(); DK.layout.toggle(); } }, DK.layout.label()));
     foot.push(el('button', { className: 'shome slogout', onclick: () => { hideMenu(); logout(); } }, el('span', { textContent: '🚪' }), 'Sair'));   // no celular a barra não tem o botão Sair
-    m.replaceChildren(el('header', {}, el('img', { src: 'assets/img/logo-128.png', alt: '' }), 'Iniciar', el('span', { className: 'swho', textContent: DK.me ? DK.me.username : '' })), search, list);
+    m.replaceChildren(el('header', {}, el('img', { src: 'assets/img/logo-128.png', alt: '' }), 'Iniciar', el('span', { className: 'swho', textContent: DK.me ? DK.displayName() : '' })), search, list);
     m.append.apply(m, foot);
 
     const apps = byOrder(visible(), MENU_ORDER);
-    const groups = CATS.map(c => ({ c: c, items: apps.filter(c.match) }));
-    const rest = apps.filter(a => !CATS.some(c => c.match(a)));
+    // categorias: as fixas e as que o usuário criou (entram depois de Jogos); um item vai para a categoria que o usuário escolheu ao instalá-lo
+    const cats = menuCategories(true);
+    const catOf = a => (a.cat && cats.some(c => c.id === a.cat) ? a.cat : ((CATS.find(c => c.match(a)) || {}).id || 'other'));
+    const groups = cats.map(c => ({ c: c, items: apps.filter(a => catOf(a) === c.id) }));
+    const rest = apps.filter(a => catOf(a) === 'other');
     if (rest.length) groups.push({ c: { id: 'other', icon: '📦', label: 'Outros' }, items: rest });
-    const open = new Set(Array.isArray(DK.prefs.startOpen) ? DK.prefs.startOpen : ['files']);
+    const open = new Set(Array.isArray(DK.prefs.startOpen) ? DK.prefs.startOpen : DEFAULT_OPEN);
 
-    const row = (a, suffix) => {
-      const b = el('button', { className: 'sitem', onclick: () => { hideMenu(); a.open(); } }, el('span', { textContent: a.icon }), a.label + (suffix || ''));
+    const row = (a, cat) => {
+      const b = el('button', { className: 'sitem', onclick: () => { hideMenu(); countUse(a); a.open(); } }, DK.iconNode(a.icon), a.label, cat ? el('small', { textContent: cat }) : '');
       b._ctx = DK.appCtx(a);
       return b;
     };
+    const favorites = () => { const u = DK.prefs.appUse || {}; return apps.filter(a => (u[a.id] || 0) >= FAV_MIN).sort((x, y) => u[y.id] - u[x.id]).slice(0, FAV_MAX); };
     function draw() {
       list.replaceChildren();
       const q = search.value.trim().toLowerCase();
-      if (q) {   // pesquisa: lista plana, sem categorias
+      if (q) {   // pesquisa: lista plana, sem categorias; acha também pelo nome da categoria e mostra a que cada resultado pertence
         const hits = [];
-        groups.forEach(g => g.items.forEach(a => { if (a.label.toLowerCase().indexOf(q) >= 0) hits.push([a, g.c.label]); }));
+        groups.forEach(g => g.items.forEach(a => { if (a.label.toLowerCase().indexOf(q) >= 0 || g.c.label.toLowerCase().indexOf(q) >= 0) hits.push([a, g.c.label]); }));
         if (!hits.length) list.append(el('div', { className: 'meta', style: 'padding:14px', textContent: 'Nada encontrado.' }));
-        hits.forEach(h => list.append(row(h[0])));
+        hits.forEach(h => list.append(row(h[0], h[1])));
         return;
       }
-      groups.filter(g => g.items.length).forEach(g => {
+      const favs = favorites();
+      if (favs.length) {
+        list.append(el('div', { className: 'scat fav' }, el('span', { textContent: '⭐' }), 'Mais usados'));
+        favs.forEach(a => list.append(row(a)));
+      }
+      const all = groups.filter(g => g.items.length);
+      if (all.length > 3) {   // abrir ou fechar todas as categorias de uma vez
+        const everyOpen = all.every(g => open.has(g.c.id));
+        list.append(el('button', { className: 'sall', textContent: everyOpen ? '▾ Recolher tudo' : '▸ Expandir tudo', onclick: () => {
+          if (everyOpen) open.clear(); else all.forEach(g => open.add(g.c.id));
+          DK.prefs.startOpen = [...open]; DK.savePrefs(); draw();
+        } }));
+      }
+      all.forEach(g => {
         const isOpen = open.has(g.c.id);
         const head = el('button', { className: 'scat' + (isOpen ? ' open' : ''), onclick: () => {
           if (open.has(g.c.id)) open.delete(g.c.id); else open.add(g.c.id);
@@ -98,7 +158,7 @@
   function buildIcons() {
     const icons = $('icons');
     icons.replaceChildren();
-    const add = (emoji, label, fn, ctx, title) => { const b = el('button', { className: 'icon', onclick: fn, title: title || label }, el('span', { textContent: emoji }), label); b._ctx = ctx; icons.append(b); };
+    const add = (emoji, label, fn, ctx, title) => { const b = el('button', { className: 'icon', onclick: fn, title: title || label }, DK.iconNode(emoji), label); b._ctx = ctx; icons.append(b); };
     byOrder(visible().filter(DK.onDesk), ICON_ORDER).forEach(a => add(a.icon, a.short || a.label.replace(/ \(.*\)$/, ''), a.open, DK.appCtx(a), a.label));
     (DK.prefs.deskFiles || []).forEach(f => add(f.type === 'dir' ? '📁' : DK.iconOf({ type: 'file', name: f.name }), f.name, () => DK.openFile(DK.deskRef(f)), DK.fileCtx(f), f.path));
     layoutIcons();
@@ -128,7 +188,7 @@
   async function showDesktop() {
     $('login').classList.add('hidden'); $('force').classList.add('hidden');
     $('desktop').classList.remove('hidden'); $('bar').classList.remove('hidden');
-    $('who').textContent = DK.me.username + (DK.me.is_admin ? ' (admin)' : '');
+    $('who').textContent = DK.displayName() + (DK.me.is_admin ? ' (admin)' : '');
     tickClock(); buildIcons(); buildStartMenu();
     await DK.loadPrefs();
     DK.applyLook();

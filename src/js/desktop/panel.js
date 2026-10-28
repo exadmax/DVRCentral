@@ -57,7 +57,7 @@
           box.append(el('div', { className: 'sec', textContent: sec.title }));
           if (sec.note && !needle) box.append(el('div', { className: 'meta', textContent: sec.note }));
           const grid = el('div', { className: 'tiles' });
-          items.forEach(i => grid.append(el('button', { className: 'tile', onclick: i.open }, el('span', { className: 'ti', textContent: i.icon }), el('b', { textContent: i.label }), el('span', { className: 'meta', textContent: i.sub }))));
+          items.forEach(i => grid.append(el('button', { className: 'tile', onclick: i.open }, el('span', { className: 'ti' }, DK.iconNode(i.icon, 32)), el('b', { textContent: i.label }), el('span', { className: 'meta', textContent: i.sub }))));
           box.append(grid);
         });
         if (!box.childNodes.length) box.append(el('div', { className: 'meta', textContent: 'Nada encontrado.' }));
