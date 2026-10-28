@@ -496,3 +496,33 @@ body.webampoff #webamp { display: none !important; }
 .utbl td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .utbl td.upd { color: #b45309; font-weight: 600; }
 .utbl td.uhow { background: #f8fafc; line-height: 1.5; }
+
+/* ---------- Casa: planta e TVs (js/desktop/home.js) ---------- */
+.homemain { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+.homefloors { flex: none; }
+.homewrap { flex: none; }
+.homecv { position: relative; width: 100%; padding-top: 58%; background: #f4f6fa; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; touch-action: none; user-select: none; }
+.homecv.edit { cursor: crosshair; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 10% 10%; }
+.homecv.placing { cursor: copy; outline: 2px dashed var(--acc); outline-offset: -3px; }
+.homeroom { position: absolute; border: 2px solid rgba(28, 36, 48, .55); border-radius: 4px; color: #1c2430; }
+.homecv.edit .homeroom { cursor: move; }
+.homeroom.sel { border-color: var(--acc); box-shadow: 0 0 0 2px rgba(37, 99, 235, .35); }
+.homeroom.drawing { background: rgba(37, 99, 235, .15); border-style: dashed; border-color: var(--acc); }
+.homeroom .lbl { position: absolute; left: 6px; top: 3px; font-size: 12px; font-weight: 600; pointer-events: none; max-width: 95%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.homeroom .cnt { position: absolute; left: 6px; bottom: 3px; font-size: 11px; color: #3b4658; pointer-events: none; }
+.homeroom .rzh { position: absolute; right: -1px; bottom: -1px; width: 14px; height: 14px; cursor: nwse-resize; background: var(--acc); border-radius: 3px 0 3px 0; opacity: .85; }
+.homedev { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 2; }
+.homecv.edit .homedev { cursor: move; }
+.homedev .ic { font-size: 24px; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); }
+.homedev .dot { position: absolute; right: -4px; top: -3px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; background: #c3cad6; }
+.homedev .lbl { font-size: 11px; background: rgba(255, 255, 255, .85); border-radius: 3px; padding: 0 4px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.homedev.sel .ic { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 4px; }
+.hbadge { display: inline-block; color: #fff; font-size: 12px; border-radius: 10px; padding: 1px 9px; background: #c3cad6; }
+.homeinsp { flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; background: #f8fafc; }
+.homeinsp input { width: auto; flex: 1; min-width: 120px; }
+.swatch { width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 2px solid var(--line); }
+.swatch.on { border-color: var(--acc); }
+.hometray { flex: none; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chip { border-radius: 14px; font-size: 12px; }
+.chip.on { background: #dbe7fb; border-color: var(--acc); }
+.homehint { flex: none; }

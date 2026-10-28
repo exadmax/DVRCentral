@@ -31,7 +31,7 @@
     'mail', 'messages', 'calendar', 'contacts',
     'docs', 'sheets', 'slides', 'officefull', 'pdf', 'notepad', 'calculator',
     'browser',
-    'images', 'paint', 'video', 'music', 'cameras',
+    'images', 'paint', 'video', 'music', 'cameras', 'home',
     'solitaire', 'freecell', 'minesweeper', 'emulators',
     'users', 'config', 'updates', 'account'];
   const ICON_ORDER = ['computer', 'control', 'explorer', 'mail', 'paint', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
@@ -45,7 +45,7 @@
     { id: 'media', icon: '🎞️', label: 'Imagem, vídeo e música', match: inIds(['images', 'paint', 'video', 'music', 'cameras']) },
     { id: 'games', icon: '🎮', label: 'Jogos', match: inIds(['solitaire', 'freecell', 'minesweeper', 'emulators']) },
     { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS, Windows e web)', match: a => String(a.id).indexOf('prog:') === 0 },
-    { id: 'house', icon: '🏠', label: 'Painel e serviços da casa', match: a => String(a.id).indexOf('link:') === 0 },
+    { id: 'house', icon: '🏠', label: 'Painel e serviços da casa', match: a => a.id === 'home' || String(a.id).indexOf('link:') === 0 },
     { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: inIds(['users', 'config', 'updates', 'account']) },
   ];
   const DEFAULT_OPEN = ['files', 'comm', 'office'];

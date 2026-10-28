@@ -32,6 +32,7 @@
     if (admin) S[S.length - 1].items.unshift({ icon: '👥', label: 'Usuários e permissões', sub: 'Criar contas e liberar Terminal/arquivos', open: DK.usersApp });
     S.push({ title: 'Dispositivos e contatos', items: [
       { icon: '📷', label: 'Câmeras', sub: admin ? 'Ver, abrir em janelas e gerenciar' : 'Ver e abrir em janelas', open: DK.camerasApp },
+      { icon: '🏠', label: 'Casa', sub: admin ? 'Planta da casa e estado das TVs; editar a planta' : 'Planta da casa e estado das TVs', open: DK.homeApp },
       { icon: '📇', label: 'Contatos', sub: 'Profissionais e serviços da casa', open: DK.contactsApp }] });
     if (me.browser) S.push({ title: 'Rede e Internet', items: [
       { icon: '🌐', label: 'Navegador', sub: 'Páginas e downloads internos', open: () => DK.browserApp() },

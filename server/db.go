@@ -81,6 +81,8 @@ var migrations = []string{
 	deskProfileMigration,
 	// Diogows: aplicativo OAuth de e-mail por usuário (desk_mail.go).
 	deskMailAppsMigration,
+	// Diogows: planta da casa e aparelhos inteligentes (desk_home.go).
+	deskHomeMigration,
 }
 
 type store struct {

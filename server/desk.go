@@ -91,6 +91,7 @@ type deskAPI struct {
 	mail      *deskMailState // E-mail (desk_mail.go)
 	upd       *deskUpdates   // atualizações de componentes (desk_updates.go)
 	staticDir string         // pasta do painel (www), onde está vendor/components.json
+	home      homeCache      // estado recente das TVs da Casa (desk_home.go)
 }
 
 func newDesk(cfg Config, st *store, sm *settingsMgr, sys *sysMon, cfgDir string) *deskAPI {
@@ -546,6 +547,7 @@ func (d *deskAPI) register(mux *http.ServeMux) {
 	d.registerWebIcon(mux)
 	d.registerUpdates(mux)
 	d.registerVM(mux)
+	d.registerHome(mux)
 }
 
 type deskMe struct {
