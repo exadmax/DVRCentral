@@ -34,7 +34,7 @@ servido por um **hub** em Go que fica em um servidor Linux da casa (pode ser um 
 | **Serviços** | Profissionais (eletricista, encanador...), com sincronização opcional com Google Planilhas | `contatos.html` |
 | **Vídeos** | Lista a pasta de vídeos do servidor; toca no navegador ou abre no VLC | `videos.html` |
 | **Livros** | PDFs e EPUBs no servidor, com envio pelo painel, categoria, dono e leitor de EPUB (desligável na Config) | `livros.html` |
-| **Diogows** | Área de trabalho no navegador, com **vários usuários**: Explorer, editor de **.docx/.odt**, visualizadores, player de vídeo, **câmeras em janelas separadas**, contatos, **calendário por usuário com avisos**, **navegador interno com downloads**, **programas DOS e sistemas virtuais (Windows 3.x, 95, 98 e ME, com o disco salvo no servidor) no navegador (DOSBox-X ou js-dos)** com **Instalar Programas e Acessórios**, **Painel de Controle**, Meu Computador e Terminal com sudo (opcional). Interface a mais: o painel segue como era | `desktop.html` |
+| **Diogows** | Área de trabalho no navegador, com **vários usuários**: Explorer, editor de **.docx/.odt**, visualizadores, player de vídeo, **câmeras em janelas separadas**, contatos, **calendário por usuário com avisos**, **navegador interno com downloads**, **programas DOS e sistemas virtuais (Windows 3.x, 95, 98 e ME, com o disco salvo no servidor) no navegador (DOSBox-X ou js-dos)** com **Instalar Programas e Acessórios** (inclui **Programas Web** com o ícone do próprio site), **Painel de Controle**, Meu Computador e Terminal com sudo (opcional), além de **E-mail** (IMAP/SMTP, Gmail e Outlook por OAuth), **Paint**, **Player de Música**, **Jogos** e perfil com foto. Interface a mais: o painel segue como era | `desktop.html` |
 | **Config** | CPU/memória do servidor; câmeras, agendas, trânsito, menu, painel, livros e integrações em abas, com ajuda embutida; desligar desktop/hub | `config.html` |
 | **Modo noturno** | Das 23h às 5h: tela escura com clima e eventos de amanhã | Início |
 | **Idiomas** | Português, English, Español e 中文, escolhido por aparelho (ou automático, pelo navegador) | Config → Idioma |
@@ -113,6 +113,7 @@ Referência completa em `server/hub.config.example.json`.
 | `videos.dir` | Pasta de vídeos (padrão `~/Videos`) |
 | `books.dir`, `books.maxMB` | Pasta dos livros (padrão `~/Livros`) e tamanho máximo de cada envio (padrão 300 MB) |
 | `desk` | Diogows: `shell` (Terminal e arquivos do computador, desligado por padrão), `protectSettings`, `noBrowser`, `maxUploadMB` ([docs/desktop.md](docs/desktop.md)) |
+| `desk.mail` | E-mail do Diogows: `redirectURI`, `allowPrivate`, `disabled` (o aplicativo OAuth é de cada usuário, em E-mail → ➕) ([docs/email.md](docs/email.md)) |
 | `profissionaisSheet` | CSV do Google Planilhas e intervalo de sincronização (vazio desliga) |
 | `games` | Chaves de Steam, PSN, Xbox e RetroAchievements (subsistema sem tela) |
 | `dbPath`, `allowedOrigins`, `forceIPv4` | Banco SQLite, origens extras para gravar, uso de IPv4 nas consultas externas |
@@ -195,6 +196,10 @@ node scripts/check-i18n.js
 | [docs/funcionalidades.md](docs/funcionalidades.md) | **Mapa de todas as funcionalidades**, API, rotinas e código |
 | [docs/cameras.md](docs/cameras.md) | Câmeras ao vivo, rodízio, gravações, modelos Intelbras |
 | [docs/desktop.md](docs/desktop.md) | **Diogows**: usuários, permissões, Terminal/sudo, calendário, LiteOffice (documentos, planilhas, apresentações e LibreOffice completo no navegador), API |
+| [docs/email.md](docs/email.md) | **E-mail do Diogows**: ligar contas (IMAP/SMTP, Gmail e Outlook por OAuth), registrar o aplicativo OAuth, segurança, API e problemas comuns |
+| [docs/aplicativos.md](docs/aplicativos.md) | Programa Web (ícone do site, WhatsApp Web), Paint, Player de Música, Jogos, perfil do usuário e menu Iniciar com categorias |
+| [docs/novidades.md](docs/novidades.md) | O que mudou desde a `v1.0.0-rc.2` e o que fazer ao atualizar (rascunho das notas da próxima versão) |
+| [docs/licencas.md](docs/licencas.md) | Componentes de terceiros embutidos (JS Paint, Webamp, bibliotecas de IMAP...) e suas licenças |
 | [docs/estoque-contatos.md](docs/estoque-contatos.md) | Geladeira, Serviços, planilha, banco, API e segurança; páginas Vídeos e Livros |
 | [docs/jogos.md](docs/jogos.md) | Subsistema de conquistas (sem tela) |
 | [docs/spec-design.md](docs/spec-design.md) | Especificação visual (TV 1920×1080) |

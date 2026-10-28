@@ -15,7 +15,7 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 | Parte | Pasta | Tecnologia |
 |---|---|---|
 | Painel web (único para todas as telas) | `src/` | HTML + JS clássico (sem módulos ES, roda também em navegadores de TV), CSS |
-| Hub (servidor + API) | `server/` | Go 1.26, só biblioteca padrão + `modernc.org/sqlite`, `gortsplib`, `mediacommon` |
+| Hub (servidor + API) | `server/` | Go 1.26, biblioteca padrão + `modernc.org/sqlite`, `gortsplib`, `mediacommon`, `golang.org/x/net` e, para o E-mail, `go-imap/v2`, `go-message` e `go-sasl` (veja [licencas.md](licencas.md)) |
 
 ## 2. Páginas e funcionalidades do painel
 
@@ -28,7 +28,7 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 | **Vídeos** | `videos.html` + `js/pages/videos.js` | Vídeos | ✅ | Lista a pasta de vídeos; tocar no navegador, abrir no VLC, copiar link |
 | **Livros** | `livros.html` + `js/pages/livros.js` | Livros | ✅ | PDFs e EPUBs no servidor: envio pelo painel, categoria e dono, leitor de EPUB; pode ser desligada na Config |
 | **Config** | `config.html` + `js/pages/config.js` | Config | ✅ | CPU/memória do servidor, botões de energia e configuração das gravações |
-| **Diogows** | `desktop.html` + `js/desktop/*.js` | Diogows | ✅ | Área de trabalho com login e vários usuários: Explorer, LiteOffice (editores leves de .docx/.odt, .xlsx/.ods e .pptx/.odp, mais o LibreOffice completo em WebAssembly), visualizadores, player de vídeo, câmeras em janelas, contatos, calendário com avisos, navegador interno com downloads, programas DOS e sistemas virtuais Windows 3.x/95/98/ME com disco salvo no servidor (DOSBox-X e js-dos), Painel de Controle, Meu Computador e Terminal (veja [desktop.md](desktop.md)) |
+| **Diogows** | `desktop.html` + `js/desktop/*.js` | Diogows | ✅ | Área de trabalho com login e vários usuários: Explorer, LiteOffice (editores leves de .docx/.odt, .xlsx/.ods e .pptx/.odp, mais o LibreOffice completo em WebAssembly), visualizadores, player de vídeo, câmeras em janelas, contatos, calendário com avisos, navegador interno com downloads, programas DOS e sistemas virtuais Windows 3.x/95/98/ME com disco salvo no servidor (DOSBox-X e js-dos), Painel de Controle, Meu Computador e Terminal; **E-mail** (IMAP/SMTP, Gmail e Outlook por OAuth), **Paint** (JS Paint), **Player de Música** (Webamp), **Jogos** (Campo Minado, Paciência, FreeCell), **Programa Web** (ícone do site, janela própria), **perfil** com foto e assinatura e menu Iniciar com categorias próprias (veja [desktop.md](desktop.md), [email.md](email.md) e [aplicativos.md](aplicativos.md)) |
 | Jogos (externo) | — | Jogos | ➖ | Abre o WebRCade (porta 8080) |
 | Música (externo) | — | Música | ➖ | Abre o Navidrome (porta 4533) |
 
@@ -103,6 +103,21 @@ sistema 10 s, tela 30 s.
 - **Modo compatibilidade** (último cartão, vale só para o aparelho): em navegador de TV (detectado pelo user agent: Tizen, webOS, Chromecast etc.; ou forçado), a página Câmeras mostra uma câmera por vez, com botões para trocar (`js/core/compat.js`).
 - **Liberar memória**: *Desligar o desktop* (display manager) e *Desativar a central* (para o hub). Exigem dois toques (botão arma por 5 s, o segundo confirma) e só funcionam no Linux com a regra do polkit instalada pelo `install.sh`.
 
+## 2.2 Aplicativos do Diogows (resumo)
+
+O inventário detalhado, a API (`/api/desk/*`) e os limites de cada um estão em [desktop.md](desktop.md); os mais novos têm guia próprio.
+
+| Aplicativo | Categoria no menu | Dados | Guia |
+|---|---|---|---|
+| E-mail | Comunicação | Credenciais cifradas no banco (`desk_mail_accounts`) e `desk/_mail.key`; mensagens ficam no provedor | [email.md](email.md) |
+| Mensagens, Calendário, Contatos | Comunicação | Banco | [desktop.md](desktop.md) |
+| LiteOffice (Documentos, Planilhas, Apresentações, Completo), Bloco de Notas, PDF, Calculadora | Escritório | Meus arquivos | [desktop.md](desktop.md) |
+| Navegador | Internet | Downloads em Meus arquivos | [desktop.md](desktop.md) |
+| Imagens, **Paint**, Vídeo, **Player de Música**, Câmeras | Imagem, vídeo e música | Meus arquivos (`Imagens`, `Músicas`) | [aplicativos.md](aplicativos.md) |
+| **Campo Minado, Paciência, FreeCell** | Jogos | Melhor tempo no navegador | [aplicativos.md §4](aplicativos.md#4-jogos) |
+| Programas DOS, sistemas virtuais, **Programas Web** | Escolha do usuário (padrão *Meus programas*) | `Programas/programas.json` | [aplicativos.md §1](aplicativos.md#1-programa-web) |
+| Perfil (nome, foto, assinatura) | Minha conta | Banco (`desk_profiles`) | [aplicativos.md §5](aplicativos.md#5-perfil-do-usuário) |
+
 ## 3. API do hub
 
 Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-store` e CORS aberto (o hub só é acessível na rede de casa).
@@ -147,6 +162,8 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 - Gravações e botões de energia: exigem o cabeçalho `X-CD-Action: confirm`, que um formulário de outro site não consegue enviar sem preflight.
 - Corpos de requisição limitados (64 KB); nomes de arquivo vindos da URL nunca viram caminho livre (validados por regex/lista).
 
+> A API do **Diogows** (`/api/desk/*`: usuários, arquivos, terminal, agendas, e-mail, perfil...) tem tabela própria em [desktop.md](desktop.md#api-apidesk) e [email.md](email.md#8-api).
+
 ## 4. Rotinas em segundo plano do hub
 
 | Rotina | Frequência | O que faz | Código |
@@ -180,6 +197,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `books.go` | Livros PDF/EPUB: lista, envio, categoria/dono, exclusão e leitor de EPUB |
 | `sysinfo.go` + `_linux/_windows/_other.go` | Amostragem de CPU/memória por plataforma |
 | `power.go` | Parar desktop/hub via `systemctl` (polkit) |
+| `desk*.go` | Diogows: usuários, arquivos, terminal, agendas, chat, navegador, VM e, novos, `desk_mail.go`/`desk_mail_proto.go`/`desk_mail_oauth.go` (E-mail), `desk_profile.go` (perfil e foto) e `desk_webicon.go` (ícone de sites); veja [desktop.md](desktop.md) |
 | `games.go`, `games_psn.go`, `games_xbox.go`, `games_steam.go`, `games_retro.go` | Agregador de conquistas e um cliente por plataforma |
 | `version.go` | Lê o arquivo `VERSION` |
 | `install.sh`, `build.sh`, `package.sh`, `centraldiogo-hub.service` | Compilar (4 arquiteturas Linux), empacotar e instalar como serviço |

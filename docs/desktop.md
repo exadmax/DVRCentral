@@ -4,6 +4,9 @@ Uma **interface a mais** do Central Diogo, no molde de uma área de trabalho cl�
 **vários usuários**. Fica em `http://<servidor>/desktop.html`. O painel de sempre (Início, Geladeira, Serviços, Câmeras, Vídeos, Livros,
 Config) **continua como era**: nada foi trocado, o Diogows só se soma a ele.
 
+> **Guias complementares:** [email.md](email.md) (cliente de e-mail com Gmail e Outlook), [aplicativos.md](aplicativos.md) (Programa Web, Paint, Player de Música, Jogos, perfil e menu),
+> [novidades.md](novidades.md) (o que mudou e o que fazer ao atualizar) e [licencas.md](licencas.md) (componentes de terceiros).
+
 > **Nome:** o que antes aparecia como “Desktop” agora se chama **Diogows**. O endereço continua `/desktop.html` e a pasta *Desktop* dentro de *Meus arquivos* também; nada precisa ser migrado.
 
 - No painel atual há o atalho **Diogows** no rodapé (menu padrão). Se o seu menu já foi editado na Config, acrescente o atalho lá:
@@ -14,7 +17,7 @@ Config) **continua como era**: nada foi trocado, o Diogows só se soma a ele.
 
 ## Área de Trabalho, menu Iniciar e menu de contexto
 
-- **Menu Iniciar por categorias** (Arquivos e sistema, Escritório, Imagens, vídeo e câmeras, Internet e comunicação, Meus programas, Painel e serviços da casa e Administração e conta), com **busca** (lista plana) e o estado salvo nas preferências do usuário.
+- **Menu Iniciar por categorias**, com **Mais usados**, **busca** (acha também pelo nome da categoria) e o estado salvo nas preferências do usuário; você pode **criar categorias** ao instalar programas (veja [Menu Iniciar](#menu-iniciar) e [aplicativos.md](aplicativos.md#6-menu-iniciar-categorias-mais-usados-e-ícones)).
 - **Botão direito** (e **toque longo** no celular e no tablet) abre o menu do Diogows na área de trabalho, nos ícones, no Iniciar, na barra de tarefas, nas janelas e no Explorer.
   Campos de texto e **Shift + botão direito** mantêm o menu do navegador.
 - **Área de Trabalho com itens seus:** aceita arquivos, pastas e ícones de aplicativos, enviados do aparelho, pelo Explorer ou arrastando e soltando. Os arquivos enviados ficam
@@ -72,9 +75,13 @@ bloqueiam por 5 minutos.
 | **Visualizador de Imagens / PDF** | todos | Abrem os da sua pasta ou, com permissão, os do computador (zoom, anterior/próxima, leitor de PDF do navegador) |
 | **Player de Vídeo** | todos | Biblioteca de vídeos da casa (com legenda `.srt`/`.vtt`) e arquivos do Explorer; avançar e voltar, velocidade, lista de reprodução |
 | **Painel de Controle** | todos (itens do admin só para ele) | Um lugar só: programas, sistema, contas, calendário, câmeras, rede e o **Config do painel aba por aba** (só admin), além de **executar os programas DOS e os sistemas virtuais (Windows) instalados** |
-| **Instalar Programas e Acessórios** | todos | Instala programas DOS, sistemas virtuais (Windows 3.x, 95, 98, ME) e programas dentro deles na sua pasta; também liga ou desliga os acessórios do Diogows (abaixo) |
+| **Instalar Programas e Acessórios** | todos | Instala programas DOS, sistemas virtuais (Windows 3.x, 95, 98, ME), programas dentro deles e **Programas Web** (ícone do próprio site, janela interna, janela própria ou outra aba) na sua pasta, cada um na **categoria do menu** que você escolher; também liga ou desliga os acessórios do Diogows (abaixo) |
 | **Navegador** | todos | Abre páginas pelo servidor e **baixa arquivos para Meus arquivos/Downloads** (abaixo) |
 | **Calculadora** | todos | Acessório simples |
+| **E-mail** | todos | Cliente de e-mail com várias contas por usuário: pastas com contagem de não lidas, busca, estrela, marcar como lida/não lida, mover e excluir (vai para a lixeira), ler (HTML limpo, sem scripts e **sem imagens remotas** até você pedir), baixar anexos, escrever, responder, responder a todos e encaminhar, com anexos do aparelho ou de Meus arquivos. Gmail e Microsoft/Outlook por **OAuth 2.0**, ou qualquer servidor **IMAP/SMTP** com senha (veja *E-mail* abaixo) |
+| **Paint** | todos | O **JS Paint** (um clone fiel do MS Paint em JavaScript, licença **MIT**, https://github.com/1j01/jspaint) dentro do hub, sem internet: lápis, pincéis, aerógrafo, texto, formas, seleção, preenchimento, zoom, desfazer em árvore e vários formatos (PNG, JPEG, GIF, BMP, WebP, TIFF…). Abre e salva em **Meus arquivos** (pasta padrão *Imagens*); no Explorer, botão direito numa imagem → **Editar no Paint**; ao fechar com alterações pergunta se quer salvar. Interface em português. Código do Diogows em `src/js/desktop/paint.js`; a cópia do JS Paint fica em `src/vendor/jspaint/` com `LICENSE.txt` |
+| **Player de Música** | todos | O **Webamp** (um Winamp 2 em JavaScript, MIT, dentro do hub, sem internet), com as janelas soltas sobre a área de trabalho: playlist, equalizador e skins `.wsz`. Toca as músicas (mp3, m4a, ogg, wav, flac) da pasta **Meus arquivos/Músicas** e subpastas (até 3 níveis, 3000 faixas); **⬆ Enviar músicas** manda arquivos do aparelho para essa pasta, **📂 Da minha pasta** acrescenta um arquivo de qualquer lugar de Meus arquivos e **🎨 Skin** troca a aparência (fica na conta). Código em `src/js/desktop/music.js` e `src/vendor/webamp/` |
+| **Jogos: Campo Minado, Paciência, FreeCell** | todos | Categoria *Jogos* do menu Iniciar; rodam inteiros no navegador, sem servidor. **Campo Minado** com 3 níveis (o primeiro clique nunca é mina), bandeira por botão direito, toque longo ou botão 🚩, clique num número para abrir os vizinhos e melhor tempo por nível. **Paciência** (Klondike, comprar 1 ou 3) e **FreeCell** (move sequências conforme as células e colunas livres, botão ⚡ Auto): clique na carta e depois no destino, duplo clique manda para a fundação, ↩ desfaz. Código em `src/js/desktop/games.js` |
 | **Câmeras** | todos veem; só o admin altera | Cada câmera abre numa **janela separada** (ou todas, ou em mosaico); a aba *Gerenciar* edita as câmeras (só admin) |
 | **Contatos** | todos | Os profissionais da casa (mesma lista da página Serviços): busca, filtro por tipo, ligar, WhatsApp, e-mail |
 | **Mensagens** | todos | Conversa entre usuários do Diogows, com envio de arquivos e imagens (arraste, cole um print ou use 📎), avisos no sino e “visto”. Ninguém envia mensagens ao administrador; ele escreve aos demais. Anexos ficam em `desk/_chat/` e podem ser salvos em *Meus arquivos/Recebidos* |
@@ -193,6 +200,19 @@ Um sistema virtual é um Windows que roda no navegador e **guarda o que você fa
   reabrir e a alteração continuar lá. Nos testes do servidor, o preparo foi conferido com os pacotes reais do **Win3.11, Win95 e Win98**; o Win95 e o Win98
   **não foram abertos** no navegador.
 
+### Programa Web
+
+Em *Instalar programa → Onde instalar → **Programa Web*** você cadastra um endereço (http ou https), escolhe um **ícone** entre alguns e se ele abre numa
+**janela interna** do Diogows (iframe) ou **fora do app** (outra aba do navegador). Entra no menu Iniciar (*Meus programas*) e, se quiser, na área de trabalho; o modo
+pode ser trocado depois na lista de programas instalados. O cadastro fica na sua conta (`Programas/programas.json`), então cada instalação tem os seus
+(o WebRCade e o Navidrome da sua máquina, por exemplo, sem precisar vir no pacote).
+
+- **Ícone do próprio site:** ao informar o endereço, o servidor procura o ícone da página (apple-touch-icon, `<link rel="icon">` ou `/favicon.ico`), o Diogows o reduz para 64 px e o oferece como primeira opção (já selecionado). Sem ícone, escolha um dos emojis. O servidor só busca em endereços da internet, como o Navegador interno.
+- **Janela própria do navegador (compacta):** para sites que **não deixam ser exibidos dentro de outra página**, como o **WhatsApp Web** (manda `frame-ancestors` só para o próprio domínio), o modo certo é abrir numa janela só do site, sem abas nem barra de endereço. Há atalhos prontos para **WhatsApp Web**, Telegram Web, Gmail e Outlook. O WhatsApp Web **não pode** ficar dentro de uma janela do Diogows: seria preciso burlar a proteção do site, e isso o Diogows não faz.
+- `{host}` no endereço vira o endereço pelo qual o Diogows foi aberto: `{host}:8080/jogos/` serve para um serviço desta máquina em outra porta. Um endereço que começa com `/` é do próprio servidor.
+- Na janela interna, sites que proíbem ser exibidos dentro de outra página (`X-Frame-Options`/`frame-ancestors`) aparecem em branco: use **↗ Abrir em outra aba** ou o modo *Fora do app*.
+- Com o Diogows em **https**, endereços **http** não podem ser embutidos (bloqueio do navegador) e abrem sempre em outra aba.
+
 **Acessórios:** a aba *Acessórios do Diogows* mostra os aplicativos do próprio Diogows (Documentos, Calendário, Calculadora, Player...). Desmarcar apenas o
 esconde do menu e dos ícones; nada é apagado e dá para marcar de novo.
 
@@ -212,6 +232,25 @@ Até 12 agendas por usuário. Opcionalmente o calendário mostra também as **ag
 Os **avisos** aparecem dentro do Diogows do usuário enquanto ele estiver aberto: sino na barra com contador, aviso na tela, som e, em HTTPS,
 avisos do navegador. Por padrão avisa **10 minutos antes** e **na hora** do compromisso, e de manhã (8h) os de dia inteiro. Tudo se ajusta em
 *Calendário → Agendas e avisos* e fica salvo na conta (acompanha o usuário em qualquer aparelho). O mesmo aviso não se repete.
+
+## E-mail
+
+Cliente de e-mail com várias contas por usuário, **IMAP/SMTP** (só TLS/STARTTLS) e login **OAuth 2.0** para **Gmail** e **Microsoft/Outlook**. O servidor é só a ponte: a
+credencial fica **cifrada** (`desk/_mail.key`, inclua no backup) e **nenhuma mensagem é gravada no servidor**. O HTML das mensagens abre num iframe com `sandbox`, sem scripts e
+**sem imagens remotas** até você pedir. O guia completo (ligar contas, registrar o seu aplicativo OAuth no Google e na Microsoft, `desk.mail`, API, segurança, problemas comuns e
+limites) está em **[email.md](email.md)**.
+
+## Perfil do usuário (nome, foto e assinatura)
+
+Em **Minha conta** cada usuário pode, se quiser, informar **nome e sobrenome**, uma **foto** e uma **assinatura de e-mail**. Nome e foto aparecem em **Mensagens** e na barra de tarefas;
+sem nome vale o nome de usuário, sem foto as iniciais. **Usar meu nome nos e-mails** põe o nome no remetente e a assinatura nas mensagens novas. Regras, limites e API em
+[aplicativos.md §5](aplicativos.md#5-perfil-do-usuário). Código em `server/desk_profile.go`.
+
+## Menu Iniciar
+
+Organizado por categorias, da mais usada à menos: **Arquivos e sistema**, **Comunicação** (E-mail, Mensagens, Calendário, Contatos), **Escritório**, **Internet**, **Imagem, vídeo e música**, **Jogos**, **Meus programas**, **Painel e serviços da casa** e **Administração e conta**. No topo ficam os **Mais usados** (os itens que você abriu 3 vezes ou mais, no máximo 5; a contagem fica na sua conta), e *Expandir tudo / Recolher tudo* abre ou fecha as categorias de uma vez. A busca acha pelo nome do item **ou da categoria** e mostra a que categoria cada resultado pertence. Dentro de cada categoria a ordem é a mesma do uso (e alfabética no que não tem ordem fixa).
+
+**Categoria de tudo o que se instala:** ao instalar um **programa DOS**, um **sistema virtual (Windows)** ou um **Programa Web**, você escolhe em qual categoria do menu ele aparece (uma das existentes, como *Internet* ou *Jogos*) ou cria uma **nova categoria** ali mesmo (nome e emoji; até 12, guardadas na sua conta). A categoria também pode ser trocada depois, na lista de programas instalados; categorias criadas somem do menu enquanto estiverem vazias.
 
 ## LiteOffice (documentos, planilhas, apresentações e o Office completo)
 
@@ -289,7 +328,8 @@ Abre numa **nova aba** (`office.html`); o botão **💾 Salvar no Diogows** (ou 
   "protectSettings": false,  // alterações de Config/câmeras exigem sessão de administrador do Diogows
   "maxUploadMB": 2048,       // tamanho máximo de cada envio
   "dir": "desk",             // onde ficam as pastas dos usuários (relativo ao hub.config.json)
-  "noBrowser": false,        // true tira o Navegador e os downloads
+  "noBrowser": false,        // true tira o Navegador, os downloads e a busca de ícones de sites
+  "mail": { },               // E-mail: redirectURI, allowPrivate, disabled (o OAuth é de cada usuário; veja email.md §3)
   "disabled": false          // true desliga o Diogows inteiro (/api/desk/* some)
 }
 ```
@@ -312,6 +352,11 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | `GET /computer`, `GET /videos`, `GET /videos/file?name=` | todos | Meu Computador e biblioteca de vídeos |
 | `GET /browse?url=`, `POST /downloads`, `GET /downloads`, `DELETE /downloads/{id}` | todos (some com `noBrowser`) | Navegador interno e downloads para Meus arquivos/Downloads |
 | `GET/POST /calendars`, `PUT/DELETE /calendars/{id}`, `GET /calendars/feed`, `GET/PUT /prefs` | cada usuário, só os próprios | Agendas e preferências |
+| `GET/PUT /profile`, `PUT/DELETE /profile/photo` | cada usuário | Nome, sobrenome, assinatura e foto |
+| `GET /avatar/{id}` | todos (logados) | Foto de um usuário (JPEG/PNG inerte; 404 se não tiver) |
+| `GET /webicon?url=` | todos (some com `noBrowser`) | Procura e devolve o ícone de um site (só endereços da internet) |
+| `GET /mail/config`, `GET/POST /mail/accounts`, `DELETE /mail/accounts/{id}`, `POST /mail/oauth/start`, `POST /mail/oauth/finish`, `GET /mail/oauth/callback` | cada usuário, só as próprias contas (o `callback` é sem sessão) | Contas de e-mail e login OAuth |
+| `GET /mail/accounts/{id}/folders\|messages\|message\|attachment`, `POST /mail/accounts/{id}/action\|send` | dono da conta | Ler, organizar e enviar (detalhes em [email.md §8](email.md#8-api)) |
 
 ## Limitações
 
@@ -320,7 +365,8 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 - O sudo só existe no Linux do servidor. No Windows de desenvolvimento o Terminal usa o PowerShell e o Explorer mostra as unidades (`/C:/...`).
 - Funciona em navegador de computador; não foi feito para TV nem celular.
 - O **LiteOffice Completo** só roda em HTTPS ou `localhost` e pede ~50 MB de download e ~1 GB de memória no computador de quem usa (seção LiteOffice).
-- Os dados ficam no banco (`centraldiogo.db`: usuários, sessões, agendas, preferências) e em `desk/` (arquivos). Entram no mesmo backup do banco; o `install.sh` não mexe neles.
+- Os dados ficam no banco (`centraldiogo.db`: usuários, sessões, agendas, preferências, **contas de e-mail** e **perfis**) e em `desk/` (arquivos e a chave `_mail.key`). Entram no mesmo backup do banco; o `install.sh` não mexe neles.
+- O **WhatsApp Web** não pode ficar numa janela interna (o site proíbe ser exibido dentro de outra página); use o modo *janela própria do navegador* do Programa Web ([aplicativos.md §1](aplicativos.md#1-programa-web)).
 
 ## Onde está o código
 
@@ -333,6 +379,10 @@ Tudo exige sessão, menos `POST /login`. Escritas exigem `X-Desk: 1`. Erros vêm
 | Agendas por usuário e preferências | `server/desk_calendar.go` |
 | Testes | `server/desk_test.go`, `server/desk_calendar_test.go` |
 | Navegador interno e downloads | `server/desk_browser.go`, `src/js/desktop/browser.js` |
+| E-mail: contas, cifra, IMAP/SMTP, OAuth e testes | `server/desk_mail.go`, `desk_mail_proto.go`, `desk_mail_oauth.go`, `desk_mail_test.go`; tela em `src/js/desktop/mail.js` |
+| Perfil do usuário, ícone do site e categorias | `server/desk_profile.go`, `desk_webicon.go` (+ testes), `src/js/desktop/admin.js` (Minha conta), `core.js` (`DK.avatar`, `DK.iconNode`), `boot.js` (categorias) |
+| Jogos, Player de Música (Webamp), Paint (JS Paint) e Programa Web | `src/js/desktop/games.js`, `music.js` (+ `src/vendor/webamp/`), `paint.js` (+ `src/vendor/jspaint/`), `programs.js` (veja [aplicativos.md §7](aplicativos.md#7-mapa-do-código)) |
+| Menu Iniciar (categorias, mais usados) | `src/js/desktop/boot.js` |
 | Programas, emulador e Painel de Controle | `src/js/desktop/programs.js`, `panel.js`, `src/emulator.html`, `src/vendor/js-dos/` (GPL-2.0, sem alterações) |
 | Interface | `src/desktop.html`, `src/css/desktop.css`, `src/js/desktop/*.js` |
 | Conversão .docx/.odt e ZIP | `src/js/desktop/docfmt.js`, `zip.js` |
