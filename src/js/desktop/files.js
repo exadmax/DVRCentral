@@ -21,11 +21,12 @@
     if (e === '.xlsx' || e === '.ods') return 'sheet';
     if (e === '.pptx' || e === '.odp') return 'slide';
     if (OFFICE_ONLY.indexOf(e) >= 0) return 'office';      // formatos que só o LibreOffice completo abre (LiteOffice Completo)
+    if (e === '.zip') return 'zip';
     if (e === '.jsdos') return 'program';
     if (VIDEO_EXT.indexOf(e) >= 0) return 'video';
     return 'other';
   };
-  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', sheet: '📗', slide: '📙', office: '🏢', program: '🕹️', video: '🎬', other: '📄' })[DK.kindOf(it)];
+  DK.iconOf = it => ({ folder: '📁', text: '📝', image: '🖼️', pdf: '📕', doc: '📘', sheet: '📗', slide: '📙', office: '🏢', program: '🕹️', zip: '🗜️', video: '🎬', other: '📄' })[DK.kindOf(it)];
 
   // Abre um arquivo no aplicativo certo. siblings = itens da mesma pasta (anterior/próxima nas imagens e no vídeo).
   DK.openFile = function (it, siblings) {
@@ -38,6 +39,7 @@
       case 'sheet': DK.sheetApp({ item: it }); break;
       case 'slide': DK.slideApp({ item: it }); break;
       case 'office': DK.officeApp({ item: it }); break;
+      case 'zip': DK.zipApp({ item: it }); break;
       case 'program': DK.installProgramApp(it); break;
       case 'video': DK.videoApp({ item: it, siblings: siblings }); break;
       default: location.href = DK.fileUrl(it, 'download');
@@ -147,6 +149,8 @@
           };
           tr._ctx = () => o.pick ? [{ icon: '▶️', label: k === 'folder' ? 'Abrir pasta' : 'Escolher', fn: open }] : [
             { icon: '▶️', label: 'Abrir', fn: open },
+            DK.kindOf(it) === 'zip' ? { icon: '📤', label: 'Extrair aqui', fn: () => DK.zipExtractHere(it) } : null,
+            k !== 'folder' && DK.kindOf(it) === 'zip' ? null : { icon: '🗜️', label: 'Compactar em ZIP', fn: () => DK.zipCompress(it) },
             DK.isOfficeFile(it) ? { icon: '🏢', label: 'Abrir no Office completo', fn: () => DK.officeApp({ item: it }) } : null,
             { icon: '📌', label: 'Adicionar à Área de Trabalho', fn: () => DK.deskAddFile(it) },
             '-',
@@ -195,7 +199,10 @@
             }
           }
         }
-        load();
+        const onFs = () => load();
+      document.addEventListener('dkfs', onFs);
+      win._onClose = () => document.removeEventListener('dkfs', onFs);
+      load();
       }
 
       sp.onclick = async () => {
