@@ -34,7 +34,7 @@ jobs:
 
       - name: Empacotar
         working-directory: server
-        run: ./package.sh "$GITHUB_REF_NAME"
+        run: bash ./package.sh "$GITHUB_REF_NAME"
 
       - name: Reunir arquivos e checksums
         run: |

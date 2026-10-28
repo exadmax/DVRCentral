@@ -4,7 +4,7 @@
 set -e
 VER="${1#v}"
 cd "$(dirname "$0")"
-./build.sh >/dev/null
+bash ./build.sh >/dev/null
 P=dist/pkg; rm -rf $P; mkdir -p $P
 cp dist/hub-linux-* install.sh centraldiogo-hub.service $P/
 # config de produção: porta 80 e painel em ./www (o arquivo de origem não é alterado).
