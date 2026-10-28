@@ -69,6 +69,12 @@ TV / celular / PC ─►  navegador  ─►  http://192.168.0.10/  ─►  Hub G
 | `docs/` | Documentação por área e design de referência (`docs/design/`) |
 | `scripts/` | Índice de build e empacotamento ([`scripts/README.md`](scripts/README.md)) e o verificador de traduções (`check-i18n.js`) |
 
+## Baixar e instalar
+Pacotes prontos nas **[Releases](https://github.com/exadmax/DVRCentral/releases/latest)** (a página de apresentação tem a [guia de download](https://exadmax.github.io/DVRCentral/#baixar)):
+- **Windows** (`centraldiogo-windows.zip`): extraia e abra o `Instalar.cmd`. Uma **janela** pergunta se este PC será o *servidor da casa* (tarefa do sistema, sobe com o Windows, atende a rede) ou de *uso pessoal* (só `localhost`, sem administrador). A senha inicial do `admin` do Diogows aparece nessa janela. Dados em `%ProgramData%\CentralDiogo` (servidor) ou `%LocalAppData%\CentralDiogo` (pessoal), mantidos ao atualizar. Desinstale em Aplicativos do Windows.
+- **Linux** (`centraldiogo.tgz`): `tar xzf centraldiogo.tgz && sudo bash install.sh`.
+Limite no Windows: os botões da Config que param o desktop e o hub (`systemctl`) e o Terminal com sudo são só do Linux.
+
 ## Começando
 
 ### Só o painel (dados de exemplo)
@@ -163,6 +169,8 @@ sudo systemctl start centraldiogo-hub
 ```
 
 ## Versão instalada
+- As versões publicadas seguem SemVer (`vMAIOR.MENOR.PATCH`) e saem como **Releases** do GitHub, com o pacote e os binários prontos. Política em **[docs/versionamento.md](docs/versionamento.md)**.
+  Num pacote de release, o `install.sh` grava no servidor a versão da própria release; o contador abaixo vale só para pacotes montados do código.
 - O servidor guarda a versão no arquivo `VERSION` (`/opt/centraldiogo/VERSION`), formato `MAIOR.MENOR.PATCH`, por exemplo `1.0.1`.
 - Cada `sudo bash install.sh` **concluído** soma 1 ao terceiro número e registra a linha em `install.log`. Instalação que falha no meio
   não muda a versão. Sem o arquivo, a primeira instalação vira `V1.0.1`. Para subir o primeiro ou o segundo número, edite o `VERSION` à mão.
