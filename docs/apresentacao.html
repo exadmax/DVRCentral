@@ -10,6 +10,7 @@
   <meta property="og:description" content="Veja a Central Diogo em ação: painel, Diogows e funcionalidades.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://exadmax.github.io/DVRCentral/img/painel.png">
+  <meta property="og:video" content="https://www.youtube.com/watch?v=--5tUhP-c88">
   <link rel="icon" href="assets/logo-192.png">
   <style>
     @font-face { font-family: 'Inter'; font-weight: 400 700; font-display: swap; src: url(assets/fonts/inter-latin.woff2) format('woff2'); }
@@ -35,7 +36,7 @@
     h1 { margin: 10px 0 14px; font-size: clamp(32px, 5vw, 48px); letter-spacing: -1px; }
     .lead { margin: 0 0 32px; max-width: 680px; color: var(--dim); font-size: 19px; }
     .frame { border-radius: 18px; padding: 8px; background: linear-gradient(145deg, rgba(77,163,255,.55), rgba(51,225,154,.35)); box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 90px rgba(77,163,255,.18); }
-    video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #000; }
+    iframe { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #000; }
     .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
     footer { padding: 28px 0; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; }
   </style>
@@ -53,15 +54,12 @@
     <h1>Conheça a Central Diogo</h1>
     <p class="lead">Um passeio em vídeo pelo painel da casa e pelo Diogows, o desktop no navegador.</p>
     <div class="frame">
-      <video controls preload="metadata" playsinline>
-        <source src="videos/diogocentral.mp4" type="video/mp4">
-        Seu navegador não suporta vídeo HTML5. <a href="videos/diogocentral.mp4">Baixe o vídeo</a>.
-      </video>
+      <iframe src="https://www.youtube-nocookie.com/embed/--5tUhP-c88" title="Apresentando a Central DVR" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
     <div class="cta">
-      <a class="btn pri" href="index.html#comecar">Começar a usar</a>
+      <a class="btn pri" href="https://www.youtube.com/watch?v=--5tUhP-c88" target="_blank" rel="noopener">▶ Assistir no YouTube</a>
+      <a class="btn" href="index.html#comecar">Começar a usar</a>
       <a class="btn" href="https://github.com/exadmax/DVRCentral">Código no GitHub</a>
-      <a class="btn" href="videos/diogocentral.mp4" download>Baixar o vídeo</a>
     </div>
   </div>
 </main>
