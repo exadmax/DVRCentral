@@ -18,3 +18,8 @@ key/
 .claude/agents/
 .claude/skills/
 .claude/settings.local.json
+
+# instância de demonstração (server/demo): só o hub.config.json é versionado
+server/demo/*
+!server/demo/hub.config.json
+!server/demo/README.md
