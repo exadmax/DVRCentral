@@ -47,6 +47,8 @@ Todas as dependências do hub estão em `server/go.mod`. As acrescentadas para o
 
 ## Atualizar um componente
 
+A tela **Administração → Atualizações** mostra o que tem versão nova e atualiza o Webamp com um clique ([atualizacoes.md](atualizacoes.md)). Ao atualizar à mão, mude também `src/vendor/components.json`.
+
 - **Webamp:** `npm pack webamp@<versão>` e copie `built/webamp.bundle.min.js` para `src/vendor/webamp/`. Atualize a versão aqui e em `src/vendor/webamp/README.md`.
 - **JS Paint:** clone o repositório, copie de novo as mesmas pastas listadas acima e **refaça o ajuste do `index.html`** (a CSP e as remoções). Teste abrir e salvar no Paint do Diogows.
 - **Bibliotecas Go:** `cd server && go get <módulo>@<versão> && go mod tidy && go vet ./... && go test ./...`.

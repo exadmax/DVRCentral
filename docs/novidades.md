@@ -17,6 +17,7 @@ Guias: [email.md](email.md) · [aplicativos.md](aplicativos.md) · [desktop.md](
 | **Player de Música** | O **Webamp** (MIT, estilo Winamp) tocando a pasta *Meus arquivos/Músicas*, com envio de músicas e skins `.wsz` | [aplicativos.md §3](aplicativos.md#3-player-de-música) |
 | **Jogos** | Campo Minado, Paciência (Klondike) e FreeCell | [aplicativos.md §4](aplicativos.md#4-jogos) |
 | **Emuladores** | Mega Drive, Master System, Super Nintendo, Game Boy, Game Boy Color, Game Boy Advance e Atari 2600 com o **EmulatorJS** (GPL-3.0, carregado do CDN ou de cópia local). ROMs suas, em `Meus arquivos/Jogos/Emuladores/<Sistema>` | [emuladores.md](emuladores.md) |
+| **Atualizações** | Tela em Administração, estilo *Windows Update*: versão em uso e mais nova dos componentes de terceiros (npm, GitHub, proxy do Go); o Webamp atualiza com um clique e pode voltar ao pacote | [atualizacoes.md](atualizacoes.md) |
 | **Programa Web** | Qualquer endereço vira um app do Diogows, com **ícone do próprio site**, três modos de abertura e atalhos prontos (WhatsApp Web, Telegram Web, Gmail, Outlook) | [aplicativos.md §1](aplicativos.md#1-programa-web) |
 
 ### Recursos
@@ -46,6 +47,7 @@ Guias: [email.md](email.md) · [aplicativos.md](aplicativos.md) · [desktop.md](
 | **Configuração** | Nova seção opcional `desk.mail` no `hub.config.json` (`redirectURI`, `allowPrivate`, `disabled`). **O aplicativo OAuth do Google/Microsoft não é do servidor: cada usuário registra o dele** em E-mail → ➕ (*Meu aplicativo*). **Sem nada disso, tudo continua funcionando**: o e-mail por senha (IMAP/SMTP) já vale. O `install.sh` preserva o seu `hub.config.json` |
 | **Rede** | O e-mail só conecta em servidores da internet. Um servidor de e-mail na rede da casa exige `"allowPrivate": true` |
 | **Menu Iniciar** | A ordem e os nomes das categorias mudaram (por exemplo *Internet e comunicação* virou *Comunicação* e *Internet*, e *Imagens, vídeo e câmeras* virou *Imagem, vídeo e música*). O estado aberto/fechado que o usuário já tinha é mantido; categorias novas seguem o padrão |
+| **Consultas de versão** | O administrador consulta `registry.npmjs.org`, `api.github.com` e `proxy.golang.org` (só leitura; a cada 7 dias por padrão). Desligue com `desk.updates.disabled` |
 | **Internet** | O app Emuladores carrega o EmulatorJS de `cdn.emulatorjs.org` quando não há cópia em `vendor/emulatorjs/data/`; os demais apps não precisam de internet |
 | **Pacote** | O pacote cresce (~+9 MB de painel: JS Paint ~7 MB e Webamp ~1 MB). O binário do hub ganhou as bibliotecas de IMAP (Go puro; os 4 binários Linux e o do Windows continuam estáticos) |
 | **`/api/desk/me`** | Passou a incluir `profile`. Clientes que ignoram campos extras não são afetados |

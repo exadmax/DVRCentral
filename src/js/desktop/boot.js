@@ -33,7 +33,7 @@
     'browser',
     'images', 'paint', 'video', 'music', 'cameras',
     'solitaire', 'freecell', 'minesweeper', 'emulators',
-    'users', 'config', 'account'];
+    'users', 'config', 'updates', 'account'];
   const ICON_ORDER = ['computer', 'control', 'explorer', 'mail', 'paint', 'browser', 'programs', 'docs', 'sheets', 'slides', 'cameras', 'contacts', 'messages', 'calendar', 'video', 'terminal'];
   // Categorias do menu Iniciar, da mais usada à menos. Um aplicativo cai na primeira categoria que o reconhece (por id); o que sobrar vai para "Outros".
   const inIds = ids => a => ids.indexOf(a.id) >= 0;
@@ -46,7 +46,7 @@
     { id: 'games', icon: '🎮', label: 'Jogos', match: inIds(['solitaire', 'freecell', 'minesweeper', 'emulators']) },
     { id: 'progs', icon: '🕹️', label: 'Meus programas (DOS, Windows e web)', match: a => String(a.id).indexOf('prog:') === 0 },
     { id: 'house', icon: '🏠', label: 'Painel e serviços da casa', match: a => String(a.id).indexOf('link:') === 0 },
-    { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: inIds(['users', 'config', 'account']) },
+    { id: 'admin', icon: '🛠️', label: 'Administração e conta', match: inIds(['users', 'config', 'updates', 'account']) },
   ];
   const DEFAULT_OPEN = ['files', 'comm', 'office'];
   // Lista de categorias do menu. all=false devolve só as que servem para guardar programas instalados (sem "Painel da casa" nem "Administração").
@@ -189,6 +189,7 @@
     $('login').classList.add('hidden'); $('force').classList.add('hidden');
     $('desktop').classList.remove('hidden'); $('bar').classList.remove('hidden');
     $('who').textContent = DK.displayName() + (DK.me.is_admin ? ' (admin)' : '');
+    if (DK.me.is_admin && DK.updatesNotice) DK.updatesNotice();
     tickClock(); buildIcons(); buildStartMenu();
     await DK.loadPrefs();
     DK.applyLook();

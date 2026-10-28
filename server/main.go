@@ -159,6 +159,7 @@ func main() {
 	desk := newDesk(cfg, db, sm, sys, filepath.Dir(*cfgPath))
 	desk.ensureFirstInstall(context.Background())
 	desk.register(mux)
+	desk.startUpdates()
 	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
 	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
 	newBooks(cfg.Books, cfg.AllowedOrigins, sm.booksEnabled).register(mux)

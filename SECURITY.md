@@ -34,6 +34,7 @@ a página Config e as APIs de sempre continuam abertas a quem alcança a porta, 
 - O **perfil** (foto, nome, assinatura): a foto só é aceita se for um JPEG ou PNG **decodificável** (até 400 KB), e é servida como imagem inerte (`nosniff`, CSP restritiva). As fotos são visíveis a qualquer usuário logado.
 - A busca do **ícone de um site** (Programa Web) é feita pelo servidor, só em endereços da internet (mesmo bloqueio do Navegador interno), aceita só imagens reconhecidas pelo conteúdo e limita o tamanho. `desk.noBrowser` a desliga.
 - Um **Programa Web** na janela interna carrega a página sem `sandbox`: ela tem os poderes de uma aba comum. Cadastre só endereços em que confia. O WhatsApp Web e outros sites que proíbem ser exibidos dentro de outra página abrem em janela própria do navegador; o Diogows não contorna essas proteções.
+- A tela **Atualizações** (só administrador) consulta versões em três endereços fixos (npm, GitHub e proxy do Go), só leitura; o Webamp baixado tem o hash sha512 conferido ([docs/atualizacoes.md](docs/atualizacoes.md)).
 - O **Paint** (JS Paint) e o **Player de Música** (Webamp) são cópias de projetos MIT dentro do hub ([docs/licencas.md](docs/licencas.md)). O Paint roda num iframe do mesmo servidor com **política de conteúdo fechada** (sem Firebase, YouTube, fontes externas nem imagens de outros sites); o Webamp é carregado direto na página do Diogows (sem iframe, mas sem usar a rede nem atalhos globais de teclado). Skins `.wsz` são arquivos de terceiros: use só os de confiança.
 
 ## Reportar uma vulnerabilidade

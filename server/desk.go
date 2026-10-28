@@ -34,14 +34,15 @@ import (
 
 // DeskConfig é o bloco "desk" do hub.config.json. Tudo é opcional; sem o bloco o desktop fica ligado e o terminal desligado.
 type DeskConfig struct {
-	Disabled        bool       `json:"disabled"`        // true desliga o desktop inteiro (/api/desk/* responde 404)
-	Dir             string     `json:"dir"`             // pasta das pastas dos usuários (padrão: "desk" ao lado do hub.config.json)
-	Shell           bool       `json:"shell"`           // liga o Terminal e os arquivos do computador (padrão desligado; veja SECURITY.md)
-	ShellAnyNetwork bool       `json:"shellAnyNetwork"` // permite o terminal por HTTP puro vindo de fora das redes privadas (não recomendado)
-	ProtectSettings bool       `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Diogows
-	NoBrowser       bool       `json:"noBrowser"`       // true tira o navegador interno e os downloads
-	MaxUploadMB     int        `json:"maxUploadMB"`     // tamanho máximo de um envio (padrão 2048)
-	Mail            MailConfig `json:"mail"`            // cliente de e-mail: contas OAuth, rede e liga/desliga (desk_mail.go)
+	Disabled        bool          `json:"disabled"`        // true desliga o desktop inteiro (/api/desk/* responde 404)
+	Dir             string        `json:"dir"`             // pasta das pastas dos usuários (padrão: "desk" ao lado do hub.config.json)
+	Shell           bool          `json:"shell"`           // liga o Terminal e os arquivos do computador (padrão desligado; veja SECURITY.md)
+	ShellAnyNetwork bool          `json:"shellAnyNetwork"` // permite o terminal por HTTP puro vindo de fora das redes privadas (não recomendado)
+	ProtectSettings bool          `json:"protectSettings"` // alterações de Config e câmeras exigem sessão de administrador do Diogows
+	NoBrowser       bool          `json:"noBrowser"`       // true tira o navegador interno e os downloads
+	MaxUploadMB     int           `json:"maxUploadMB"`     // tamanho máximo de um envio (padrão 2048)
+	Mail            MailConfig    `json:"mail"`            // cliente de e-mail: rede e liga/desliga (desk_mail.go)
+	Updates         UpdatesConfig `json:"updates"`         // atualizações dos componentes de terceiros (desk_updates.go)
 }
 
 const (
@@ -88,11 +89,14 @@ type deskAPI struct {
 	calClient *http.Client // baixa as agendas iCal (só endereços públicos; os testes trocam por um cliente comum)
 	calCache  deskCalCache
 	mail      *deskMailState // E-mail (desk_mail.go)
+	upd       *deskUpdates   // atualizações de componentes (desk_updates.go)
+	staticDir string         // pasta do painel (www), onde está vendor/components.json
 }
 
 func newDesk(cfg Config, st *store, sm *settingsMgr, sys *sysMon, cfgDir string) *deskAPI {
 	d := &deskAPI{dl: dlManager{jobs: map[int64][]*dlJob{}}, st: st, cfg: cfg.Desk, sm: sm, sys: sys, videos: cfg.Videos, verDir: cfgDir, lim: newDeskLimiter(), calClient: newCalClient(), webClient: newSafeClient(35 * time.Second), dlClient: newSafeClient(0),
 		shell: &deskShellState{unlocks: map[string]deskUnlock{}, busy: map[int64]bool{}}}
+	d.staticDir = cfg.StaticDir
 	d.dir = cfg.Desk.Dir
 	if d.dir == "" {
 		d.dir = "desk"
@@ -516,6 +520,7 @@ func (d *deskAPI) register(mux *http.ServeMux) {
 	d.registerMail(mux)
 	d.registerProfile(mux)
 	d.registerWebIcon(mux)
+	d.registerUpdates(mux)
 	d.registerVM(mux)
 }
 

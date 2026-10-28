@@ -1,7 +1,7 @@
 # Aplicativos novos do Diogows
 
 Guia dos aplicativos e recursos acrescentados ao Diogows (`desktop.html`) além do que está em [desktop.md](desktop.md). O **E-mail** tem guia próprio:
-[email.md](email.md), e os **Emuladores** de consoles também: [emuladores.md](emuladores.md). Terceiros embutidos e licenças: [licencas.md](licencas.md). Resumo por versão: [novidades.md](novidades.md).
+[email.md](email.md), e os **Emuladores** de consoles também: [emuladores.md](emuladores.md). A manutenção dos componentes de terceiros: [atualizacoes.md](atualizacoes.md). Terceiros embutidos e licenças: [licencas.md](licencas.md). Resumo por versão: [novidades.md](novidades.md).
 
 - [1. Programa Web](#1-programa-web)
 - [2. Paint](#2-paint)

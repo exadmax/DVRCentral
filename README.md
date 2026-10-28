@@ -113,6 +113,7 @@ Referência completa em `server/hub.config.example.json`.
 | `videos.dir` | Pasta de vídeos (padrão `~/Videos`) |
 | `books.dir`, `books.maxMB` | Pasta dos livros (padrão `~/Livros`) e tamanho máximo de cada envio (padrão 300 MB) |
 | `desk` | Diogows: `shell` (Terminal e arquivos do computador, desligado por padrão), `protectSettings`, `noBrowser`, `maxUploadMB` ([docs/desktop.md](docs/desktop.md)) |
+| `desk.updates` | Atualizações dos componentes de terceiros: `disabled`, `checkDays` ([docs/atualizacoes.md](docs/atualizacoes.md)) |
 | `desk.mail` | E-mail do Diogows: `redirectURI`, `allowPrivate`, `disabled` (o aplicativo OAuth é de cada usuário, em E-mail → ➕) ([docs/email.md](docs/email.md)) |
 | `profissionaisSheet` | CSV do Google Planilhas e intervalo de sincronização (vazio desliga) |
 | `games` | Chaves de Steam, PSN, Xbox e RetroAchievements (subsistema sem tela) |

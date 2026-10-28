@@ -488,3 +488,11 @@ html.mob .card { padding: 18px; }
 /* o Webamp se coloca no body; fica acima das janelas do Diogows e abaixo da barra de tarefas e do menu Iniciar */
 #webamp { z-index: 7000 !important; }
 body.webampoff #webamp { display: none !important; }
+
+/* ---------- Atualizações (js/desktop/updates.js) ---------- */
+.ulist { flex: 1; min-height: 0; overflow: auto; padding: 6px 10px; }
+.utbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.utbl th { text-align: left; font-size: 12px; color: var(--mute); border-bottom: 1px solid var(--line); padding: 4px 6px; }
+.utbl td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.utbl td.upd { color: #b45309; font-weight: 600; }
+.utbl td.uhow { background: #f8fafc; line-height: 1.5; }
