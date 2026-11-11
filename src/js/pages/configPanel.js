@@ -107,9 +107,6 @@
       return '<div class="cfg-banner"><span>' + t('cp.pending') + (h.canRestart ? '' : ' ' + t('cp.pendingManual')) + '</span>' +
         (h.canRestart ? btn('restart', busy.restart ? t('cp.restarting') : t('cp.restartNow'), '', busy.restart) : '') + '</div>';
     }
-    const secret = (f, label, set, ph) => '<div class="fld wide"><span>' + esc(label) + '</span>' +
-      input(f, '', { type: 'password', ph: set ? t('cp.secretSet') : ph || t('cp.secretPaste') }) +
-      (set ? '<label class="cfg-chk"><input type="checkbox" data-clear="' + f + '">' + esc(t('cp.secretClear')) + '</label>' : '') + '</div>';
 
     function cDrive() {
       const h = st.hub;
@@ -126,16 +123,6 @@
         grid(fld(t('cp.sheet.url'), input('sheetUrl', h.sheetUrl, { ph: 'https://docs.google.com/spreadsheets/d/ID/gviz/tq?tqx=out:csv&sheet=profissionais' }), 'wide') +
           fld(t('cp.sheet.min'), num('sheetMinutes', h.sheetMinutes || 5, 1, 1440))));
     }
-    function cGames() {
-      const h = st.hub;
-      return card('hubgames', 'integracoes', t('cp.games.title'), t('cp.games.hint'),
-        grid(fld(t('cp.games.min'), num('gamesCacheMinutes', h.gamesCacheMinutes || 360, 1, 10080), 'wide') +
-          '<div class="cfg-sub wide">Steam</div>' + fld(t('cp.games.steamUser'), input('steamUser', h.steamUser)) + secret('steamKey', t('cp.games.apiKey'), h.steamKeySet) +
-          '<div class="cfg-sub wide">PlayStation</div>' + fld(t('cp.games.psnUser'), input('psnUser', h.psnUser)) + secret('psnNpsso', t('cp.games.npsso'), h.psnNpssoSet) +
-          '<div class="cfg-sub wide">Xbox</div>' + fld('Gamertag', input('xboxGamertag', h.xboxGamertag)) + fld(t('cp.games.clientId'), input('xboxClientId', h.xboxClientId)) +
-          secret('xboxClientSecret', t('cp.games.clientSecret'), h.xboxClientSecretSet) +
-          '<div class="cfg-sub wide">RetroAchievements</div>' + fld(t('cp.games.retroUser'), input('retroUser', h.retroUser)) + secret('retroKey', t('cp.games.apiKey'), h.retroKeySet)));
-    }
     function cMisc() {
       const h = st.hub;
       return card('hubmisc', 'integracoes', t('cp.misc.title'), t('cp.restartNote'),
@@ -147,9 +134,9 @@
 
     // ---------- desenho ----------
     const R = { loc: cLoc, night: cNight, rot: cRot, soon: cSoon, vid: cVid, locais: cLocais, hol: cHol, books: cBooks,
-      hubdrive: cDrive, hubsheet: cSheet, hubgames: cGames, hubmisc: cMisc };
-    const HUBCARDS = ['hubdrive', 'hubsheet', 'hubgames', 'hubmisc'];
-    const ORDER = ['loc', 'night', 'rot', 'soon', 'locais', 'vid', 'hol', 'books', 'hubdrive', 'hubsheet', 'hubgames', 'hubmisc'];
+      hubdrive: cDrive, hubsheet: cSheet, hubmisc: cMisc };
+    const HUBCARDS = ['hubdrive', 'hubsheet', 'hubmisc'];
+    const ORDER = ['loc', 'night', 'rot', 'soon', 'locais', 'vid', 'hol', 'books', 'hubdrive', 'hubsheet', 'hubmisc'];
 
     function cardEl(id) { return root.querySelector('[data-card="' + id + '"]'); }
     function redraw(id) {
@@ -224,17 +211,15 @@
       return { localHolidays: st.hol.filter(h => h.date || (h.name || '').trim()).map(h => ({ date: h.date, name: h.name, type: h.type })) };
     }
 
-    const NUMERIC = ['driveHour', 'driveMaxFileMB', 'sheetMinutes', 'gamesCacheMinutes', 'calendarCacheMinutes', 'trafficCacheMinutes'];
+    const NUMERIC = ['driveHour', 'driveMaxFileMB', 'sheetMinutes', 'calendarCacheMinutes', 'trafficCacheMinutes'];
     async function saveHub(from) {
-      const body = {}, clear = [];
+      const body = {};
       HUBCARDS.forEach(id => {
         const el = cardEl(id);
         if (!el) return;
         const o = read(el);
         Object.keys(o).forEach(k => { body[k] = NUMERIC.indexOf(k) >= 0 ? int(o[k], 0) : o[k]; });
-        el.querySelectorAll('[data-clear]:checked').forEach(c => clear.push(c.getAttribute('data-clear')));
-      });
-      body.clearSecrets = clear;
+      });
       setBusy(from, true); say(from, t('c.saving')); showMsg(from);
       try {
         st.hub = await CD.hubApi.settings.save('hub', body);

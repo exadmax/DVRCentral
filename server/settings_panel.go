@@ -361,19 +361,18 @@ type hubOptions struct {
 	Videos               VideosConfig     `json:"videos"`
 	DriveSync            DriveSyncConfig  `json:"driveSync"`
 	Sheet                SheetConfig      `json:"sheet"`
-	Games                GamesConfig      `json:"games"`
 	CalendarCacheMinutes int              `json:"calendarCacheMinutes"`
 	TrafficCacheMinutes  int              `json:"trafficCacheMinutes"`
 	ForceIPv4            bool             `json:"forceIPv4"`
 }
 
 func hubOptsFrom(c *Config) hubOptions {
-	return hubOptions{Recordings: c.Recordings, Videos: c.Videos, DriveSync: c.DriveSync, Sheet: c.ProfissionaisSheet, Games: c.Games,
+	return hubOptions{Recordings: c.Recordings, Videos: c.Videos, DriveSync: c.DriveSync, Sheet: c.ProfissionaisSheet,
 		CalendarCacheMinutes: c.CalendarCacheMinutes, TrafficCacheMinutes: c.TrafficCacheMinutes, ForceIPv4: c.ForceIPv4}
 }
 
 func (o hubOptions) applyTo(c *Config) {
-	c.Recordings, c.Videos, c.DriveSync, c.ProfissionaisSheet, c.Games = o.Recordings, o.Videos, o.DriveSync, o.Sheet, o.Games
+	c.Recordings, c.Videos, c.DriveSync, c.ProfissionaisSheet = o.Recordings, o.Videos, o.DriveSync, o.Sheet
 	c.CalendarCacheMinutes, c.TrafficCacheMinutes, c.ForceIPv4 = o.CalendarCacheMinutes, o.TrafficCacheMinutes, o.ForceIPv4
 }
 
@@ -397,22 +396,6 @@ type hubView struct {
 	SheetURL     string `json:"sheetUrl"`
 	SheetMinutes int    `json:"sheetMinutes"`
 
-	GamesCacheMinutes int      `json:"gamesCacheMinutes"`
-	SteamUser         string   `json:"steamUser"`
-	SteamKey          string   `json:"steamKey,omitempty"`
-	SteamKeySet       bool     `json:"steamKeySet"`
-	PSNUser           string   `json:"psnUser"`
-	PSNNpsso          string   `json:"psnNpsso,omitempty"`
-	PSNNpssoSet       bool     `json:"psnNpssoSet"`
-	XboxGamertag      string   `json:"xboxGamertag"`
-	XboxClientID      string   `json:"xboxClientId"`
-	XboxSecret        string   `json:"xboxClientSecret,omitempty"`
-	XboxSecretSet     bool     `json:"xboxClientSecretSet"`
-	RetroUser         string   `json:"retroUser"`
-	RetroKey          string   `json:"retroKey,omitempty"`
-	RetroKeySet       bool     `json:"retroKeySet"`
-	ClearSecrets      []string `json:"clearSecrets,omitempty"` // só na gravação: nomes dos segredos a apagar (ex.: "steamKey")
-
 	CalendarCacheMinutes int  `json:"calendarCacheMinutes"`
 	TrafficCacheMinutes  int  `json:"trafficCacheMinutes"`
 	ForceIPv4            bool `json:"forceIPv4"`
@@ -425,16 +408,10 @@ func canRestart() bool { return os.Getenv("INVOCATION_ID") != "" }
 
 func (m *settingsMgr) hubView() hubView {
 	o := m.hubCurrent()
-	g := o.Games
 	return hubView{
 		RecordingsDir: o.Recordings.Dir, VideosDir: o.Videos.Dir,
 		DriveEnabled: o.DriveSync.Enabled, DriveRemote: o.DriveSync.Remote, DriveHour: o.DriveSync.Hour, DriveMaxFileMB: o.DriveSync.MaxFileMB,
 		SheetURL: o.Sheet.URL, SheetMinutes: o.Sheet.Minutes,
-		GamesCacheMinutes: g.CacheMinutes,
-		SteamUser:         g.Steam.User, SteamKeySet: g.Steam.Key != "",
-		PSNUser: g.PSN.User, PSNNpssoSet: g.PSN.NPSSO != "",
-		XboxGamertag: g.Xbox.Gamertag, XboxClientID: g.Xbox.ClientID, XboxSecretSet: g.Xbox.ClientSecret != "",
-		RetroUser: g.Retro.User, RetroKeySet: g.Retro.Key != "",
 		CalendarCacheMinutes: o.CalendarCacheMinutes, TrafficCacheMinutes: o.TrafficCacheMinutes, ForceIPv4: o.ForceIPv4,
 		Pending:    m.st.Hub != nil && !reflect.DeepEqual(*m.st.Hub, m.boot),
 		CanRestart: canRestart(),
@@ -488,39 +465,6 @@ func (m *settingsMgr) putHub(body []byte) (interface{}, error) {
 	o.Sheet.Minutes = in.SheetMinutes
 	if o.Sheet.URL != "" && o.Sheet.Minutes == 0 {
 		o.Sheet.Minutes = 5
-	}
-
-	if in.GamesCacheMinutes < 0 || in.GamesCacheMinutes > 10080 {
-		return nil, badRequest("intervalo dos jogos: até 10080 minutos")
-	}
-	g := &o.Games
-	g.CacheMinutes = in.GamesCacheMinutes
-	for _, f := range []struct {
-		dst  *string
-		src  string
-		what string
-	}{{&g.Steam.User, in.SteamUser, "usuário Steam"}, {&g.PSN.User, in.PSNUser, "usuário PSN"}, {&g.Xbox.Gamertag, in.XboxGamertag, "gamertag"},
-		{&g.Xbox.ClientID, in.XboxClientID, "client id do Xbox"}, {&g.Retro.User, in.RetroUser, "usuário RetroAchievements"}} {
-		if *f.dst, err = trimLen(f.src, 80, f.what); err != nil {
-			return nil, err
-		}
-	}
-	for _, f := range []struct {
-		dst  *string
-		src  string
-		name string
-	}{{&g.Steam.Key, in.SteamKey, "steamKey"}, {&g.PSN.NPSSO, in.PSNNpsso, "psnNpsso"}, {&g.Xbox.ClientSecret, in.XboxSecret, "xboxClientSecret"}, {&g.Retro.Key, in.RetroKey, "retroKey"}} {
-		if v := strings.TrimSpace(f.src); v != "" {
-			if len(v) > 500 {
-				return nil, badRequest("segredo longo demais")
-			}
-			*f.dst = v
-		}
-		for _, c := range in.ClearSecrets {
-			if c == f.name {
-				*f.dst = ""
-			}
-		}
 	}
 
 	if in.CalendarCacheMinutes < 1 || in.CalendarCacheMinutes > 1440 || in.TrafficCacheMinutes < 1 || in.TrafficCacheMinutes > 1440 {

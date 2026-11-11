@@ -15,7 +15,7 @@
         <tr><td>Painel</td><td>Cidade e clima, modo noturno, rodízio das câmeras, validade, locais do estoque, vídeos e feriados locais.</td></tr>
         <tr><td>Livros</td><td>Liga ou desliga a página Livros e define as categorias e os donos dos livros.</td></tr>
         <tr><td>Menu</td><td>Os botões de atalho do rodapé da tela inicial.</td></tr>
-        <tr><td>Integrações</td><td>Planilha de profissionais, contas de jogos, pasta de vídeos, tempos de cache e rede.</td></tr>
+        <tr><td>Integrações</td><td>Planilha de profissionais, pasta de vídeos, tempos de cache e rede.</td></tr>
         <tr><td>Idioma</td><td>Idioma da interface: português, inglês, espanhol ou chinês (vale só no aparelho).</td></tr>
         <tr><td>Compatibilidade</td><td>Modo para TVs que só tocam um vídeo por vez (vale só no aparelho).</td></tr>
         <tr><td>Ajuda</td><td>Esta página.</td></tr></table>
@@ -27,7 +27,7 @@
       <table class="help-t"><tr><th>O que você mudou</th><th>Quando vale</th></tr>
         <tr><td>Câmeras, agendas, trânsito, menu</td><td>Na hora, no servidor. As telas já abertas atualizam o menu e o painel em até 5 minutos (ou ao recarregar).</td></tr>
         <tr><td>Aba Painel (cidade, noturno, rodízio, validade, locais, vídeos, feriados)</td><td>Na hora; telas abertas pegam em até 5 minutos.</td></tr>
-        <tr><td>Pasta das gravações, Drive, planilha, jogos, pasta de vídeos, cache, IPv4</td><td><b>Só depois de reiniciar o hub.</b> A tela mostra uma faixa amarela “aguardando reinício” com o botão <b>Reiniciar o hub agora</b>.</td></tr>
+        <tr><td>Pasta das gravações, Drive, planilha, pasta de vídeos, cache, IPv4</td><td><b>Só depois de reiniciar o hub.</b> A tela mostra uma faixa amarela “aguardando reinício” com o botão <b>Reiniciar o hub agora</b>.</td></tr>
         <tr><td>Idioma e modo compatibilidade</td><td>Na hora, só neste aparelho (a tela recarrega ao trocar o idioma).</td></tr></table>
       <h3>Onde fica guardado</h3>
       <p>Tudo o que você edita fica em <code>hub.settings.json</code>, na mesma pasta do <code>hub.config.json</code> no servidor. O arquivo de configuração original continua valendo para tudo o que você ainda não editou. Para <b>voltar uma seção ao original</b>, apague a chave dela em <code>hub.settings.json</code> (ou o arquivo todo) e reinicie o hub. Faça uma cópia do <code>hub.settings.json</code> como backup.</p>
@@ -217,14 +217,6 @@
         <li><b>Sincronizar a cada</b>: minutos entre leituras (padrão 5).</li></ol>
       <p>Cabeçalhos reconhecidos (sem diferenciar acento ou maiúscula): <code>Profissional/Empresa</code> (ou Nome), <code>Serviço</code> (ou Tipo), <code>Contato</code> (ou Telefone), <code>Referência</code> (ou Indicação), <code>O que vai fazer</code>, <code>Obs</code>.</p>
       ${warn('a planilha é a <b>fonte da verdade</b>: linhas novas entram, mudanças atualizam e <b>linhas que saírem da planilha são apagadas</b> da página Serviços.')}
-      <h3>Jogos e conquistas</h3>
-      <p>Lista jogos e conquistas das suas contas. <b>Atualizar a cada</b>: minutos entre atualizações completas (padrão 360 = 6 horas). Cada serviço:</p>
-      <table class="help-t"><tr><th>Serviço</th><th>O que preencher</th></tr>
-        <tr><td>Steam</td><td><b>Usuário</b>: a URL personalizada do perfil ou o SteamID64. <b>Chave da API</b>: gere em <code>steamcommunity.com/dev/apikey</code>. O perfil precisa ter os detalhes de jogos públicos.</td></tr>
-        <tr><td>PlayStation</td><td><b>Usuário</b>: só para exibição. <b>Cookie npsso</b>: logado na sua conta PSN, abra <code>ca.account.sony.com/api/v1/ssocookie</code> e copie o valor de <code>npsso</code>. Ele vale por cerca de 2 meses: se aparecer “npsso inválido ou expirado”, gere outro.</td></tr>
-        <tr><td>Xbox</td><td><b>Gamertag</b>. Client ID e secret são opcionais (só se você usar um app seu no Azure). Depois de salvar e reiniciar, autorize a conta uma vez: botão <b>Conectar Xbox</b> do painel de jogos, ou no servidor <code>./hub -config hub.config.json -xbox-login</code>.</td></tr>
-        <tr><td>RetroAchievements</td><td><b>Usuário</b> e <b>Chave da API</b> (em <code>retroachievements.org/settings</code>, “Web API Key”).</td></tr></table>
-      <p>Os campos de chave ficam em branco depois de salvos e mostram “configurada”. Marque “apagar a configurada” para remover uma chave.</p>
       <h3>Vídeos, cache e rede</h3>
       <ul><li><b>Pasta dos vídeos no servidor</b>: a pasta que a página Vídeos lista (padrão <code>~/Videos</code>). Em branco desliga a lista. O endereço de reprodução fica em Painel.</li>
         <li><b>Agendas: guardar por</b>: minutos que o hub reaproveita a agenda antes de ler o Google de novo (padrão 5).</li>

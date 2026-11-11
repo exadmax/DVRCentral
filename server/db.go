@@ -69,26 +69,15 @@ var migrations = []string{
 	DROP TABLE itens;
 	ALTER TABLE itens_novo RENAME TO itens;
 	CREATE INDEX itens_validade ON itens (validade);`,
-	// Diogows (desk.go): usuários e sessões.
-	deskMigration,
-	// Diogows: agendas iCal por usuário e preferências (desk_calendar.go).
-	deskCalendarMigration,
-	// Diogows: mensagens entre usuários (desk_chat.go).
-	deskChatMigration,
-	// Diogows: contas de e-mail por usuário (desk_mail.go).
-	deskMailMigration,
-	// Diogows: nome, foto e assinatura dos usuários (desk_profile.go).
-	deskProfileMigration,
-	// Diogows: aplicativo OAuth de e-mail por usuário (desk_mail.go).
-	deskMailAppsMigration,
-	// Diogows: planta da casa e aparelhos inteligentes (desk_home.go).
-	deskHomeMigration,
+	// As migrações 5 a 11 criavam as tabelas do Diogows (usuários, agendas, mensagens, e-mail, perfil, planta da casa). O Diogows virou outro
+	// projeto, com banco próprio, e a Central não cria mais essas tabelas. As entradas continuam aqui, vazias, porque PRAGMA user_version
+	// conta migrações pela posição: bancos já instalados estão na versão 11 e uma migração nova precisa ser a de número 12.
+	"SELECT 1;", "SELECT 1;", "SELECT 1;", "SELECT 1;", "SELECT 1;", "SELECT 1;", "SELECT 1;",
 }
 
 type store struct {
 	db      *sql.DB // única conexão, para gravar (e para o que precisa ler o que acabou de gravar numa transação)
 	rdb     *sql.DB // até readConns conexões só de leitura: no modo WAL elas não esperam a gravação (nem a gravação espera por elas)
-	sess    sessCache
 	locais  func() []string // ids dos locais do estoque em uso (nil = os padrão)
 	origins []string        // origens extras com permissão de gravar (além do próprio endereço do hub)
 }

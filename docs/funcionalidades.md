@@ -15,7 +15,7 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 | Parte | Pasta | Tecnologia |
 |---|---|---|
 | Painel web (único para todas as telas) | `src/` | HTML + JS clássico (sem módulos ES, roda também em navegadores de TV), CSS |
-| Hub (servidor + API) | `server/` | Go 1.26, biblioteca padrão + `modernc.org/sqlite`, `gortsplib`, `mediacommon`, `golang.org/x/net` e, para o E-mail, `go-imap/v2`, `go-message` e `go-sasl` (veja [licencas.md](licencas.md)) |
+| Hub (servidor + API) | `server/` | Go 1.26, biblioteca padrão + `modernc.org/sqlite`, `gortsplib`, `mediacommon` e `golang.org/x/net` |
 
 ## 2. Páginas e funcionalidades do painel
 
@@ -28,7 +28,7 @@ Legenda de **Precisa do hub**: ✅ só funciona com o hub no ar · ➖ funciona 
 | **Vídeos** | `videos.html` + `js/pages/videos.js` | Vídeos | ✅ | Lista a pasta de vídeos; tocar no navegador, abrir no VLC, copiar link |
 | **Livros** | `livros.html` + `js/pages/livros.js` | Livros | ✅ | PDFs e EPUBs no servidor: envio pelo painel, categoria e dono, leitor de EPUB; pode ser desligada na Config |
 | **Config** | `config.html` + `js/pages/config.js` | Config | ✅ | CPU/memória do servidor, botões de energia e configuração das gravações |
-| **Diogows** | `desktop.html` + `js/desktop/*.js` | Diogows | ✅ | Área de trabalho com login e vários usuários: Explorer, LiteOffice (editores leves de .docx/.odt, .xlsx/.ods e .pptx/.odp, mais o LibreOffice completo em WebAssembly), visualizadores, player de vídeo, câmeras em janelas, contatos, calendário com avisos, navegador interno com downloads, programas DOS e sistemas virtuais Windows 3.x/95/98/ME com disco salvo no servidor (DOSBox-X e js-dos), Painel de Controle, Meu Computador e Terminal; **E-mail** (IMAP/SMTP, Gmail e Outlook por OAuth), **Paint** (JS Paint), **Player de Música** (Webamp), **Jogos** (Campo Minado, Paciência, FreeCell), **Programa Web** (ícone do site, janela própria), **perfil** com foto e assinatura e menu Iniciar com categorias próprias (veja [desktop.md](desktop.md), [email.md](email.md) e [aplicativos.md](aplicativos.md)) |
+| **Diogows** | — | Diogows | ➖ | Outro programa (porta 8090): [github.com/exadmax/diogogows](https://github.com/exadmax/diogogows). Aqui só há o atalho do menu e o redirecionamento de `/desktop.html` (`diogows.go`) |
 | Jogos (externo) | — | Jogos | ➖ | Abre o WebRCade (porta 8080) |
 | Música (externo) | — | Música | ➖ | Abre o Navidrome (porta 4533) |
 
@@ -103,20 +103,12 @@ sistema 10 s, tela 30 s.
 - **Modo compatibilidade** (último cartão, vale só para o aparelho): em navegador de TV (detectado pelo user agent: Tizen, webOS, Chromecast etc.; ou forçado), a página Câmeras mostra uma câmera por vez, com botões para trocar (`js/core/compat.js`).
 - **Liberar memória**: *Desligar o desktop* (display manager) e *Desativar a central* (para o hub). Exigem dois toques (botão arma por 5 s, o segundo confirma) e só funcionam no Linux com a regra do polkit instalada pelo `install.sh`.
 
-## 2.2 Aplicativos do Diogows (resumo)
+## 2.2 O Diogows (projeto separado)
 
-O inventário detalhado, a API (`/api/desk/*`) e os limites de cada um estão em [desktop.md](desktop.md); os mais novos têm guia próprio.
-
-| Aplicativo | Categoria no menu | Dados | Guia |
-|---|---|---|---|
-| E-mail | Comunicação | Credenciais cifradas no banco (`desk_mail_accounts`) e `desk/_mail.key`; mensagens ficam no provedor | [email.md](email.md) |
-| Mensagens, Calendário, Contatos | Comunicação | Banco | [desktop.md](desktop.md) |
-| LiteOffice (Documentos, Planilhas, Apresentações, Completo), Bloco de Notas, PDF, Calculadora | Escritório | Meus arquivos | [desktop.md](desktop.md) |
-| Navegador | Internet | Downloads em Meus arquivos | [desktop.md](desktop.md) |
-| Imagens, **Paint**, Vídeo, **Player de Música**, Câmeras | Imagem, vídeo e música | Meus arquivos (`Imagens`, `Músicas`) | [aplicativos.md](aplicativos.md) |
-| **Campo Minado, Paciência, FreeCell** | Jogos | Melhor tempo no navegador | [aplicativos.md §4](aplicativos.md#4-jogos) |
-| Programas DOS, sistemas virtuais, **Programas Web** | Escolha do usuário (padrão *Meus programas*) | `Programas/programas.json` | [aplicativos.md §1](aplicativos.md#1-programa-web) |
-| Perfil (nome, foto, assinatura) | Minha conta | Banco (`desk_profiles`) | [aplicativos.md §5](aplicativos.md#5-perfil-do-usuário) |
+A área de trabalho no navegador (**Diogows**) deixou de fazer parte do hub: é outro programa, com repositório, serviço (`diogows`, porta 8090) e banco próprios, em
+[github.com/exadmax/diogogows](https://github.com/exadmax/diogogows). Ele **consulta** o hub, por `127.0.0.1`, para mostrar câmeras (`/api/cameras*`), contatos (`/api/contatos`),
+agendas da casa (`/api/ics`) e o menu/painel (`/api/settings/*`); essas rotas continuam sendo daqui e não mudaram. Do lado do hub só existe `GET /desktop.html`, que redireciona
+para o Diogows (`diogowsPort`, padrão 8090). A lista de aplicativos, a API `/api/desk/*` e tudo o mais estão na documentação do Diogows.
 
 ## 3. API do hub
 
@@ -126,10 +118,9 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 |---|---|---|
 | `GET /api/health` | `{ok, time, version}` — usado pelo painel para detectar o hub | `main.go` |
 | `GET /api/version` | `{version, installedAt}` do arquivo `VERSION` (`dev` fora do servidor) | `main.go`, `version.go` |
+| `GET /desktop.html` | Redireciona (302) para o Diogows, na mesma máquina e na porta `diogowsPort` | `diogows.go` |
 | `GET /api/ics` | Texto iCal de cada agenda configurada (com cache e fallback "stale") | `calendars.go` |
 | `GET /api/traffic[?ask=id,id]` | `people: [{id, label, onDemand, result}]` (tempo, nível, trajeto codificado); quem é "só quando eu pedir" só vem com `?ask=` (`?diogo=1` e as chaves `diogo`/`pessoa2` continuam por compatibilidade) | `traffic.go` |
-| `GET /api/games[?refresh=1]` | Conquistas/troféus Steam, PSN, Xbox, RetroAchievements (subsistema sem tela; ver [jogos.md](jogos.md)) | `games*.go` |
-| `GET /api/games/xbox-login` · `POST` `{url}` | URL de login Microsoft · conclui a autorização do Xbox | `main.go`, `games_xbox.go` |
 | `GET/POST /api/estoque` · `GET/PUT/DELETE /api/estoque/{id}` | CRUD de itens | `db.go`, `estoque.go` |
 | `GET/POST /api/contatos` · `GET/PUT/DELETE /api/contatos/{id}` | CRUD de profissionais | `db.go`, `contatos.go` |
 | `GET /api/cameras` | `[{id, name}]` (a URL RTSP com senha nunca sai do hub) | `cameras.go` |
@@ -162,13 +153,12 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 - Gravações e botões de energia: exigem o cabeçalho `X-CD-Action: confirm`, que um formulário de outro site não consegue enviar sem preflight.
 - Corpos de requisição limitados (64 KB); nomes de arquivo vindos da URL nunca viram caminho livre (validados por regex/lista).
 
-> A API do **Diogows** (`/api/desk/*`: usuários, arquivos, terminal, agendas, e-mail, perfil...) tem tabela própria em [desktop.md](desktop.md#api-apidesk) e [email.md](email.md#8-api).
+> A API do **Diogows** (`/api/desk/*`) é do outro programa e está documentada no repositório dele ([docs/desktop.md](https://github.com/exadmax/diogogows/blob/main/docs/desktop.md)).
 
 ## 4. Rotinas em segundo plano do hub
 
 | Rotina | Frequência | O que faz | Código |
 |---|---|---|---|
-| Atualização de jogos | ao iniciar e a cada `games.cacheMinutes` (360) | Consulta as 4 plataformas e grava cache/tokens em `games.state.json` | `games.go: loop/refresh` |
 | Sincronização da planilha | ao iniciar e a cada `profissionaisSheet.minutes` (5) | Baixa o CSV, cria/atualiza/apaga profissionais; não altera nada se a planilha falhar ou vier vazia | `sheet.go: sheetLoop` |
 | Amostragem do sistema | 3 s | Lê CPU/memória (Linux `/proc`, Windows API); consulta o desktop a cada 4ª amostra | `sysinfo.go: loop` |
 | Varredura das gravações | 10 min e a cada mudança de configuração | Apaga gravações vencidas e aplica o limite de GB (só arquivos com o padrão de nome) | `recorder.go: sweep` |
@@ -197,8 +187,7 @@ Todas as rotas respondem JSON (exceto vídeo/arquivos) com `Cache-Control: no-st
 | `books.go` | Livros PDF/EPUB: lista, envio, categoria/dono, exclusão e leitor de EPUB |
 | `sysinfo.go` + `_linux/_windows/_other.go` | Amostragem de CPU/memória por plataforma |
 | `power.go` | Parar desktop/hub via `systemctl` (polkit) |
-| `desk*.go` | Diogows: usuários, arquivos, terminal, agendas, chat, navegador, VM e, novos, `desk_mail.go`/`desk_mail_proto.go`/`desk_mail_oauth.go` (E-mail), `desk_profile.go` (perfil e foto) e `desk_webicon.go` (ícone de sites); veja [desktop.md](desktop.md) |
-| `games.go`, `games_psn.go`, `games_xbox.go`, `games_steam.go`, `games_retro.go` | Agregador de conquistas e um cliente por plataforma |
+| `diogows.go` | Redireciona `/desktop.html` para o Diogows (outro programa) |
 | `version.go` | Lê o arquivo `VERSION` |
 | `install.sh`, `build.sh`, `package.sh`, `centraldiogo-hub.service` | Compilar (4 arquiteturas Linux), empacotar e instalar como serviço |
 
@@ -233,10 +222,9 @@ Erros viram `Error` com a mensagem do servidor (traduzida por `CD.i18n.srv` quan
 | `centraldiogo.db` | servidor | SQLite (WAL) com `itens` e `contatos`; o `install.sh` não mexe |
 | `recordings.state.json` | servidor | Configuração das gravações por câmera |
 | `drive.state.json` | servidor | Gravações já copiadas para o Drive e resultado da última rodada |
-| `games.state.json` | servidor | Cache e tokens dos jogos (permissão 600) |
 
 ## 7. Testes
 
 34 testes em Go (`cd server && go test ./...`): estoque/contatos/CRUD e proteção de origem (`store_test.go`), planilha (`sheet_test.go`),
 câmeras (`cameras_test.go`), gravador, retenção e movimento (`recorder_test.go`), vídeos e legendas (`videos_test.go`), trânsito
-(`traffic_test.go`), versão (`version_test.go`), sistema (`sysinfo_test.go`) e jogos (`games_test.go`). O painel não tem testes automatizados; as traduções têm um verificador (`node scripts/check-i18n.js`: chaves iguais nos quatro idiomas, parâmetros, chaves usadas no código e estrutura do manual).
+(`traffic_test.go`), versão (`version_test.go`) e sistema (`sysinfo_test.go`). O painel não tem testes automatizados; as traduções têm um verificador (`node scripts/check-i18n.js`: chaves iguais nos quatro idiomas, parâmetros, chaves usadas no código e estrutura do manual).

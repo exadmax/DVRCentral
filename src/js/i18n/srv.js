@@ -153,9 +153,6 @@
       'la dirección de la hoja de cálculo debe empezar por https://', '表格地址必须以 https:// 开头'),
     L(/^intervalo da planilha: de 1 a 1440 minutos$/, 'sheetmin', 'intervalo da planilha: de 1 a 1440 minutos', 'spreadsheet interval: from 1 to 1440 minutes',
       'intervalo de la hoja de cálculo: de 1 a 1440 minutos', '表格同步间隔：1 到 1440 分钟'),
-    L(/^intervalo dos jogos: até 10080 minutos$/, 'gamesmin', 'intervalo dos jogos: até 10080 minutos', 'games interval: up to 10080 minutes',
-      'intervalo de los juegos: hasta 10080 minutos', '游戏更新间隔：最多 10080 分钟'),
-    L(/^segredo longo demais$/, 'secretlong', 'segredo longo demais', 'secret too long', 'secreto demasiado largo', '密钥内容过长'),
     L(/^os tempos de cache vão de 1 a 1440 minutos$/, 'cachemin', 'os tempos de cache vão de 1 a 1440 minutos', 'cache times go from 1 to 1440 minutes',
       'los tiempos de caché van de 1 a 1440 minutos', '缓存时间范围为 1 到 1440 分钟'),
     // estoque e serviços

@@ -1,11 +1,9 @@
 node_modules/
 src/config/settings.js
-src/vendor/zetaoffice/
 build/
 
 server/hub.config.json
 server/dist/
-server/games.state.json
 
 # binários locais, bancos SQLite e chaves (nunca versionar)
 *.exe
@@ -18,3 +16,6 @@ key/
 .claude/agents/
 .claude/skills/
 .claude/settings.local.json
+
+# estado local do antigo placar de jogos (agora do Diogows)
+server/games.state.json

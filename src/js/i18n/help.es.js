@@ -14,7 +14,7 @@
         <tr><td>Panel</td><td>Ciudad y clima, modo nocturno, rotación de las cámaras, caducidad, lugares del inventario, vídeos y festivos locales.</td></tr>
         <tr><td>Libros</td><td>Activa o desactiva la página Libros y define las categorías y los dueños de los libros.</td></tr>
         <tr><td>Menú</td><td>Los botones de acceso directo del pie de la pantalla de inicio.</td></tr>
-        <tr><td>Integraciones</td><td>Hoja de cálculo de profesionales, cuentas de juegos, carpeta de vídeos, tiempos de caché y red.</td></tr>
+        <tr><td>Integraciones</td><td>Hoja de cálculo de profesionales, carpeta de vídeos, tiempos de caché y red.</td></tr>
         <tr><td>Idioma</td><td>Idioma de la interfaz: portugués, inglés, español o chino (vale solo en el dispositivo).</td></tr>
         <tr><td>Compatibilidad</td><td>Modo para TV que solo reproducen un vídeo a la vez (vale solo en el dispositivo).</td></tr>
         <tr><td>Ayuda</td><td>Esta página.</td></tr></table>
@@ -26,7 +26,7 @@
       <table class="help-t"><tr><th>Qué cambió</th><th>Cuándo vale</th></tr>
         <tr><td>Cámaras, agendas, tráfico, menú</td><td>Al instante, en el servidor. Las pantallas ya abiertas actualizan el menú y el panel en un máximo de 5 minutos (o al recargar).</td></tr>
         <tr><td>Pestaña Panel (ciudad, nocturno, rotación, caducidad, lugares, vídeos, festivos)</td><td>Al instante; las pantallas abiertas lo toman en un máximo de 5 minutos.</td></tr>
-        <tr><td>Carpeta de grabaciones, Drive, hoja de cálculo, juegos, carpeta de vídeos, caché, IPv4</td><td><b>Solo después de reiniciar el hub.</b> La pantalla muestra una franja amarilla “pendiente de reinicio” con el botón <b>Reiniciar el hub ahora</b>.</td></tr>
+        <tr><td>Carpeta de grabaciones, Drive, hoja de cálculo, carpeta de vídeos, caché, IPv4</td><td><b>Solo después de reiniciar el hub.</b> La pantalla muestra una franja amarilla “pendiente de reinicio” con el botón <b>Reiniciar el hub ahora</b>.</td></tr>
         <tr><td>Idioma y modo compatibilidad</td><td>Al instante, solo en este dispositivo (la pantalla se recarga al cambiar el idioma).</td></tr></table>
       <h3>Dónde se guarda</h3>
       <p>Todo lo que edita se guarda en <code>hub.settings.json</code>, en la misma carpeta que <code>hub.config.json</code> en el servidor. El archivo de configuración original sigue valiendo para todo lo que aún no editó. Para <b>devolver una sección al original</b>, borre su clave en <code>hub.settings.json</code> (o el archivo entero) y reinicie el hub. Haga una copia de <code>hub.settings.json</code> como respaldo.</p>
@@ -216,14 +216,6 @@
         <li><b>Sincronizar cada</b>: minutos entre lecturas (por defecto 5).</li></ol>
       <p>Encabezados reconocidos (sin distinguir acentos ni mayúsculas): <code>Profissional/Empresa</code> (o Nome), <code>Serviço</code> (o Tipo), <code>Contato</code> (o Telefone), <code>Referência</code> (o Indicação), <code>O que vai fazer</code>, <code>Obs</code>. Los encabezados deben escribirse en portugués, tal como aparecen.</p>
       ${warn('la hoja es la <b>fuente de la verdad</b>: las filas nuevas entran, los cambios actualizan y <b>las filas que salgan de la hoja se borran</b> de la página Servicios.')}
-      <h3>Juegos y logros</h3>
-      <p>Lista juegos y logros de sus cuentas. <b>Actualizar cada</b>: minutos entre actualizaciones completas (por defecto 360 = 6 horas). Cada servicio:</p>
-      <table class="help-t"><tr><th>Servicio</th><th>Qué rellenar</th></tr>
-        <tr><td>Steam</td><td><b>Usuario</b>: la URL personalizada del perfil o el SteamID64. <b>Clave de la API</b>: genérela en <code>steamcommunity.com/dev/apikey</code>. El perfil debe tener los detalles de juegos públicos.</td></tr>
-        <tr><td>PlayStation</td><td><b>Usuario</b>: solo para mostrar. <b>Cookie npsso</b>: con la sesión iniciada en su cuenta PSN, abra <code>ca.account.sony.com/api/v1/ssocookie</code> y copie el valor de <code>npsso</code>. Vale unos 2 meses: si aparece “npsso inválido o caducado”, genere otro.</td></tr>
-        <tr><td>Xbox</td><td><b>Gamertag</b>. Client ID y secret son opcionales (solo si usa una app propia en Azure). Tras guardar y reiniciar, autorice la cuenta una vez: botón <b>Conectar Xbox</b> del panel de juegos, o en el servidor <code>./hub -config hub.config.json -xbox-login</code>.</td></tr>
-        <tr><td>RetroAchievements</td><td><b>Usuario</b> y <b>Clave de la API</b> (en <code>retroachievements.org/settings</code>, “Web API Key”).</td></tr></table>
-      <p>Los campos de clave quedan en blanco tras guardar y muestran “configurada”. Marque “borrar la configurada” para quitar una clave.</p>
       <h3>Vídeos, caché y red</h3>
       <ul><li><b>Carpeta de vídeos en el servidor</b>: la carpeta que lista la página Vídeos (por defecto <code>~/Videos</code>). En blanco desactiva la lista. La dirección de reproducción está en Panel.</li>
         <li><b>Agendas: conservar durante</b>: minutos que el hub reutiliza la agenda antes de leer Google otra vez (por defecto 5).</li>

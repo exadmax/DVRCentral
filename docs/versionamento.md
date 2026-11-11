@@ -5,7 +5,7 @@ O projeto segue [SemVer](https://semver.org/lang/pt-BR/): tags no formato **`vMA
 | Número | Quando sobe | Exemplo |
 |---|---|---|
 | **PATCH** (`v1.0.1`) | correção ou ajuste pequeno, sem mudar o comportamento | corrigir um aviso, um texto, um bug |
-| **MENOR** (`v1.1.0`) | funcionalidade nova que não quebra nada | novo app do Diogows, nova integração |
+| **MENOR** (`v1.1.0`) | funcionalidade nova que não quebra nada | nova página do painel, nova integração |
 | **MAIOR** (`v2.0.0`) | quebra de compatibilidade | mudança no banco ou na configuração que exige ação manual |
 
 Pré-lançamentos usam sufixo: `v1.1.0-rc.1`, `v1.1.0-beta.1`. O GitHub os marca como *pre-release*.

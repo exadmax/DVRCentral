@@ -14,7 +14,7 @@
         <tr><td>面板</td><td>城市与天气、夜间模式、摄像头轮播、保质期、库存位置、视频和本地假日。</td></tr>
         <tr><td>图书</td><td>开启或关闭“图书”页面，并设置图书的分类和所有者。</td></tr>
         <tr><td>菜单</td><td>主屏幕底部的快捷按钮。</td></tr>
-        <tr><td>集成</td><td>服务商表格、游戏账号、视频文件夹、缓存时间和网络。</td></tr>
+        <tr><td>集成</td><td>服务商表格、视频文件夹、缓存时间和网络。</td></tr>
         <tr><td>语言</td><td>界面语言：葡萄牙语、英语、西班牙语或中文（仅对此设备有效）。</td></tr>
         <tr><td>兼容性</td><td>适用于一次只能播放一个视频的电视的模式（仅对此设备有效）。</td></tr>
         <tr><td>帮助</td><td>本页面。</td></tr></table>
@@ -26,7 +26,7 @@
       <table class="help-t"><tr><th>您更改的内容</th><th>何时生效</th></tr>
         <tr><td>摄像头、日历、路况、菜单</td><td>立即在服务器上生效。已打开的屏幕会在 5 分钟内（或重新加载时）更新菜单和面板。</td></tr>
         <tr><td>“面板”标签页（城市、夜间模式、轮播、保质期、位置、视频、假日）</td><td>立即生效；已打开的屏幕会在 5 分钟内获取更改。</td></tr>
-        <tr><td>录像文件夹、Drive、表格、游戏、视频文件夹、缓存、IPv4</td><td><b>只有重启 hub 之后才生效。</b>屏幕上会出现黄色的“等待重启”提示条，带有<b>立即重启 hub</b>按钮。</td></tr>
+        <tr><td>录像文件夹、Drive、表格、视频文件夹、缓存、IPv4</td><td><b>只有重启 hub 之后才生效。</b>屏幕上会出现黄色的“等待重启”提示条，带有<b>立即重启 hub</b>按钮。</td></tr>
         <tr><td>语言和兼容模式</td><td>立即生效，仅对此设备有效（更改语言时页面会重新加载）。</td></tr></table>
       <h3>保存在哪里</h3>
       <p>您编辑的所有内容都保存在服务器上的 <code>hub.settings.json</code> 中，与 <code>hub.config.json</code> 在同一个文件夹。对于您尚未编辑的内容，原来的配置文件仍然有效。如果要<b>把某一部分恢复为原始设置</b>，请删除 <code>hub.settings.json</code> 中对应的键（或删除整个文件），然后重启 hub。请备份一份 <code>hub.settings.json</code>。</p>
@@ -216,14 +216,6 @@
         <li><b>同步间隔</b>：两次读取之间的分钟数（默认 5）。</li></ol>
       <p>可识别的表头（不区分重音和大小写）：<code>Profissional/Empresa</code>（或 Nome）、<code>Serviço</code>（或 Tipo）、<code>Contato</code>（或 Telefone）、<code>Referência</code>（或 Indicação）、<code>O que vai fazer</code>、<code>Obs</code>。表头必须按所列的葡萄牙语书写。</p>
       ${warn('表格是<b>唯一的数据来源</b>：新行会加入，修改会更新，而<b>从表格中消失的行会从“服务”页面删除</b>。')}
-      <h3>游戏与成就</h3>
-      <p>列出您账号中的游戏和成就。<b>更新间隔</b>：两次完整更新之间的分钟数（默认 360 = 6 小时）。各个服务：</p>
-      <table class="help-t"><tr><th>服务</th><th>要填写什么</th></tr>
-        <tr><td>Steam</td><td><b>用户</b>：个人资料的自定义 URL 或 SteamID64。<b>API 密钥</b>：在 <code>steamcommunity.com/dev/apikey</code> 生成。个人资料需要把游戏详情设为公开。</td></tr>
-        <tr><td>PlayStation</td><td><b>用户</b>：仅用于显示。<b>npsso Cookie</b>：登录 PSN 账号后，打开 <code>ca.account.sony.com/api/v1/ssocookie</code> 并复制 <code>npsso</code> 的值。它大约两个月有效：如果出现“npsso 无效或已过期”，请重新生成。</td></tr>
-        <tr><td>Xbox</td><td><b>Gamertag</b>。Client ID 和 secret 是可选的（只有您使用自己在 Azure 中的应用时才需要）。保存并重启后，需要授权一次账号：使用游戏面板中的<b>连接 Xbox</b>按钮，或在服务器上运行 <code>./hub -config hub.config.json -xbox-login</code>。</td></tr>
-        <tr><td>RetroAchievements</td><td><b>用户</b>和<b>API 密钥</b>（在 <code>retroachievements.org/settings</code> 的“Web API Key”）。</td></tr></table>
-      <p>密钥字段保存后会变为空白并显示“已设置”。勾选“删除已设置的内容”可以移除密钥。</p>
       <h3>视频、缓存与网络</h3>
       <ul><li><b>服务器上的视频文件夹</b>：“视频”页面列出的文件夹（默认 <code>~/Videos</code>）。留空则关闭列表。播放地址在“面板”中设置。</li>
         <li><b>日历：缓存时间</b>：hub 在再次读取 Google 之前复用日历的分钟数（默认 5）。</li>
