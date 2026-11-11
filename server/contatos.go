@@ -56,7 +56,7 @@ func scanContato(r interface{ Scan(...interface{}) error }) (Contato, error) {
 func (s *store) contatosAPI() crud {
 	return crud{
 		list: func() (interface{}, error) {
-			rows, err := s.db.Query("SELECT " + contatoCols + " FROM contatos ORDER BY tipo_servico COLLATE NOCASE, nome COLLATE NOCASE")
+			rows, err := s.rdb.Query("SELECT " + contatoCols + " FROM contatos ORDER BY tipo_servico COLLATE NOCASE, nome COLLATE NOCASE")
 			if err != nil {
 				return nil, err
 			}
@@ -121,7 +121,7 @@ func (s *store) contatosAPI() crud {
 }
 
 func (s *store) getContato(id int64) (interface{}, error) {
-	c, err := scanContato(s.db.QueryRow("SELECT "+contatoCols+" FROM contatos WHERE id = ?", id))
+	c, err := scanContato(s.rdb.QueryRow("SELECT "+contatoCols+" FROM contatos WHERE id = ?", id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, errNotFound
 	}

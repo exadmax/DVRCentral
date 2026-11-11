@@ -98,7 +98,7 @@ func scanItem(r interface{ Scan(...interface{}) error }) (Item, error) {
 func (s *store) itensAPI() crud {
 	return crud{
 		list: func() (interface{}, error) {
-			rows, err := s.db.Query("SELECT " + itemCols + " FROM itens ORDER BY validade IS NULL, validade, nome COLLATE NOCASE")
+			rows, err := s.rdb.Query("SELECT " + itemCols + " FROM itens ORDER BY validade IS NULL, validade, nome COLLATE NOCASE")
 			if err != nil {
 				return nil, err
 			}
@@ -163,7 +163,7 @@ func (s *store) itensAPI() crud {
 }
 
 func (s *store) getItem(id int64) (interface{}, error) {
-	it, err := scanItem(s.db.QueryRow("SELECT "+itemCols+" FROM itens WHERE id = ?", id))
+	it, err := scanItem(s.rdb.QueryRow("SELECT "+itemCols+" FROM itens WHERE id = ?", id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, errNotFound
 	}

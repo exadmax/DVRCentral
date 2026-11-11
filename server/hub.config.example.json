@@ -50,14 +50,6 @@
     ]
   },
   "forceIPv4": true,
-  "games": {
-    "cacheMinutes": 360,
-    "stateFile": "games.state.json",
-    "steam": {"key": "", "user": ""},
-    "psn": {"npsso": "", "user": ""},
-    "xbox": {"clientId": "", "clientSecret": "", "gamertag": ""},
-    "retro": {"key": "", "user": ""}
-  },
   "cameras": [
     {"id": "garagem", "name": "Garagem", "url": "rtsp://admin:SENHA@192.168.0.21:554/cam/realmonitor?channel=1&subtype=1"},
     {"id": "sala", "name": "Sala", "url": "rtsp://192.168.0.23:554/live/mpeg4"}
@@ -65,6 +57,5 @@
   "recordings": {"dir": "/home/usuario/securityCam"},
   "driveSync": {"enabled": false, "remote": "GDrive:CameraSeguranca", "hour": 3, "maxFileMB": 1024},
   "dbPath": "centraldiogo.db",
-  "allowedOrigins": [],
-  "desk": {"shell": false, "protectSettings": false, "maxUploadMB": 2048}
+  "allowedOrigins": []
 }

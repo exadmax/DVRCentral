@@ -4,10 +4,8 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -24,7 +22,6 @@ type Config struct {
 	CalendarCacheMinutes int         `json:"calendarCacheMinutes"`
 	TrafficCacheMinutes  int         `json:"trafficCacheMinutes"` // intervalo entre consultas dentro da janela
 	ForceIPv4            bool        `json:"forceIPv4"`
-	Games                GamesConfig `json:"games"`
 	DBPath               string      `json:"dbPath"` // banco SQLite (estoque e contatos); relativo à pasta do hub.config.json
 	ProfissionaisSheet   SheetConfig `json:"profissionaisSheet"`
 	Videos         VideosConfig     `json:"videos"`         // pasta dos vídeos servida pelo nginx em /videos/ (lista da página Vídeos)
@@ -32,8 +29,8 @@ type Config struct {
 	Cameras        []CameraConfig   `json:"cameras"`       // câmeras ao vivo (RTSP H.264); a URL com a senha nunca sai do hub
 	Recordings     RecordingsConfig `json:"recordings"`     // pasta das gravações das câmeras (liga/desliga e retenção: página Config)
 	DriveSync      DriveSyncConfig  `json:"driveSync"`      // cópia diária das gravações para o Google Drive via rclone (drive.go)
-	Desk           DeskConfig       `json:"desk"`           // Diogows (desktop.html): usuários, arquivos, terminal (desk.go)
 	AllowedOrigins []string         `json:"allowedOrigins"` // origens extras com permissão de gravar (ex.: painel em dev em outra porta)
+	DiogowsPort    int              `json:"diogowsPort"`    // porta do Diogows (outro programa) na mesma máquina; /desktop.html daqui redireciona para lá (padrão 8090)
 }
 
 type CalendarConfig struct {
@@ -107,7 +104,6 @@ func withCORS(h http.Handler) http.Handler {
 
 func main() {
 	cfgPath := flag.String("config", "hub.config.json", "caminho do arquivo de configuração")
-	xboxLogin := flag.Bool("xbox-login", false, "autoriza a conta Xbox (uma vez) e sai")
 	flag.Parse()
 	initLogFile(filepath.Dir(*cfgPath))
 	cfg := loadConfig(*cfgPath)
@@ -115,15 +111,8 @@ func main() {
 	settingsPath := filepath.Join(filepath.Dir(*cfgPath), "hub.settings.json")
 	saved := loadSettings(settingsPath)
 	saved.applyTo(&cfg)
-	if *xboxLogin {
-		xboxLoginCLI(cfg, *cfgPath)
-		return
-	}
-
 	cal := newCalendars(cfg)
 	tr := newTraffic(cfg)
-	gm := newGames(cfg, *cfgPath)
-	go gm.loop()
 
 	// Se o banco não abrir, o resto do hub (agenda, clima, jogos) segue no ar e /api/estoque e /api/contatos respondem 503.
 	if !filepath.IsAbs(cfg.DBPath) { // relativo à pasta do hub.config.json, como o stateFile dos jogos
@@ -156,9 +145,6 @@ func main() {
 	sm.register(mux)
 	sys := newSysMon()
 	go sys.loop()
-	desk := newDesk(cfg, db, sm, sys, filepath.Dir(*cfgPath))
-	desk.ensureFirstInstall(context.Background())
-	desk.register(mux)
 	mux.HandleFunc("/api/videos", videosHandler(cfg.Videos))
 	mux.HandleFunc("/api/videos/sub", subHandler(cfg.Videos))
 	newBooks(cfg.Books, cfg.AllowedOrigins, sm.booksEnabled).register(mux)
@@ -174,6 +160,7 @@ func main() {
 		writeJSON(w, map[string]interface{}{"version": v, "installedAt": at})
 	})
 	mux.HandleFunc("/api/system", sys.handler)
+	mux.HandleFunc("GET /desktop.html", diogowsRedirect(cfg.DiogowsPort))
 	mux.HandleFunc("/api/admin/desktop-off", powerHandler(sys, dmUnit, false))
 	mux.HandleFunc("/api/admin/hub-off", powerHandler(sys, "centraldiogo-hub.service", true))
 	mux.HandleFunc("/api/ics", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, cal.get()) })
@@ -188,34 +175,11 @@ func main() {
 		}
 		writeJSON(w, tr.get(ask))
 	})
-	mux.HandleFunc("/api/games", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, gm.get(r.URL.Query().Get("refresh") == "1"))
-	})
-	// Conectar o Xbox pelo dashboard: GET devolve a URL de login; POST {"url": "<endereço final colado>"}
-	mux.HandleFunc("/api/games/xbox-login", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			writeJSON(w, map[string]string{"url": gm.xboxLoginURL()})
-			return
-		}
-		var body struct {
-			URL string `json:"url"`
-		}
-		json.NewDecoder(io.LimitReader(r.Body, 1<<16)).Decode(&body)
-		a, err := gm.xboxAuthorize(body.URL)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-			return
-		}
-		go gm.refresh()
-		writeJSON(w, map[string]interface{}{"ok": true, "gamertag": a.gtg})
-	})
-	mux.Handle("/", withOfficeIsolation(http.FileServer(http.Dir(cfg.StaticDir))))
+	mux.Handle("/", newStaticHandler(cfg.StaticDir, func() string { v, _ := readVersion(verDir); return v }))
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,
-		Handler:           withCORS(desk.protectSettings(mux)),
+		Handler:           withCORS(mux),
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      60 * time.Second,
 		IdleTimeout:       60 * time.Second,

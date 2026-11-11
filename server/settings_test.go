@@ -186,31 +186,21 @@ func TestSettingsLocais(t *testing.T) {
 
 func TestSettingsHub(t *testing.T) {
 	m, mux, _ := testSettings(t)
-	m.cfg.Games.Steam.Key = "SEGREDO"
-	m.boot = hubOptsFrom(m.cfg)
-	w := httptest.NewRecorder()
-	mux.ServeHTTP(w, httptest.NewRequest("GET", "/api/settings/hub", nil))
-	if strings.Contains(w.Body.String(), "SEGREDO") || !strings.Contains(w.Body.String(), `"steamKeySet":true`) {
-		t.Fatalf("segredo deve vir só como configurado: %s", w.Body)
-	}
 	body := `{"recordingsDir":"/dados/cam","videosDir":"/dados/videos","driveEnabled":true,"driveRemote":"GDrive:Cam","driveHour":4,"driveMaxFileMB":512,` +
-		`"sheetUrl":"https://docs.google.com/x","sheetMinutes":10,"gamesCacheMinutes":120,"steamUser":"fulano","calendarCacheMinutes":5,"trafficCacheMinutes":10,"forceIPv4":true}`
+		`"sheetUrl":"https://docs.google.com/x","sheetMinutes":10,"calendarCacheMinutes":5,"trafficCacheMinutes":10,"forceIPv4":true}`
 	if w := put(mux, "/api/settings/hub", body); w.Code != 200 || !strings.Contains(w.Body.String(), `"pending":true`) {
 		t.Fatalf("PUT: %d %s", w.Code, w.Body)
 	}
-	if m.st.Hub.Games.Steam.Key != "SEGREDO" || m.st.Hub.DriveSync.Hour != 4 || m.st.Hub.Recordings.Dir != "/dados/cam" {
+	if m.st.Hub.DriveSync.Hour != 4 || m.st.Hub.Recordings.Dir != "/dados/cam" {
 		t.Fatalf("opções: %+v", m.st.Hub)
 	}
 	var cfg Config
 	m.st.applyTo(&cfg)
-	if cfg.Recordings.Dir != "/dados/cam" || cfg.Games.Steam.User != "fulano" {
+	if cfg.Recordings.Dir != "/dados/cam" || cfg.ProfissionaisSheet.Minutes != 10 {
 		t.Fatal("applyTo")
 	}
 	if w := put(mux, "/api/settings/hub", `{"driveEnabled":true,"driveRemote":"semdoispontos","driveHour":3,"calendarCacheMinutes":5,"trafficCacheMinutes":10}`); w.Code != 400 {
 		t.Fatalf("remote inválido deveria falhar: %d", w.Code)
-	}
-	if w := put(mux, "/api/settings/hub", `{"clearSecrets":["steamKey"],"calendarCacheMinutes":5,"trafficCacheMinutes":10}`); w.Code != 200 || m.st.Hub.Games.Steam.Key != "" {
-		t.Fatalf("clearSecrets: %d", w.Code)
 	}
 }
 
@@ -226,12 +216,12 @@ func TestMigrationKeepsItems(t *testing.T) {
 	s.db.Exec(`CREATE TABLE itens (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, quantidade REAL, peso_kg REAL, validade TEXT,
 		local TEXT NOT NULL CHECK (local IN ('freezer','geladeira','dispensa')), criado_em TEXT NOT NULL DEFAULT 'x', atualizado_em TEXT NOT NULL DEFAULT 'x')`)
 	s.db.Exec("INSERT INTO itens (nome, quantidade, local) VALUES ('Leite', 2, 'geladeira'), ('Frango', 1, 'freezer')")
-	s.db.Close()
+	s.Close()
 	s, err = openStore(path, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer s.db.Close()
+	defer s.Close()
 	var n int
 	s.db.QueryRow("SELECT COUNT(*) FROM itens").Scan(&n)
 	if _, err := s.db.Exec("INSERT INTO itens (nome, quantidade, local) VALUES ('Tinta', 1, 'garagem')"); err != nil || n != 2 {

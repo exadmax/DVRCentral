@@ -140,6 +140,9 @@ function Install-Central([string]$modo, [scriptblock]$log) {
     if ($cfgAtual.listen -match ':(\d+)$') { $porta = [int]$Matches[1] }
   }
 
+  Write-Texto (Join-Path $D 'VERSION') $nova
+  Add-Content -Path (Join-Path $D 'install.log') -Value ('{0}  V{1} -> V{2}  ({3})' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $velha, $nova, $modo)
+
   if (-not $SemRegistro) {
     & $log 'Registrando a inicialização automática ...'
     Unregister-ScheduledTask -TaskName $Tarefa -Confirm:$false -ErrorAction SilentlyContinue
@@ -162,7 +165,7 @@ function Install-Central([string]$modo, [scriptblock]$log) {
       New-NetFirewallRule -DisplayName $Regra -Direction Inbound -Action Allow -Protocol TCP -LocalPort $porta -Profile Private, Domain | Out-Null
     }
 
-    $url = "http://localhost:$porta/"
+    $url = "http://127.0.0.1:$porta/"
     $atalho = Get-Atalho $modo
     New-Item -ItemType Directory -Force -Path (Split-Path $atalho) | Out-Null
     [IO.File]::WriteAllText($atalho, "[InternetShortcut]`r`nURL=$url`r`n", [Text.Encoding]::ASCII)
@@ -184,30 +187,18 @@ function Install-Central([string]$modo, [scriptblock]$log) {
     Start-ScheduledTask -TaskName $Tarefa
   }
 
-  Write-Texto (Join-Path $D 'VERSION') $nova
-  Add-Content -Path (Join-Path $D 'install.log') -Value ('{0}  V{1} -> V{2}  ({3})' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $velha, $nova, $modo)
-
-  $url = "http://localhost:$porta/"
+  $url = "http://127.0.0.1:$porta/"
   if (-not $SemRegistro) {
+    & $log 'Aguardando o Central Diogo responder ...'
     $ok = $false
-    for ($i = 0; $i -lt 15 -and -not $ok; $i++) {
+    for ($i = 0; $i -lt 30 -and -not $ok; $i++) {
       Start-Sleep -Seconds 1
       try { $ok = (Invoke-WebRequest -Uri ($url + 'api/health') -UseBasicParsing -TimeoutSec 2).StatusCode -eq 200 } catch { }
     }
-    if ($ok) { & $log "Pronto: o Central Diogo respondeu em $url" } else { & $log "Aviso: o Central Diogo ainda não respondeu em $url. Aguarde um instante e abra o endereço." }
+    if ($ok) { & $log "O Central Diogo está no ar em $url" }
+    else { & $log "O Central Diogo foi iniciado, mas ainda não respondeu em $url. Espere um pouco e abra o endereço; se persistir, veja o arquivo hub.log em $D." }
   }
-  # Primeira instalação do Diogows: o hub sorteia a senha do "admin" e só a escreve no hub.log. Mostra aqui e apaga do arquivo.
-  $hubLog = Join-Path $D 'hub.log'
-  if (Test-Path $hubLog) {
-    $txt = Get-Content $hubLog -Raw -Encoding UTF8
-    if ($txt -match 'senha inicial "([^"]+)"') {
-      & $log ''
-      & $log "Diogows - usuário: admin   senha inicial: $($Matches[1])"
-      & $log '(anote agora: ela não aparece de novo, e a troca é pedida no primeiro login)'
-      & $log ''
-      Write-Texto $hubLog ($txt -replace 'senha inicial "[^"]+"', 'senha inicial "(oculta)"')
-    }
-  }
+
   & $log "Versão instalada: V$nova (era V$velha)"
   return [pscustomobject]@{ Url = $url; Versao = $nova; Modo = $modo; Pasta = $D; Porta = $porta }
 }
@@ -324,6 +315,7 @@ $caixa = New-Object Windows.Forms.TextBox
 $caixa.Multiline = $true; $caixa.ReadOnly = $true; $caixa.ScrollBars = 'Vertical'
 $caixa.Location = New-Object Drawing.Point(24, 96); $caixa.Size = New-Object Drawing.Size(530, 270)
 $pg2.Controls.Add($caixa)
+
 $btAbrir = New-Object Windows.Forms.Button
 $btAbrir.Text = 'Abrir o Central Diogo'; $btAbrir.Size = New-Object Drawing.Size(180, 36); $btAbrir.Location = New-Object Drawing.Point(180, 388); $btAbrir.Visible = $false
 $btFechar = New-Object Windows.Forms.Button

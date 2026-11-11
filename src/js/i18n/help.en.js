@@ -14,7 +14,7 @@
         <tr><td>Panel</td><td>City and weather, night mode, camera rotation, expiry warning, stock places, videos and local holidays.</td></tr>
         <tr><td>Books</td><td>Turns the Books page on or off and sets the book categories and owners.</td></tr>
         <tr><td>Menu</td><td>The shortcut buttons at the bottom of the home screen.</td></tr>
-        <tr><td>Integrations</td><td>Professionals spreadsheet, game accounts, videos folder, cache times and network.</td></tr>
+        <tr><td>Integrations</td><td>Professionals spreadsheet, videos folder, cache times and network.</td></tr>
         <tr><td>Language</td><td>Interface language: Portuguese, English, Spanish or Chinese (applies to this device only).</td></tr>
         <tr><td>Compatibility</td><td>Mode for TVs that can only play one video at a time (applies to this device only).</td></tr>
         <tr><td>Help</td><td>This page.</td></tr></table>
@@ -26,7 +26,7 @@
       <table class="help-t"><tr><th>What you changed</th><th>When it takes effect</th></tr>
         <tr><td>Cameras, calendars, traffic, menu</td><td>Immediately, on the server. Screens that are already open update the menu and the panel within 5 minutes (or when reloaded).</td></tr>
         <tr><td>Panel tab (city, night mode, rotation, expiry, places, videos, holidays)</td><td>Immediately; open screens pick it up within 5 minutes.</td></tr>
-        <tr><td>Recordings folder, Drive, spreadsheet, games, videos folder, cache, IPv4</td><td><b>Only after the hub restarts.</b> The screen shows a yellow “waiting for restart” banner with the <b>Restart the hub now</b> button.</td></tr>
+        <tr><td>Recordings folder, Drive, spreadsheet, videos folder, cache, IPv4</td><td><b>Only after the hub restarts.</b> The screen shows a yellow “waiting for restart” banner with the <b>Restart the hub now</b> button.</td></tr>
         <tr><td>Language and compatibility mode</td><td>Immediately, on this device only (the screen reloads when you change the language).</td></tr></table>
       <h3>Where it is stored</h3>
       <p>Everything you edit is kept in <code>hub.settings.json</code>, in the same folder as <code>hub.config.json</code> on the server. The original configuration file still applies to everything you have not edited. To <b>take a section back to the original</b>, delete its key in <code>hub.settings.json</code> (or the whole file) and restart the hub. Keep a copy of <code>hub.settings.json</code> as a backup.</p>
@@ -216,14 +216,6 @@
         <li><b>Sync every</b>: minutes between reads (default 5).</li></ol>
       <p>Recognized headers (ignoring accents and capitalization): <code>Profissional/Empresa</code> (or Nome), <code>Serviço</code> (or Tipo), <code>Contato</code> (or Telefone), <code>Referência</code> (or Indicação), <code>O que vai fazer</code>, <code>Obs</code>. The headers must be written in Portuguese, as listed.</p>
       ${warn('the spreadsheet is the <b>source of truth</b>: new rows come in, changes update, and <b>rows that leave the spreadsheet are deleted</b> from the Services page.')}
-      <h3>Games and achievements</h3>
-      <p>Lists games and achievements from your accounts. <b>Refresh every</b>: minutes between full updates (default 360 = 6 hours). Each service:</p>
-      <table class="help-t"><tr><th>Service</th><th>What to fill in</th></tr>
-        <tr><td>Steam</td><td><b>User</b>: the profile’s custom URL or the SteamID64. <b>API key</b>: generate it at <code>steamcommunity.com/dev/apikey</code>. The profile must have game details set to public.</td></tr>
-        <tr><td>PlayStation</td><td><b>User</b>: display only. <b>npsso cookie</b>: while logged in to your PSN account, open <code>ca.account.sony.com/api/v1/ssocookie</code> and copy the <code>npsso</code> value. It lasts about 2 months: if “npsso invalid or expired” appears, generate another.</td></tr>
-        <tr><td>Xbox</td><td><b>Gamertag</b>. Client ID and secret are optional (only if you use your own app in Azure). After saving and restarting, authorize the account once: the <b>Connect Xbox</b> button in the games panel, or on the server <code>./hub -config hub.config.json -xbox-login</code>.</td></tr>
-        <tr><td>RetroAchievements</td><td><b>User</b> and <b>API key</b> (at <code>retroachievements.org/settings</code>, “Web API Key”).</td></tr></table>
-      <p>Key fields stay blank after saving and show “set”. Tick “delete the saved one” to remove a key.</p>
       <h3>Videos, cache and network</h3>
       <ul><li><b>Videos folder on the server</b>: the folder the Videos page lists (default <code>~/Videos</code>). Blank turns the list off. The playback address is in Panel.</li>
         <li><b>Calendars: keep for</b>: minutes the hub reuses a calendar before reading Google again (default 5).</li>
